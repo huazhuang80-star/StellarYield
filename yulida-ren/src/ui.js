@@ -61,8 +61,22 @@ export class UI {
     if (state.bossWarning > 0) this._bossBanner(ctx, state.bossWarning);
     if (state.paused) this._pauseOverlay(ctx, state);
     if (!state.started) this._startOverlay(ctx);
+    if (state.portraitHint) this._portraitHint(ctx);
 
     ctx.restore();
+  }
+
+  _portraitHint(ctx) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.75)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 40px system-ui, sans-serif';
+    ctx.fillText('📱 请横屏游玩', LOGICAL_W / 2, LOGICAL_H / 2 - 20);
+    ctx.fillStyle = '#e6f4ff';
+    ctx.font = '20px system-ui, sans-serif';
+    ctx.fillText('Rotate your device to landscape', LOGICAL_W / 2, LOGICAL_H / 2 + 24);
   }
 
   _levelPanel(ctx, state) {

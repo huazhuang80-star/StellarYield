@@ -445,17 +445,17 @@ export function drawCannon(ctx, cannon, level) {
   ctx.lineTo(58, -12);
   ctx.closePath();
   ctx.fill();
-  // level ring on cannon body
+  ctx.restore();
+  // Level pip on the base (upright, always visible).
+  ctx.save();
+  ctx.translate(baseX, baseY + 12);
   ctx.fillStyle = level.color;
   ctx.beginPath();
-  ctx.arc(10, 0, 12, 0, TAU);
+  ctx.arc(0, 0, 12, 0, TAU);
   ctx.fill();
-  ctx.restore();
-  // level label
-  ctx.save();
-  ctx.translate(baseX, baseY);
-  ctx.rotate(cannon.angle);
-  ctx.rotate(-cannon.angle);
+  ctx.strokeStyle = '#0d1a2a';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 14px system-ui, sans-serif';
   ctx.textAlign = 'center';

@@ -34,6 +34,7 @@ export class Game {
 
     this._resize();
     window.addEventListener('resize', () => this._resize());
+    window.addEventListener('orientationchange', () => this._resize());
 
     this.input.onClick((x, y) => this._onClick(x, y));
     setMuted(this.state.muted);
@@ -53,6 +54,9 @@ export class Game {
     this.viewScale = scale;
     this.viewOffX = (this.canvas.width - LOGICAL_W * scale) / 2;
     this.viewOffY = (this.canvas.height - LOGICAL_H * scale) / 2;
+    // Show a rotate hint on portrait devices with a small screen.
+    const shortEdge = Math.min(wCss, hCss);
+    this.state.portraitHint = (hCss > wCss && shortEdge < 700);
   }
 
   _onClick(x, y) {
@@ -60,6 +64,7 @@ export class Game {
     if (!this.state.started) {
       this.state.started = true;
       startMusic();
+      this._tryLockLandscape();
       return;
     }
     const btn = this.ui.hitTest(x, y);
@@ -119,6 +124,16 @@ export class Game {
   _save() {
     this.state.bestSession = Math.max(this.state.bestSession, this.state.totalCaughtThisSession);
     saveState(this.state);
+  }
+
+  _tryLockLandscape() {
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    } catch {
+      // no-op — feature not available or not permitted
+    }
   }
 
   _loop(nowRaw) {
