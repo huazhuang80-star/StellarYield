@@ -1,4 +1,4 @@
-import { LOGICAL_W, LOGICAL_H, FISH_TYPES, SPAWN } from './config.js';
+import { LOGICAL_W, LOGICAL_H, FISH_TYPES, SPAWN, SCHOOL } from './config.js';
 
 let nextId = 1;
 
@@ -47,14 +47,15 @@ export class Fish {
     }
   }
 
-  update(dt, now) {
+  update(dt, now, freezeUntil = 0) {
     if (this.dying) {
       this.dyingT += dt / 700;
       if (this.dyingT >= 1) this.dead = true;
       return;
     }
     let vx = 0, vy = 0;
-    const s = (now < this.slowUntil) ? 0.35 : 1;
+    const frozen = now < freezeUntil;
+    const s = frozen ? 0 : ((now < this.slowUntil) ? 0.35 : 1);
     const speed = this.speed * s;
     switch (this.pathKind) {
       case 'straight':
@@ -115,6 +116,7 @@ export class Spawner {
     this.elapsedMs = 0;
     this.lastBoss = 0;
     this.lastGolden = 0;
+    this.lastSchool = 0;
     this.weightedList = this._buildWeightedList(FISH_TYPES.filter(t => !t.special));
     this.pendingBoss = false;
   }
@@ -150,6 +152,27 @@ export class Spawner {
       const g = FISH_TYPES.find(t => t.special === 'golden');
       fish.push(new Fish(g));
       this.lastGolden = this.elapsedMs;
+    }
+
+    if (this.elapsedMs - this.lastSchool > SCHOOL.intervalMs) {
+      this._spawnSchool(fish);
+      this.lastSchool = this.elapsedMs;
+    }
+  }
+
+  _spawnSchool(fish) {
+    const eligible = FISH_TYPES.filter(t => SCHOOL.eligibleIds.includes(t.id));
+    const type = eligible[(Math.random() * eligible.length) | 0];
+    const count = SCHOOL.minCount + Math.floor(Math.random() * (SCHOOL.maxCount - SCHOOL.minCount + 1));
+    for (let i = 0; i < count; i++) {
+      const f = new Fish(type);
+      // stagger them along a diagonal line for a school-like look
+      const off = (i - count / 2) * 34;
+      f.x += -Math.sign(f.dir) * off;
+      f.baseY += (i % 2 === 0 ? 1 : -1) * 12 + Math.random() * 8;
+      f.y = f.baseY;
+      f.phase = i * 0.4;
+      fish.push(f);
     }
   }
 

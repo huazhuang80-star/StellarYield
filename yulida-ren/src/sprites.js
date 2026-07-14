@@ -22,6 +22,8 @@ export function drawFish(ctx, fish, t) {
     case 'ray': drawRay(ctx, fish, flap); break;
     case 'turtle': drawTurtle(ctx, fish, flap); break;
     case 'shark': drawShark(ctx, fish, flap); break;
+    case 'sword': drawSwordfish(ctx, fish, flap); break;
+    case 'jelly': drawJellyfish(ctx, fish, flap, t); break;
     case 'dragon': drawDragon(ctx, fish, flap, t); break;
     case 'boss': drawKraken(ctx, fish, flap, t); break;
     default: drawOval(ctx, fish, flap);
@@ -276,6 +278,87 @@ function drawShark(ctx, fish, flap) {
   drawEye(ctx, 22, -6, 2.6);
 }
 
+function drawSwordfish(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(fin, 0.1);
+  tailPath(ctx, -22, 0, 22, flap);
+  ctx.fill();
+  const grad = ctx.createLinearGradient(0, -12, 0, 12);
+  grad.addColorStop(0, lighten(body, 0.3));
+  grad.addColorStop(0.55, body);
+  grad.addColorStop(1, '#eef7fb');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(24, 0);
+  ctx.quadraticCurveTo(12, -14, -18, -10);
+  ctx.quadraticCurveTo(-22, 0, -18, 10);
+  ctx.quadraticCurveTo(12, 14, 24, 0);
+  ctx.closePath();
+  ctx.fill();
+  // sword bill
+  ctx.fillStyle = darken(fin, 0.25);
+  ctx.beginPath();
+  ctx.moveTo(24, -2);
+  ctx.lineTo(60, 0);
+  ctx.lineTo(24, 2);
+  ctx.closePath();
+  ctx.fill();
+  // dorsal
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(4, -10);
+  ctx.lineTo(-4 + flap * 3, -24);
+  ctx.lineTo(-10, -8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, 10);
+  ctx.lineTo(-8, 20);
+  ctx.lineTo(-12, 8);
+  ctx.closePath();
+  ctx.fill();
+  drawEye(ctx, 16, -4, 2.4);
+}
+
+function drawJellyfish(ctx, fish, flap, t) {
+  const { body, fin } = fish.type;
+  const pulse = 1 + 0.08 * Math.sin(t * 0.005 + fish.phase);
+  const grad = ctx.createRadialGradient(0, -6, 4, 0, -6, 24);
+  grad.addColorStop(0, lighten(body, 0.35));
+  grad.addColorStop(1, darken(body, 0.15));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, -6, 22 * pulse, 16 * pulse, 0, Math.PI, 0);
+  ctx.lineTo(-20 * pulse, 2);
+  ctx.quadraticCurveTo(0, 8, 20 * pulse, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = darken(body, 0.4);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-20 * pulse, 2);
+  ctx.lineTo(20 * pulse, 2);
+  ctx.stroke();
+  // tentacles
+  ctx.strokeStyle = fin;
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  for (let k = -3; k <= 3; k++) {
+    const x0 = k * 6;
+    const len = 22 + Math.abs(k) * 3;
+    ctx.beginPath();
+    ctx.moveTo(x0, 4);
+    for (let s = 1; s <= 4; s++) {
+      const p = s / 4;
+      const wobble = Math.sin(t * 0.006 + fish.phase + k + s) * 3;
+      ctx.lineTo(x0 + wobble, 4 + len * p);
+    }
+    ctx.stroke();
+  }
+  drawEye(ctx, -6, -8, 1.6);
+  drawEye(ctx, 6, -8, 1.6);
+}
+
 function drawDragon(ctx, fish, flap, t) {
   const { body, fin } = fish.type;
   const glow = 0.4 + 0.3 * Math.sin(t * 0.006);
@@ -507,6 +590,42 @@ export function drawNet(ctx, net, level) {
     ctx.stroke();
   }
   ctx.restore();
+}
+
+export function drawMuzzleFlash(ctx, cannon, level, life) {
+  const r = 22 * (1 - life);
+  const cx = cannon.baseX + Math.cos(cannon.angle) * (62 + 10);
+  const cy = cannon.baseY + Math.sin(cannon.angle) * (62 + 10);
+  const grad = ctx.createRadialGradient(cx, cy, 1, cx, cy, r);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.5, level.color);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+export function drawItemIcon(ctx, x, y, size, item) {
+  const g = ctx.createRadialGradient(x, y, 2, x, y, size);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.4, item.color);
+  g.addColorStop(1, 'rgba(6,22,36,0.85)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = item.color;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = '#0b1a24';
+  ctx.font = `bold ${Math.round(size * 1.1)}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(item.label, x, y + 1);
 }
 
 export function drawCoin(ctx, x, y, r) {

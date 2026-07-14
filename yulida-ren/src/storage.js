@@ -6,7 +6,16 @@ const DEFAULT_STATE = {
   totalCaught: 0,
   bestSession: 0,
   autofire: false,
-  muted: false
+  muted: false,
+  items: { freeze: 0, bomb: 0, lightning: 0 },
+  bestCombo: 0,
+  shark: 0,
+  golden: 0,
+  boss: 0,
+  usedFreeze: false,
+  usedBomb: false,
+  usedLightning: false,
+  achievements: []
 };
 
 export function loadState() {
@@ -28,7 +37,16 @@ export function saveState(state) {
       totalCaught: state.totalCaught,
       bestSession: state.bestSession,
       autofire: state.autofire,
-      muted: state.muted
+      muted: state.muted,
+      items: state.items,
+      bestCombo: state.bestCombo,
+      shark: state.shark,
+      golden: state.golden,
+      boss: state.boss,
+      usedFreeze: state.usedFreeze,
+      usedBomb: state.usedBomb,
+      usedLightning: state.usedLightning,
+      achievements: state.achievements
     };
     localStorage.setItem(ECONOMY.savingsKey, JSON.stringify(persisted));
   } catch {

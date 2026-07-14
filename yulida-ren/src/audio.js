@@ -109,6 +109,85 @@ export function playBossWarn() {
   }
 }
 
+export function playFreeze() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1200, t);
+  osc.frequency.exponentialRampToValueAtTime(240, t + 0.5);
+  envelope(g, t, 0.005, 0.4, 0.14, 0.05);
+  osc.connect(g).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.6);
+}
+
+export function playBomb() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const bufferSize = c.sampleRate * 0.5;
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const filter = c.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1800, t);
+  filter.frequency.exponentialRampToValueAtTime(120, t + 0.5);
+  const g = c.createGain();
+  g.gain.value = 0.28;
+  src.connect(filter).connect(g).connect(c.destination);
+  src.start(t);
+}
+
+export function playLightning() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const bufferSize = c.sampleRate * 0.25;
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const filter = c.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.value = 2000;
+  const g = c.createGain();
+  envelope(g, t, 0.002, 0.2, 0.22, 0.02);
+  src.connect(filter).connect(g).connect(c.destination);
+  src.start(t);
+}
+
+export function playAchievement() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = f;
+    const s = t + i * 0.08;
+    envelope(g, s, 0.005, 0.14, 0.18, 0.04);
+    osc.connect(g).connect(c.destination);
+    osc.start(s);
+    osc.stop(s + 0.2);
+  });
+}
+
 export function playUpgrade() {
   if (muted) return;
   const c = ensureCtx();
