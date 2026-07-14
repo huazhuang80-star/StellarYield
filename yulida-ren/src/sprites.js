@@ -628,6 +628,22 @@ export function drawItemIcon(ctx, x, y, size, item) {
   ctx.fillText(item.label, x, y + 1);
 }
 
+export function drawFishShadow(ctx, fish, floorY) {
+  const dropDist = floorY - fish.y;
+  if (dropDist <= 0) return;
+  const scale = Math.max(0.35, 1 - dropDist / 900);
+  const alpha = Math.max(0.05, 0.4 * scale);
+  const rx = fish.size * 0.75 * scale;
+  const ry = fish.size * 0.22 * scale;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(fish.x, floorY - 4, rx, ry, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
 export function drawCoin(ctx, x, y, r) {
   const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r);
   g.addColorStop(0, '#fff2b8');

@@ -1,4 +1,4 @@
-import { LOGICAL_W, LOGICAL_H, CANNON, SPAWN, COMBO, ITEMS } from './config.js';
+import { LOGICAL_W, LOGICAL_H, CANNON, SPAWN, COMBO, ITEMS, SHADOW_SPECIES } from './config.js';
 import { loadState, saveState, resetState } from './storage.js';
 import {
   unlockAudio, setMuted,
@@ -12,7 +12,7 @@ import { Net } from './bullet.js';
 import { Cannon } from './cannon.js';
 import { ParticleSystem } from './particles.js';
 import { updateScene, drawScene } from './scene.js';
-import { drawFish, drawCannon, drawBullet, drawNet, drawCoin, drawMuzzleFlash } from './sprites.js';
+import { drawFish, drawFishShadow, drawCannon, drawBullet, drawNet, drawCoin, drawMuzzleFlash } from './sprites.js';
 import { UI } from './ui.js';
 import { ItemSystem, rollItemDrop } from './items.js';
 import { AchievementTracker } from './achievements.js';
@@ -27,6 +27,7 @@ export class Game {
     this.state.bossWarning = 0;
     this.state.totalCaughtThisSession = 0;
     this.state.settingsOpen = false;
+    this.state.codexOpen = false;
 
     // Combo runtime state (not persisted — only bestCombo is).
     this.combo = { count: 0, lastAt: 0, level: 0 };
@@ -91,9 +92,15 @@ export class Game {
       this._tryLockLandscape();
       return;
     }
+    if (this.state.codexOpen) {
+      const btn = this.ui.codexHitTest(x, y);
+      if (btn === 'codexClose') this.state.codexOpen = false;
+      return;
+    }
     if (this.state.settingsOpen) {
       const btn = this.ui.settingsHitTest(x, y);
       if (btn === 'settingsClose') this.state.settingsOpen = false;
+      else if (btn === 'settingsCodex') { this.state.codexOpen = true; this.state.settingsOpen = false; }
       else if (btn === 'settingsReset') this._resetSave();
       else if (btn === 'settingsMute') this._toggleMute();
       return;
@@ -351,6 +358,10 @@ export class Game {
     ctx.setTransform(this.viewScale, 0, 0, this.viewScale, this.viewOffX + sx, this.viewOffY + sy);
 
     drawScene(ctx, now);
+    const floorY = LOGICAL_H - 30;
+    for (const f of this.fish) {
+      if (SHADOW_SPECIES.includes(f.type.id)) drawFishShadow(ctx, f, floorY);
+    }
     for (const f of this.fish) drawFish(ctx, f, now);
     for (const n of this.nets) drawNet(ctx, n, this.cannon.currentLevel());
     for (const b of this.bullets) drawBullet(ctx, b, this.cannon.currentLevel());
@@ -359,7 +370,12 @@ export class Game {
     drawCannon(ctx, this.cannon, this.cannon.currentLevel());
     if (this.muzzle > 0) drawMuzzleFlash(ctx, this.cannon, this.cannon.currentLevel(), 1 - this.muzzle);
 
-    this.ui.render(ctx, this.state, this.items, this.combo);
+    const boss = this.fish.find(f => f.type.special === 'boss' && !f.dying);
+    this.ui.render(ctx, this.state, this.items, this.combo, {
+      boss: boss ? { hp: boss.hp, maxHp: boss.maxHp } : null,
+      raining: this.spawner.isRaining(),
+      now
+    });
     this.achievements.render(ctx, now);
   }
 }

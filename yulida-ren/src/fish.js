@@ -117,6 +117,9 @@ export class Spawner {
     this.lastBoss = 0;
     this.lastGolden = 0;
     this.lastSchool = 0;
+    this.lastRain = 0;
+    this.rainUntil = 0;
+    this.rainTimer = 0;
     this.weightedList = this._buildWeightedList(FISH_TYPES.filter(t => !t.special));
     this.pendingBoss = false;
   }
@@ -158,6 +161,23 @@ export class Spawner {
       this._spawnSchool(fish);
       this.lastSchool = this.elapsedMs;
     }
+
+    // Golden rain event.
+    if (this.rainUntil > 0 && this.elapsedMs < this.rainUntil) {
+      this.rainTimer += dt;
+      if (this.rainTimer >= 350) {
+        this.rainTimer = 0;
+        const g = FISH_TYPES.find(t => t.special === 'golden');
+        fish.push(new Fish(g, { speedBoost: 1.15 }));
+      }
+    } else if (this.elapsedMs - this.lastRain > SPAWN.goldenRainIntervalMs && Math.random() < 0.6) {
+      this.rainUntil = this.elapsedMs + SPAWN.goldenRainDurationMs;
+      this.lastRain = this.elapsedMs;
+    }
+  }
+
+  isRaining() {
+    return this.rainUntil > 0 && this.elapsedMs < this.rainUntil;
   }
 
   _spawnSchool(fish) {

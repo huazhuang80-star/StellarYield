@@ -95,8 +95,12 @@ export const SPAWN = {
   minInterval: 320,
   intervalRampSeconds: 240,
   bossIntervalMs: 90000,
-  goldenIntervalMs: 45000
+  goldenIntervalMs: 45000,
+  goldenRainIntervalMs: 180000,
+  goldenRainDurationMs: 6000
 };
+
+export const SHADOW_SPECIES = ['turtle', 'shark', 'swordfish', 'ray', 'golden', 'kraken'];
 
 export const ECONOMY = {
   initialCoins: 200,
