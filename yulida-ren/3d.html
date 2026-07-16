@@ -152,24 +152,38 @@ const LEVELS = [
 ];
 // tiers: 0 micro 1 small 2 mid 3 big  (special: mermaid/devourer/boss)
 const FISH = [
-  { id:'krill',   name:'荧光磷虾', tier:0, hp:2,  coins:1,   r:1.0, speed:7,  w:26, kind:'std', color:0x7fe7ff, school:8 },
-  { id:'neon',    name:'霓虹灯鱼', tier:0, hp:3,  coins:1,   r:1.1, speed:8,  w:22, kind:'std', color:0x69ff9e, school:7 },
-  { id:'glass',   name:'玻璃鱼',   tier:0, hp:4,  coins:2,   r:1.2, speed:8,  w:18, kind:'std', color:0xbfe8ff, school:6 },
-  { id:'lamp',    name:'灯泡鱼',   tier:0, hp:6,  coins:2,   r:1.3, speed:6,  w:14, kind:'std', color:0xffe07a, school:5 },
-  { id:'sardine', name:'沙丁鱼',   tier:1, hp:9,  coins:3,   r:1.7, speed:9,  w:20, kind:'std', color:0x8dc7f0, school:7 },
-  { id:'clown',   name:'小丑鱼',   tier:1, hp:14, coins:5,   r:1.9, speed:8,  w:13, kind:'std', color:0xff8a4f },
-  { id:'puffer',  name:'刺魨',     tier:1, hp:18, coins:7,   r:2.1, speed:5,  w:10, kind:'puffer', color:0xf2b98c },
-  { id:'angel',   name:'天使鱼',   tier:1, hp:24, coins:9,   r:2.2, speed:8,  w:9,  kind:'std', color:0xc8a0e9 },
+  { id:'krill',   name:'荧光磷虾', tier:0, hp:2,  coins:1,   r:1.0, speed:7,  w:26, kind:'real', color:0x7fe7ff, school:8,
+    style:{ profile:'fusi', base:0x7fe7ff, flat:.5 } },
+  { id:'neon',    name:'霓虹灯鱼', tier:0, hp:3,  coins:1,   r:1.1, speed:8,  w:22, kind:'real', color:0x69ff9e, school:7,
+    style:{ profile:'fusi', base:0x2a6a8a, lateral:'rgba(110,255,220,.95)', belly:0xffb3c8 } },
+  { id:'glass',   name:'玻璃鱼',   tier:0, hp:4,  coins:2,   r:1.2, speed:8,  w:18, kind:'real', color:0xbfe8ff, school:6,
+    style:{ profile:'fusi', base:0xbfe8ff, opacity:.7 } },
+  { id:'lamp',    name:'灯泡鱼',   tier:0, hp:6,  coins:2,   r:1.3, speed:6,  w:14, kind:'real', color:0xffe07a, school:5,
+    style:{ profile:'deep', base:0xffc83a, belly:0xfff2c8 } },
+  { id:'sardine', name:'沙丁鱼',   tier:1, hp:9,  coins:3,   r:1.7, speed:9,  w:20, kind:'real', color:0x8dc7f0, school:7,
+    style:{ profile:'fusi', base:0x5a8ab8, lateral:'rgba(220,240,255,.8)' } },
+  { id:'clown',   name:'小丑鱼',   tier:1, hp:14, coins:5,   r:1.9, speed:8,  w:13, kind:'real', color:0xff8a4f,
+    style:{ profile:'deep', base:0xff7a30, belly:0xffb37a, stripes:[.22,.52,.82], fin:0xff9a50 } },
+  { id:'puffer',  name:'刺魨',     tier:1, hp:18, coins:7,   r:2.1, speed:5,  w:10, kind:'real', color:0xf2b98c,
+    style:{ profile:'round', base:0xd9a56a, belly:0xf7ead2, spots:26, spikes:1, flat:.85 } },
+  { id:'angel',   name:'天使鱼',   tier:1, hp:24, coins:9,   r:2.2, speed:8,  w:9,  kind:'real', color:0xc8a0e9,
+    style:{ profile:'deep', base:0xb88ae0, belly:0xe8d8f8, stripes:[.35,.62], stripeColor:'rgba(40,30,70,.55)', tallFins:1 } },
   { id:'jelly',   name:'灵光水母', tier:1, hp:28, coins:11,  r:2.4, speed:3,  w:8,  kind:'jelly', color:0xdab6ff },
-  { id:'grouper', name:'石斑鱼',   tier:2, hp:50, coins:18,  r:3.0, speed:6,  w:7,  kind:'std', color:0xb08968 },
-  { id:'eel',     name:'电鳗',     tier:2, hp:60, coins:22,  r:3.2, speed:7,  w:6,  kind:'eel', color:0x9fe86a },
+  { id:'grouper', name:'石斑鱼',   tier:2, hp:50, coins:18,  r:3.0, speed:6,  w:7,  kind:'real', color:0xb08968,
+    style:{ profile:'fusi', base:0x9a7a52, belly:0xd8c8a8, spots:44 } },
+  { id:'eel',     name:'电鳗',     tier:2, hp:60, coins:22,  r:3.2, speed:7,  w:6,  kind:'real', color:0x9fe86a,
+    style:{ profile:'elong', base:0x6a9a3a, belly:0xc8e8a0, long:1.6, ampMul:2.2, lateral:'rgba(200,255,140,.9)' } },
   { id:'ray',     name:'魔鬼魟',   tier:2, hp:70, coins:26,  r:3.6, speed:5,  w:5,  kind:'ray', color:0x8a7a9a },
   { id:'turtle',  name:'玄甲龟',   tier:2, hp:90, coins:34,  r:3.6, speed:4,  w:4,  kind:'turtle', color:0x7abf7c },
-  { id:'dolphin', name:'银弧海豚', tier:2, hp:110,coins:42,  r:3.8, speed:11, w:4,  kind:'std', color:0xa9c8e8, arc:1 },
-  { id:'sword',   name:'звезда剑鱼', tier:3, hp:150,coins:60,  r:4.6, speed:14, w:3,  kind:'sword', color:0x5aa8d1 },
-  { id:'shark',   name:'白煞鲨',   tier:3, hp:190,coins:80,  r:5.4, speed:10, w:3,  kind:'shark', color:0x7a8b95 },
+  { id:'dolphin', name:'银弧海豚', tier:2, hp:110,coins:42,  r:3.8, speed:11, w:4,  kind:'real', color:0xa9c8e8, arc:1,
+    style:{ profile:'fusi', base:0x8aa8c8, belly:0xe8f2fa, rostrum:1, flat:.8 } },
+  { id:'sword',   name:'追风剑鱼', tier:3, hp:150,coins:60,  r:4.6, speed:14, w:3,  kind:'real', color:0x5aa8d1,
+    style:{ profile:'fusi', base:0x3a7aaa, belly:0xd8ecf8, bill:1, flat:.7 } },
+  { id:'shark',   name:'白煞鲨',   tier:3, hp:190,coins:80,  r:5.4, speed:10, w:3,  kind:'real', color:0x7a8b95,
+    style:{ profile:'fusi', base:0x5a6b78, belly:0xe6efef, bigDorsal:1, flat:.78 } },
   { id:'mermaid', name:'沧海人鱼', tier:3, hp:280,coins:140, r:5.0, speed:6,  w:1,  kind:'mermaid', color:0x66e8d8, drop:.6 },
-  { id:'whale',   name:'星辉巨鲸', tier:3, hp:450,coins:200, r:8.5, speed:4,  w:1,  kind:'whale', color:0x6a7ec8, drop:.35 }
+  { id:'whale',   name:'星辉巨鲸', tier:3, hp:450,coins:200, r:8.5, speed:4,  w:1,  kind:'real', color:0x6a7ec8, drop:.35,
+    style:{ profile:'whale', base:0x4a5c9a, belly:0xc8d4e8, fluke:1, flat:.9 } }
 ];
 const BOSSES = [
   { id:'dragon', name:'东海神龙', hp:2600, coins:1500, kind:'dragon' },
@@ -510,7 +524,107 @@ function buildDevourer(def) {
   }
   return g;
 }
-const BUILDERS = { std:buildStd, eel:buildEel, sword:buildSword, shark:buildShark, puffer:buildPuffer,
+/* ---- realistic procedural fish (revolved fusiform body + countershaded skin + fins) ---- */
+function shadeHex(hex, amt) {
+  const c = new THREE.Color(hex);
+  if (amt < 0) c.multiplyScalar(1 + amt); else c.lerp(new THREE.Color(0xffffff), amt);
+  return '#' + c.getHexString();
+}
+function fishTexture(st) {
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+  const g = cv.getContext('2d');
+  const base = st.base != null ? st.base : (st.color || 0x88aacc);
+  const belly = st.belly != null ? st.belly : 0xeef6ff;
+  // u (x) wraps around the body: 0/256 = back(dark), 128 = belly(light) — countershading
+  const grad = g.createLinearGradient(0, 0, 256, 0);
+  grad.addColorStop(0.00, shadeHex(base, -0.38));
+  grad.addColorStop(0.30, shadeHex(base, -0.04));
+  grad.addColorStop(0.50, '#' + new THREE.Color(belly).getHexString());
+  grad.addColorStop(0.70, shadeHex(base, -0.04));
+  grad.addColorStop(1.00, shadeHex(base, -0.38));
+  g.fillStyle = grad; g.fillRect(0, 0, 256, 128);
+  g.globalAlpha = .07;                                  // scale speckle
+  for (let i = 0; i < 130; i++) { g.fillStyle = i % 2 ? '#000' : '#fff'; g.beginPath(); g.arc(Math.random()*256, Math.random()*128, 1.4+Math.random()*2.2, 0, 7); g.fill(); }
+  g.globalAlpha = 1;
+  g.strokeStyle = 'rgba(255,255,255,.20)'; g.lineWidth = 2; // lateral line on each flank
+  g.beginPath(); g.moveTo(64,10); g.lineTo(64,118); g.moveTo(192,10); g.lineTo(192,118); g.stroke();
+  if (st.stripes) for (const s of st.stripes) {          // vertical body bands
+    const y = s * 128; g.fillStyle = st.stripeColor || 'rgba(250,250,255,.92)'; g.fillRect(0, y-7, 256, 14);
+    g.fillStyle = 'rgba(18,18,28,.4)'; g.fillRect(0, y-9, 256, 2); g.fillRect(0, y+7, 256, 2);
+  }
+  if (st.spots) for (let i = 0; i < st.spots; i++) { g.fillStyle = 'rgba(38,26,14,.45)'; g.beginPath(); g.arc(Math.random()*256, Math.random()*128, 2+Math.random()*3.5, 0, 7); g.fill(); }
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+}
+function forkFin(len, spread, notch) {                   // caudal (forked, in XY plane)
+  const s = new THREE.Shape(); s.moveTo(0,0); s.lineTo(-len, spread); s.lineTo(-len*(notch||.55), 0); s.lineTo(-len, -spread); s.closePath();
+  return new THREE.ShapeGeometry(s);
+}
+function triFin(baseLen, h, rake) {                       // dorsal / anal / pectoral (in XY plane, rises +Y)
+  const s = new THREE.Shape(); s.moveTo(baseLen*.5, 0); s.lineTo(-baseLen*.5, 0); s.lineTo(-baseLen*.5 + (rake||baseLen*.35), h); s.closePath();
+  return new THREE.ShapeGeometry(s);
+}
+function buildReal(def) {
+  const st = def.style || { base: def.color };
+  const g = new THREE.Group();
+  const prof = st.profile || 'fusi';
+  const N = 22, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N; let r;
+    if (prof === 'elong') r = Math.pow(Math.sin(Math.PI*t), .4) * .55;
+    else if (prof === 'round') r = Math.pow(Math.sin(Math.PI*t), .42);
+    else if (prof === 'deep') r = Math.pow(Math.sin(Math.PI*Math.min(1, t*1.02)), .5);
+    else if (prof === 'whale') r = Math.pow(Math.sin(Math.PI*t), .5);
+    else r = Math.pow(Math.sin(Math.PI*Math.min(1, t*1.03)), .62);
+    pts.push(new THREE.Vector2(Math.max(.03, r), t - .5));
+  }
+  const geo = new THREE.LatheGeometry(pts, 20); geo.rotateZ(-Math.PI/2); // head toward +X
+  const mat = new THREE.MeshStandardMaterial({ map: fishTexture(st), roughness:.5, metalness:.14,
+    emissive: new THREE.Color(st.base||def.color).multiplyScalar(.10),
+    transparent: st.opacity != null, opacity: st.opacity != null ? st.opacity : 1, side: THREE.DoubleSide });
+  const heightR = prof==='deep'?1.7 : prof==='whale'?1.15 : prof==='round'?1.1 : 1.0;
+  const widthR = heightR * (st.flat != null ? st.flat : .5);
+  const len = 2.5 * (st.long || 1);
+  const body = new THREE.Mesh(geo, mat); body.scale.set(len, heightR, widthR); g.add(body);
+  const finMat = new THREE.MeshStandardMaterial({ color: shadeHex(st.base||def.color, .15), roughness:.6, metalness:.05, transparent:true, opacity:.82, side:THREE.DoubleSide });
+  // caudal
+  const tail = new THREE.Group();
+  tail.add(new THREE.Mesh(forkFin(1.15, .78, .55), finMat));
+  tail.position.set(-len*.5 - .05, 0, 0);
+  if (st.fluke) tail.rotation.x = Math.PI/2;
+  g.add(tail); g.userData.tail = tail;
+  // dorsal (+ anal for tall-finned)
+  if (!st.fluke) {
+    const dh = st.bigDorsal ? 1.6 : st.tallFins ? 1.5 : .7;
+    const dorsal = new THREE.Mesh(triFin(len*.5, dh, len*.24), finMat);
+    dorsal.position.set(st.bigDorsal ? .3 : -.2, heightR*.78, 0); g.add(dorsal);
+    if (st.tallFins) { const anal = new THREE.Mesh(triFin(len*.42, 1.3, len*.2), finMat);
+      anal.rotation.z = Math.PI; anal.position.set(-.3, -heightR*.78, 0); g.add(anal); }
+  }
+  // pectorals
+  for (const s of [-1,1]) {
+    const pec = new THREE.Mesh(triFin(.55, .55, .2), finMat);
+    pec.position.set(len*.2, -.1, s*widthR*.92); pec.rotation.x = s*Math.PI/2; pec.rotation.z = -.6; g.add(pec);
+  }
+  // head accents
+  if (st.bill) { const bill = new THREE.Mesh(new THREE.ConeGeometry(.09, 2.2, 7), new THREE.MeshStandardMaterial({ color:0x24485f, roughness:.6 }));
+    bill.rotation.z = -Math.PI/2; bill.position.x = len*.5 + 1.0; g.add(bill); }
+  if (st.rostrum) { const ro = new THREE.Mesh(new THREE.ConeGeometry(.24, .9, 10), mat); ro.rotation.z = -Math.PI/2; ro.position.x = len*.5 + .3; g.add(ro); }
+  // eyes
+  for (const s of [-1,1]) {
+    const w = new THREE.Mesh(new THREE.SphereGeometry(.17, 10, 10), new THREE.MeshStandardMaterial({ color:0xffffff, roughness:.3 }));
+    w.position.set(len*.34, heightR*.30, s*widthR*.76); g.add(w);
+    const p = new THREE.Mesh(new THREE.SphereGeometry(.09, 8, 8), new THREE.MeshBasicMaterial({ color:0x08131c }));
+    p.position.set(len*.34 + .08, heightR*.30, s*widthR*.80); g.add(p);
+  }
+  // puffer spikes
+  if (st.spikes) { const sm = new THREE.MeshStandardMaterial({ color: shadeHex(st.base||def.color, -.15), roughness:.7 });
+    for (let i = 0; i < 20; i++) { const d = new THREE.Vector3().randomDirection();
+      const sp = new THREE.Mesh(new THREE.ConeGeometry(.08, .45, 5), sm);
+      sp.position.set(d.x*len*.32, d.y*heightR*.85, d.z*widthR*.9);
+      sp.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d); g.add(sp); } }
+  return g;
+}
+const BUILDERS = { real:buildReal, std:buildStd, eel:buildEel, sword:buildSword, shark:buildShark, puffer:buildPuffer,
   jelly:buildJelly, ray:buildRay, turtle:buildTurtle, whale:buildWhale, mermaid:buildMermaid, devourer:buildDevourer };
 
 /* ============================================================= boss builders */
