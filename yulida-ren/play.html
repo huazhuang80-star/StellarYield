@@ -1,0 +1,3009 @@
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; width: 100%; background: #02121f; overflow: hidden; overscroll-behavior: none; }
+  body { display: flex; align-items: center; justify-content: center; touch-action: none; user-select: none; -webkit-user-select: none; color: #e6f4ff; font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  #game { display: block; width: 100vw; height: 100vh; cursor: crosshair; touch-action: none; }
+  @supports (padding: max(0px)) {
+    body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
+  }
+</style>
+<canvas id="game" aria-label="鱼乐达人"></canvas>
+<script>
+
+// === config.js ===
+const LOGICAL_W = 1280;
+const LOGICAL_H = 720;
+const CANNON = {
+  baseX: LOGICAL_W / 2,
+  baseY: LOGICAL_H - 60,
+  barrelLength: 62,
+  fireDelay: 190,
+  autofireDelay: 320,
+  minAngle: -Math.PI + 0.15,
+  maxAngle: -0.15,
+  levels: [
+    { level: 1,  damage: 1,   cost: 1,   color: '#8ecdf1', barrel: '#3a6f97' },
+    { level: 2,  damage: 2,   cost: 2,   color: '#6bb9e8', barrel: '#2f5f88' },
+    { level: 3,  damage: 3,   cost: 3,   color: '#4aa3d9', barrel: '#255079' },
+    { level: 4,  damage: 5,   cost: 5,   color: '#4a8fd0', barrel: '#204573' },
+    { level: 5,  damage: 8,   cost: 8,   color: '#4a76c8', barrel: '#1e3a69' },
+    { level: 6,  damage: 12,  cost: 12,  color: '#5c5cc8', barrel: '#2c2c73' },
+    { level: 7,  damage: 20,  cost: 20,  color: '#7a4ac8', barrel: '#3d2378' },
+    { level: 8,  damage: 32,  cost: 32,  color: '#a13ec6', barrel: '#5b1e70' },
+    { level: 9,  damage: 50,  cost: 50,  color: '#c93aa5', barrel: '#6f1c5b' },
+    { level: 10, damage: 80,  cost: 80,  color: '#e04477', barrel: '#7a1e42' }
+  ]
+};
+const BULLET = {
+  speed: 900,
+  radius: 8,
+  netRadius: 60,
+  netDuration: 260
+};
+const FISH_TYPES = [
+  { id: 'guppy',     name: '小鱼',    hp: 3,   coins: 1,    size: 26,  speed: 90,  weight: 32, body: '#f7c56b', fin: '#e08a3d', shape: 'oval' },
+  { id: 'sardine',   name: '沙丁鱼',  hp: 6,   coins: 2,    size: 32,  speed: 110, weight: 24, body: '#8dc7f0', fin: '#4b90c9', shape: 'oval' },
+  { id: 'blowfish',  name: '河豚',    hp: 12,  coins: 4,    size: 40,  speed: 70,  weight: 16, body: '#f2b98c', fin: '#c47845', shape: 'puff' },
+  { id: 'clown',     name: '小丑鱼',  hp: 18,  coins: 6,    size: 38,  speed: 115, weight: 10, body: '#ff8a4f', fin: '#ffffff', shape: 'striped' },
+  { id: 'jelly',     name: '水母',    hp: 22,  coins: 8,    size: 44,  speed: 40,  weight: 8,  body: '#dab6ff', fin: '#8a5cd0', shape: 'jelly' },
+  { id: 'angel',     name: '天使鱼',  hp: 30,  coins: 10,   size: 46,  speed: 95,  weight: 7,  body: '#c8a0e9', fin: '#71499a', shape: 'diamond' },
+  { id: 'ray',       name: '魟鱼',    hp: 55,  coins: 20,   size: 62,  speed: 60,  weight: 6,  body: '#82705e', fin: '#3f342a', shape: 'ray' },
+  { id: 'turtle',    name: '海龟',    hp: 90,  coins: 40,   size: 70,  speed: 55,  weight: 4,  body: '#7abf7c', fin: '#3d6a3f', shape: 'turtle' },
+  { id: 'swordfish', name: '剑鱼',    hp: 130, coins: 70,   size: 88,  speed: 190, weight: 3,  body: '#5aa8d1', fin: '#22557a', shape: 'sword' },
+  { id: 'shark',     name: '鲨鱼',    hp: 180, coins: 100,  size: 100, speed: 140, weight: 3,  body: '#7a8b95', fin: '#3e4a53', shape: 'shark' },
+  { id: 'golden',    name: '金龙',    hp: 250, coins: 300,  size: 92,  speed: 100, weight: 1,  body: '#ffd54a', fin: '#a97009', shape: 'dragon', special: 'golden' },
+  { id: 'kraken',    name: '海皇',    hp: 800, coins: 1000, size: 170, speed: 45,  weight: 1,  body: '#4b3b73', fin: '#f5c542', shape: 'boss',   special: 'boss' }
+];
+const ITEMS = {
+  freeze:    { id: 'freeze',    name: '冰冻',  color: '#7cd4ff', durationMs: 4000, label: '❄' },
+  bomb:      { id: 'bomb',      name: '海炸',  color: '#ff7a4a', durationMs: 0,    label: '💣' },
+  lightning: { id: 'lightning', name: '闪电',  color: '#ffe14a', durationMs: 0,    label: '⚡' }
+};
+
+// When a fish is caught, roll for an item drop. Bosses guarantee a drop.
+const ITEM_DROP = {
+  boss:   { any: 1.0,   distribution: { freeze: 0.33, bomb: 0.34, lightning: 0.33 } },
+  golden: { any: 0.6,   distribution: { freeze: 0.5,  bomb: 0.2,  lightning: 0.3  } },
+  shark:  { any: 0.12,  distribution: { freeze: 0.5,  bomb: 0.25, lightning: 0.25 } },
+  other:  { any: 0.008, distribution: { freeze: 0.5,  bomb: 0.25, lightning: 0.25 } }
+};
+const COMBO = {
+  windowMs: 3000,
+  levels: [
+    { threshold: 0,  mult: 1,   color: '#e6f4ff' },
+    { threshold: 3,  mult: 1.5, color: '#9ee0ff' },
+    { threshold: 6,  mult: 2,   color: '#ffd54a' },
+    { threshold: 10, mult: 3,   color: '#ffb14a' },
+    { threshold: 16, mult: 5,   color: '#ff6bd5' }
+  ]
+};
+const SCHOOL = {
+  intervalMs: 30000,
+  minCount: 6,
+  maxCount: 10,
+  eligibleIds: ['guppy', 'sardine', 'clown', 'angel']
+};
+const MISSION_POOL = [
+  { id: 'catch_10',     type: 'catch',        goal: 10,  reward: 60,   text: n => `捕获任意鱼 ${n} 条` },
+  { id: 'catch_30',     type: 'catch',        goal: 30,  reward: 180,  text: n => `捕获任意鱼 ${n} 条` },
+  { id: 'shark_3',      type: 'species_kill', speciesId: 'shark',  goal: 3,  reward: 300, text: (n, name) => `捕获 ${name} ${n} 条` },
+  { id: 'golden_1',     type: 'species_kill', speciesId: 'golden', goal: 1,  reward: 400, text: (n, name) => `捕获 ${name} ${n} 条` },
+  { id: 'boss_1',       type: 'species_kill', speciesId: 'kraken', goal: 1,  reward: 800, text: (n, name) => `击败 ${name}` },
+  { id: 'combo_5',      type: 'combo',        goal: 5,   reward: 150,  text: n => `触发 ${n}× 连击` },
+  { id: 'combo_10',     type: 'combo',        goal: 10,  reward: 400,  text: n => `触发 ${n}× 连击` },
+  { id: 'freeze_use',   type: 'item_use',     itemId: 'freeze',    goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'bomb_use',     type: 'item_use',     itemId: 'bomb',      goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'lightning_use',type: 'item_use',     itemId: 'lightning', goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'coins_500',    type: 'earn_coins',   goal: 500, reward: 100,  text: n => `本日再赚 ${n} 金币` }
+];
+const AUDIO_DEFAULTS = {
+  musicVol: 0.55,
+  sfxVol: 0.9
+};
+const AUDIO_LEVELS = [0, 0.25, 0.5, 0.75, 1.0];
+const ACHIEVEMENTS = [
+  { id: 'first_catch',   name: '初次收获',   desc: '捕获第一条鱼',    check: s => s.totalCaught >= 1 },
+  { id: 'ten_catches',   name: '渔场熟手',   desc: '累计捕获 10 条',  check: s => s.totalCaught >= 10 },
+  { id: 'hundred',       name: '渔场大师',   desc: '累计捕获 100 条', check: s => s.totalCaught >= 100 },
+  { id: 'first_shark',   name: '大白猎手',   desc: '击败一条鲨鱼',    check: s => s.shark >= 1 },
+  { id: 'first_golden',  name: '金鳞传说',   desc: '击败一条金龙',    check: s => s.golden >= 1 },
+  { id: 'first_boss',    name: '海皇征服者', desc: '击败海皇',        check: s => s.boss >= 1 },
+  { id: 'coin_grand',    name: '万贯家财',   desc: '累计金币 1000',   check: s => s.coins >= 1000 },
+  { id: 'combo_x3',      name: '连击大师',   desc: '触发 3× 连击',    check: s => s.bestCombo >= 3 },
+  { id: 'combo_x5',      name: '完美连击',   desc: '触发 5× 连击',    check: s => s.bestCombo >= 5 },
+  { id: 'all_items',     name: '道具通',     desc: '三种道具都使用过', check: s => s.usedFreeze && s.usedBomb && s.usedLightning }
+];
+const SPAWN = {
+  baseInterval: 900,
+  minInterval: 320,
+  intervalRampSeconds: 240,
+  bossIntervalMs: 90000,
+  goldenIntervalMs: 45000,
+  goldenRainIntervalMs: 180000,
+  goldenRainDurationMs: 6000
+};
+const SHADOW_SPECIES = ['turtle', 'shark', 'swordfish', 'ray', 'golden', 'kraken'];
+const ECONOMY = {
+  initialCoins: 200,
+  savingsKey: 'yulida.save.v1'
+};
+const COLORS = {
+  deepTop: '#052a44',
+  deepMid: '#0a3f65',
+  deepBottom: '#031a2b',
+  hudPanel: 'rgba(6, 22, 36, 0.72)',
+  hudBorder: 'rgba(140, 210, 255, 0.35)',
+  hudText: '#e6f4ff',
+  gold: '#ffd54a'
+};
+
+
+// === storage.js ===
+
+const DEFAULT_STATE = {
+  coins: ECONOMY.initialCoins,
+  cannonLevel: 1,
+  totalCaught: 0,
+  bestSession: 0,
+  autofire: false,
+  muted: false,
+  items: { freeze: 0, bomb: 0, lightning: 0 },
+  bestCombo: 0,
+  shark: 0,
+  golden: 0,
+  boss: 0,
+  usedFreeze: false,
+  usedBomb: false,
+  usedLightning: false,
+  achievements: [],
+  speciesKills: {},
+  missions: null,
+  musicVol: AUDIO_DEFAULTS.musicVol,
+  sfxVol: AUDIO_DEFAULTS.sfxVol
+};
+function loadState() {
+  try {
+    const raw = localStorage.getItem(ECONOMY.savingsKey);
+    if (!raw) return { ...DEFAULT_STATE };
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_STATE, ...parsed };
+  } catch {
+    return { ...DEFAULT_STATE };
+  }
+}
+function saveState(state) {
+  try {
+    const persisted = {
+      coins: state.coins,
+      cannonLevel: state.cannonLevel,
+      totalCaught: state.totalCaught,
+      bestSession: state.bestSession,
+      autofire: state.autofire,
+      muted: state.muted,
+      items: state.items,
+      bestCombo: state.bestCombo,
+      shark: state.shark,
+      golden: state.golden,
+      boss: state.boss,
+      usedFreeze: state.usedFreeze,
+      usedBomb: state.usedBomb,
+      usedLightning: state.usedLightning,
+      achievements: state.achievements,
+      speciesKills: state.speciesKills,
+      missions: state.missions,
+      musicVol: state.musicVol,
+      sfxVol: state.sfxVol
+    };
+    localStorage.setItem(ECONOMY.savingsKey, JSON.stringify(persisted));
+  } catch {
+    // storage disabled — ignore
+  }
+}
+function resetState() {
+  try {
+    localStorage.removeItem(ECONOMY.savingsKey);
+  } catch {
+    // ignore
+  }
+  return { ...DEFAULT_STATE };
+}
+
+
+// === audio.js ===
+let ctx = null;
+let muted = false;
+let musicGain = null;
+let musicNodes = [];
+let musicVol = 0.55;
+let sfxVol = 0.9;
+function setMusicVolume(v) {
+  musicVol = Math.max(0, Math.min(1, v));
+  if (musicGain && !muted) musicGain.gain.setTargetAtTime(0.11 * musicVol, ctx.currentTime, 0.05);
+}
+function setSfxVolume(v) { sfxVol = Math.max(0, Math.min(1, v)); }
+function getSfxVol() { return sfxVol; }
+function getMusicVol() { return musicVol; }
+
+function ensureCtx() {
+  if (ctx) return ctx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  ctx = new AC();
+  return ctx;
+}
+function unlockAudio() {
+  const c = ensureCtx();
+  if (c && c.state === 'suspended') c.resume();
+}
+function setMuted(v) {
+  muted = !!v;
+  if (musicGain) musicGain.gain.setTargetAtTime(muted ? 0 : 0.11 * musicVol, ctx.currentTime, 0.05);
+}
+function isMuted() {
+  return muted;
+}
+
+function envelope(gainNode, t0, attack, decay, peak, tail) {
+  gainNode.gain.setValueAtTime(0, t0);
+  gainNode.gain.linearRampToValueAtTime(peak, t0 + attack);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + decay + tail);
+}
+function playShoot() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(660, t);
+  osc.frequency.exponentialRampToValueAtTime(180, t + 0.08);
+  envelope(g, t, 0.005, 0.05, 0.12, 0.02);
+  osc.connect(g).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.12);
+}
+function playHit() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const bufferSize = c.sampleRate * 0.12;
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const filter = c.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 900;
+  const g = c.createGain();
+  g.gain.value = 0.15;
+  src.connect(filter).connect(g).connect(c.destination);
+  src.start(t);
+}
+function playCatch(coinValue) {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const notes = coinValue >= 200 ? [523, 659, 784, 1047]
+              : coinValue >= 40  ? [523, 659, 784]
+              : [660, 880];
+  notes.forEach((freq, i) => {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const start = t + i * 0.06;
+    envelope(g, start, 0.005, 0.12, 0.14, 0.04);
+    osc.connect(g).connect(c.destination);
+    osc.start(start);
+    osc.stop(start + 0.2);
+  });
+}
+function playBossWarn() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  for (let k = 0; k < 3; k++) {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'sawtooth';
+    const start = t + k * 0.18;
+    osc.frequency.setValueAtTime(120, start);
+    osc.frequency.linearRampToValueAtTime(180, start + 0.14);
+    envelope(g, start, 0.01, 0.14, 0.18, 0.02);
+    osc.connect(g).connect(c.destination);
+    osc.start(start);
+    osc.stop(start + 0.2);
+  }
+}
+function playFreeze() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1200, t);
+  osc.frequency.exponentialRampToValueAtTime(240, t + 0.5);
+  envelope(g, t, 0.005, 0.4, 0.14, 0.05);
+  osc.connect(g).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.6);
+}
+function playBomb() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const bufferSize = c.sampleRate * 0.5;
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const filter = c.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1800, t);
+  filter.frequency.exponentialRampToValueAtTime(120, t + 0.5);
+  const g = c.createGain();
+  g.gain.value = 0.28;
+  src.connect(filter).connect(g).connect(c.destination);
+  src.start(t);
+}
+function playLightning() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const bufferSize = c.sampleRate * 0.25;
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const filter = c.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.value = 2000;
+  const g = c.createGain();
+  envelope(g, t, 0.002, 0.2, 0.22, 0.02);
+  src.connect(filter).connect(g).connect(c.destination);
+  src.start(t);
+}
+function playAchievement() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = f;
+    const s = t + i * 0.08;
+    envelope(g, s, 0.005, 0.14, 0.18, 0.04);
+    osc.connect(g).connect(c.destination);
+    osc.start(s);
+    osc.stop(s + 0.2);
+  });
+}
+function playUpgrade() {
+  if (muted) return;
+  const c = ensureCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(440, t);
+  osc.frequency.exponentialRampToValueAtTime(880, t + 0.14);
+  envelope(g, t, 0.005, 0.14, 0.16, 0.02);
+  osc.connect(g).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.2);
+}
+function startMusic() {
+  const c = ensureCtx();
+  if (!c || musicGain) return;
+  musicGain = c.createGain();
+  musicGain.gain.value = muted ? 0 : 0.11 * musicVol;
+  musicGain.connect(c.destination);
+
+  const bass = c.createOscillator();
+  bass.type = 'sine';
+  bass.frequency.value = 65;
+  const bassGain = c.createGain();
+  bassGain.gain.value = 0.4;
+  const lfo = c.createOscillator();
+  lfo.frequency.value = 0.18;
+  const lfoGain = c.createGain();
+  lfoGain.gain.value = 8;
+  lfo.connect(lfoGain).connect(bass.frequency);
+  bass.connect(bassGain).connect(musicGain);
+  bass.start();
+  lfo.start();
+
+  const pad = c.createOscillator();
+  pad.type = 'triangle';
+  pad.frequency.value = 196;
+  const padGain = c.createGain();
+  padGain.gain.value = 0.15;
+  pad.connect(padGain).connect(musicGain);
+  pad.start();
+
+  musicNodes = [bass, lfo, pad];
+}
+function stopMusic() {
+  if (!ctx) return;
+  musicNodes.forEach(n => { try { n.stop(); } catch {} });
+  musicNodes = [];
+  if (musicGain) { musicGain.disconnect(); musicGain = null; }
+}
+
+
+// === input.js ===
+class Input {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.pointer = { x: LOGICAL_W / 2, y: LOGICAL_H / 2, active: false, downThisFrame: false, held: false };
+    this._downLatch = false;
+    this._clickListeners = [];
+
+    canvas.addEventListener('mousemove', e => this._updateFromEvent(e));
+    canvas.addEventListener('mousedown', e => { this._updateFromEvent(e); this._press(); });
+    canvas.addEventListener('mouseup',   e => { this._updateFromEvent(e); this._release(); });
+    canvas.addEventListener('mouseleave', () => { this.pointer.held = false; });
+
+    canvas.addEventListener('touchstart', e => {
+      if (e.touches.length) this._updateFromTouch(e.touches[0]);
+      this._press();
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+      if (e.touches.length) this._updateFromTouch(e.touches[0]);
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchend', e => {
+      this._release();
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchcancel', () => this._release());
+  }
+
+  onClick(fn) {
+    this._clickListeners.push(fn);
+  }
+
+  _updateFromEvent(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+    this._setPointerFromCss(cssX, cssY, rect.width, rect.height);
+    this.pointer.active = true;
+  }
+
+  _updateFromTouch(t) {
+    const rect = this.canvas.getBoundingClientRect();
+    const cssX = t.clientX - rect.left;
+    const cssY = t.clientY - rect.top;
+    this._setPointerFromCss(cssX, cssY, rect.width, rect.height);
+    this.pointer.active = true;
+  }
+
+  _setPointerFromCss(cssX, cssY, cssW, cssH) {
+    const scale = Math.min(cssW / LOGICAL_W, cssH / LOGICAL_H);
+    const offsetX = (cssW - LOGICAL_W * scale) / 2;
+    const offsetY = (cssH - LOGICAL_H * scale) / 2;
+    this.pointer.x = (cssX - offsetX) / scale;
+    this.pointer.y = (cssY - offsetY) / scale;
+  }
+
+  _press() {
+    this.pointer.held = true;
+    this._downLatch = true;
+    for (const fn of this._clickListeners) fn(this.pointer.x, this.pointer.y);
+  }
+
+  _release() {
+    this.pointer.held = false;
+  }
+
+  beginFrame() {
+    this.pointer.downThisFrame = this._downLatch;
+    this._downLatch = false;
+  }
+}
+
+
+// === sprites.js ===
+// All fish and effect art is drawn procedurally from paths — no external assets.
+
+const TAU = Math.PI * 2;
+function drawFish(ctx, fish, t) {
+  ctx.save();
+  ctx.translate(fish.x, fish.y);
+  ctx.rotate(fish.heading);
+  if (fish.dying) {
+    const p = fish.dyingT;
+    ctx.rotate(Math.sin(p * 12) * 0.6 * (1 - p));
+    ctx.globalAlpha = 1 - p;
+  }
+  const scale = fish.size / 40;
+  ctx.scale(scale, scale);
+  const flap = Math.sin(t * 0.014 + fish.phase);
+  switch (fish.type.shape) {
+    case 'oval': drawOval(ctx, fish, flap); break;
+    case 'puff': drawPuff(ctx, fish, flap); break;
+    case 'striped': drawStriped(ctx, fish, flap); break;
+    case 'diamond': drawDiamond(ctx, fish, flap); break;
+    case 'ray': drawRay(ctx, fish, flap); break;
+    case 'turtle': drawTurtle(ctx, fish, flap); break;
+    case 'shark': drawShark(ctx, fish, flap); break;
+    case 'sword': drawSwordfish(ctx, fish, flap); break;
+    case 'jelly': drawJellyfish(ctx, fish, flap, t); break;
+    case 'dragon': drawDragon(ctx, fish, flap, t); break;
+    case 'boss': drawKraken(ctx, fish, flap, t); break;
+    default: drawOval(ctx, fish, flap);
+  }
+  ctx.restore();
+}
+
+function shadedFill(ctx, hex, dx, dy, rx, ry, accent) {
+  const grad = ctx.createLinearGradient(0, -ry, 0, ry);
+  grad.addColorStop(0, lighten(hex, 0.25));
+  grad.addColorStop(1, darken(hex, 0.2));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(dx, dy, rx, ry, 0, 0, TAU);
+  ctx.fill();
+  if (accent) {
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    ctx.ellipse(dx - rx * 0.2, dy - ry * 0.5, rx * 0.6, ry * 0.3, 0, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawEye(ctx, x, y, r) {
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#0b1a24';
+  ctx.beginPath();
+  ctx.arc(x + r * 0.2, y, r * 0.55, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(x + r * 0.05, y - r * 0.3, r * 0.2, 0, TAU);
+  ctx.fill();
+}
+
+function tailPath(ctx, x, y, spread, flap) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.quadraticCurveTo(x - spread * 0.7, y - spread * 0.5 + flap * 4, x - spread, y - spread * 0.6);
+  ctx.lineTo(x - spread * 0.55, y);
+  ctx.lineTo(x - spread, y + spread * 0.6);
+  ctx.quadraticCurveTo(x - spread * 0.7, y + spread * 0.5 - flap * 4, x, y);
+  ctx.closePath();
+}
+
+function drawOval(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(fin, 0.1);
+  tailPath(ctx, -18, 0, 18, flap);
+  ctx.fill();
+  shadedFill(ctx, body, 0, 0, 22, 14, fin);
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(2, -12);
+  ctx.quadraticCurveTo(-2 + flap * 3, -22, -10, -10);
+  ctx.closePath();
+  ctx.fill();
+  drawEye(ctx, 12, -3, 3);
+}
+
+function drawPuff(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = fin;
+  tailPath(ctx, -20, 0, 14, flap);
+  ctx.fill();
+  shadedFill(ctx, body, 0, 0, 22, 20, null);
+  ctx.strokeStyle = darken(body, 0.35);
+  ctx.lineWidth = 1.4;
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * TAU;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * 14, Math.sin(a) * 12);
+    ctx.lineTo(Math.cos(a) * 22, Math.sin(a) * 20);
+    ctx.stroke();
+  }
+  drawEye(ctx, 13, -4, 3.2);
+}
+
+function drawStriped(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(body, 0.2);
+  tailPath(ctx, -18, 0, 16, flap);
+  ctx.fill();
+  shadedFill(ctx, body, 0, 0, 22, 13, null);
+  ctx.fillStyle = fin;
+  [-6, 4, 14].forEach(x => {
+    ctx.beginPath();
+    ctx.moveTo(x, -13);
+    ctx.quadraticCurveTo(x - 3, 0, x, 13);
+    ctx.quadraticCurveTo(x + 4, 0, x, -13);
+    ctx.fill();
+  });
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.moveTo(4, -11);
+  ctx.quadraticCurveTo(-2 + flap * 3, -20, -8, -8);
+  ctx.closePath();
+  ctx.fill();
+  drawEye(ctx, 14, -3, 3);
+}
+
+function drawDiamond(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = fin;
+  tailPath(ctx, -20, 0, 18, flap);
+  ctx.fill();
+  const grad = ctx.createLinearGradient(0, -22, 0, 22);
+  grad.addColorStop(0, lighten(body, 0.3));
+  grad.addColorStop(1, darken(body, 0.25));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(24, 0);
+  ctx.lineTo(0, -22);
+  ctx.lineTo(-14, 0);
+  ctx.lineTo(0, 22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(2, -18);
+  ctx.quadraticCurveTo(-6 + flap * 4, -32, -12, -18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(2, 18);
+  ctx.quadraticCurveTo(-6 - flap * 4, 32, -12, 18);
+  ctx.closePath();
+  ctx.fill();
+  drawEye(ctx, 12, -3, 3);
+}
+
+function drawRay(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  const wing = 6 + flap * 6;
+  ctx.fillStyle = darken(fin, 0.1);
+  ctx.beginPath();
+  ctx.moveTo(-30, 0);
+  ctx.lineTo(-42, wing);
+  ctx.lineTo(-38, -wing);
+  ctx.closePath();
+  ctx.fill();
+  const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, 28);
+  grad.addColorStop(0, lighten(body, 0.25));
+  grad.addColorStop(1, darken(body, 0.3));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(28, 0);
+  ctx.quadraticCurveTo(0, -30 - wing, -26, -6);
+  ctx.quadraticCurveTo(-28, 0, -26, 6);
+  ctx.quadraticCurveTo(0, 30 + wing, 28, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = darken(body, 0.5);
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.arc(-4 + i * 5, -4 + (i % 2) * 8, 1.3, 0, TAU);
+    ctx.fill();
+  }
+  drawEye(ctx, 16, -6, 2.4);
+  drawEye(ctx, 16, 6, 2.4);
+}
+
+function drawTurtle(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(fin, 0.05);
+  // flippers
+  ctx.beginPath();
+  ctx.ellipse(-6, -22 - flap * 2, 10, 5, -0.4, 0, TAU);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(-6, 22 + flap * 2, 10, 5, 0.4, 0, TAU);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(18, -14, 8, 4, 0.3, 0, TAU);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(18, 14, 8, 4, -0.3, 0, TAU);
+  ctx.fill();
+  // shell
+  const grad = ctx.createRadialGradient(-4, 0, 3, 0, 0, 26);
+  grad.addColorStop(0, lighten(body, 0.2));
+  grad.addColorStop(1, darken(body, 0.35));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 26, 22, 0, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = darken(body, 0.5);
+  ctx.lineWidth = 1.2;
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * 8, -18);
+    ctx.lineTo(i * 8, 18);
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(-22, 0);
+  ctx.lineTo(22, 0);
+  ctx.stroke();
+  // head
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.ellipse(30, 0, 10, 7, 0, 0, TAU);
+  ctx.fill();
+  drawEye(ctx, 34, -2, 2);
+}
+
+function drawShark(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(body, 0.3);
+  tailPath(ctx, -28, 0, 22, flap);
+  ctx.fill();
+  const grad = ctx.createLinearGradient(0, -18, 0, 18);
+  grad.addColorStop(0, lighten(body, 0.2));
+  grad.addColorStop(0.55, body);
+  grad.addColorStop(0.56, lighten(body, 0.4));
+  grad.addColorStop(1, '#e6efef');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(34, 0);
+  ctx.quadraticCurveTo(20, -18, -14, -14);
+  ctx.quadraticCurveTo(-24, -4, -24, 0);
+  ctx.quadraticCurveTo(-24, 4, -14, 14);
+  ctx.quadraticCurveTo(20, 18, 34, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(4, -14);
+  ctx.lineTo(-2 + flap * 2, -30);
+  ctx.lineTo(-10, -12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-2, 12);
+  ctx.lineTo(-14, 22);
+  ctx.lineTo(-14, 10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#20272e';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(30, -1);
+  ctx.lineTo(20, -3);
+  ctx.moveTo(28, 4);
+  ctx.lineTo(18, 2);
+  ctx.stroke();
+  drawEye(ctx, 22, -6, 2.6);
+}
+
+function drawSwordfish(ctx, fish, flap) {
+  const { body, fin } = fish.type;
+  ctx.fillStyle = darken(fin, 0.1);
+  tailPath(ctx, -22, 0, 22, flap);
+  ctx.fill();
+  const grad = ctx.createLinearGradient(0, -12, 0, 12);
+  grad.addColorStop(0, lighten(body, 0.3));
+  grad.addColorStop(0.55, body);
+  grad.addColorStop(1, '#eef7fb');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(24, 0);
+  ctx.quadraticCurveTo(12, -14, -18, -10);
+  ctx.quadraticCurveTo(-22, 0, -18, 10);
+  ctx.quadraticCurveTo(12, 14, 24, 0);
+  ctx.closePath();
+  ctx.fill();
+  // sword bill
+  ctx.fillStyle = darken(fin, 0.25);
+  ctx.beginPath();
+  ctx.moveTo(24, -2);
+  ctx.lineTo(60, 0);
+  ctx.lineTo(24, 2);
+  ctx.closePath();
+  ctx.fill();
+  // dorsal
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(4, -10);
+  ctx.lineTo(-4 + flap * 3, -24);
+  ctx.lineTo(-10, -8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, 10);
+  ctx.lineTo(-8, 20);
+  ctx.lineTo(-12, 8);
+  ctx.closePath();
+  ctx.fill();
+  drawEye(ctx, 16, -4, 2.4);
+}
+
+function drawJellyfish(ctx, fish, flap, t) {
+  const { body, fin } = fish.type;
+  const pulse = 1 + 0.08 * Math.sin(t * 0.005 + fish.phase);
+  const grad = ctx.createRadialGradient(0, -6, 4, 0, -6, 24);
+  grad.addColorStop(0, lighten(body, 0.35));
+  grad.addColorStop(1, darken(body, 0.15));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, -6, 22 * pulse, 16 * pulse, 0, Math.PI, 0);
+  ctx.lineTo(-20 * pulse, 2);
+  ctx.quadraticCurveTo(0, 8, 20 * pulse, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = darken(body, 0.4);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-20 * pulse, 2);
+  ctx.lineTo(20 * pulse, 2);
+  ctx.stroke();
+  // tentacles
+  ctx.strokeStyle = fin;
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  for (let k = -3; k <= 3; k++) {
+    const x0 = k * 6;
+    const len = 22 + Math.abs(k) * 3;
+    ctx.beginPath();
+    ctx.moveTo(x0, 4);
+    for (let s = 1; s <= 4; s++) {
+      const p = s / 4;
+      const wobble = Math.sin(t * 0.006 + fish.phase + k + s) * 3;
+      ctx.lineTo(x0 + wobble, 4 + len * p);
+    }
+    ctx.stroke();
+  }
+  drawEye(ctx, -6, -8, 1.6);
+  drawEye(ctx, 6, -8, 1.6);
+}
+
+function drawDragon(ctx, fish, flap, t) {
+  const { body, fin } = fish.type;
+  const glow = 0.4 + 0.3 * Math.sin(t * 0.006);
+  ctx.save();
+  ctx.shadowBlur = 24;
+  ctx.shadowColor = `rgba(255, 213, 74, ${glow})`;
+  ctx.fillStyle = darken(fin, 0.1);
+  tailPath(ctx, -26, 0, 20, flap);
+  ctx.fill();
+  const grad = ctx.createLinearGradient(-26, 0, 30, 0);
+  grad.addColorStop(0, darken(body, 0.15));
+  grad.addColorStop(1, lighten(body, 0.35));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(30, 0);
+  ctx.quadraticCurveTo(6, -18, -18, -8);
+  ctx.quadraticCurveTo(-20, 0, -18, 8);
+  ctx.quadraticCurveTo(6, 18, 30, 0);
+  ctx.closePath();
+  ctx.fill();
+  // scales
+  ctx.strokeStyle = darken(body, 0.4);
+  ctx.lineWidth = 1;
+  for (let i = -14; i < 24; i += 6) {
+    ctx.beginPath();
+    ctx.arc(i, 0, 5, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
+  }
+  // whiskers
+  ctx.strokeStyle = fin;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(28, -4);
+  ctx.quadraticCurveTo(40, -12 + flap * 3, 46, -4);
+  ctx.moveTo(28, 4);
+  ctx.quadraticCurveTo(40, 12 - flap * 3, 46, 4);
+  ctx.stroke();
+  // fin ridge
+  ctx.fillStyle = fin;
+  ctx.beginPath();
+  ctx.moveTo(0, -14);
+  ctx.quadraticCurveTo(-4 + flap * 4, -26, -10, -14);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  drawEye(ctx, 22, -4, 3);
+}
+
+function drawKraken(ctx, fish, flap, t) {
+  const { body, fin } = fish.type;
+  ctx.save();
+  ctx.shadowBlur = 32;
+  ctx.shadowColor = 'rgba(245, 197, 66, 0.55)';
+  // tentacles
+  ctx.strokeStyle = darken(body, 0.35);
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  for (let k = 0; k < 6; k++) {
+    const baseAng = (k / 6) * TAU;
+    ctx.beginPath();
+    let px = Math.cos(baseAng) * 20;
+    let py = Math.sin(baseAng) * 20;
+    ctx.moveTo(px, py);
+    for (let s = 1; s <= 4; s++) {
+      const wave = Math.sin(t * 0.005 + k + s * 0.6) * 8;
+      const rr = 20 + s * 12;
+      px = Math.cos(baseAng) * rr + wave * Math.sin(baseAng);
+      py = Math.sin(baseAng) * rr - wave * Math.cos(baseAng);
+      ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  // body
+  const grad = ctx.createRadialGradient(0, -6, 6, 0, 0, 40);
+  grad.addColorStop(0, lighten(body, 0.3));
+  grad.addColorStop(1, darken(body, 0.4));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 40, 32, 0, 0, TAU);
+  ctx.fill();
+  // crown ridges
+  ctx.strokeStyle = fin;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-14, -24);
+  ctx.lineTo(-4, -34);
+  ctx.lineTo(4, -22);
+  ctx.lineTo(14, -34);
+  ctx.lineTo(20, -20);
+  ctx.stroke();
+  ctx.restore();
+  drawEye(ctx, -10, -4, 5);
+  drawEye(ctx, 14, -4, 5);
+  // fanged mouth
+  ctx.fillStyle = '#1a0e1a';
+  ctx.beginPath();
+  ctx.ellipse(0, 12, 12, 5, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  for (let i = -8; i <= 8; i += 4) {
+    ctx.beginPath();
+    ctx.moveTo(i, 8);
+    ctx.lineTo(i + 1.5, 15);
+    ctx.lineTo(i + 3, 8);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// helpers
+function lighten(hex, amount) {
+  return mix(hex, '#ffffff', amount);
+}
+function darken(hex, amount) {
+  return mix(hex, '#000000', amount);
+}
+function mix(a, b, t) {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+function hexToRgb(h) {
+  if (h.startsWith('rgb')) {
+    const m = h.match(/\d+/g).map(Number);
+    return [m[0], m[1], m[2]];
+  }
+  const s = h.replace('#', '');
+  const v = parseInt(s.length === 3 ? s.split('').map(c => c + c).join('') : s, 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+
+// ---------- other sprites ----------
+function drawCannon(ctx, cannon, level) {
+  const { baseX, baseY } = cannon;
+  ctx.save();
+  ctx.translate(baseX, baseY);
+  // base ring
+  const ringGrad = ctx.createRadialGradient(0, -6, 4, 0, 0, 46);
+  ringGrad.addColorStop(0, '#3a5a78');
+  ringGrad.addColorStop(1, '#0d1a2a');
+  ctx.fillStyle = ringGrad;
+  ctx.beginPath();
+  ctx.ellipse(0, 12, 60, 22, 0, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#6db5e0';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // barrel
+  ctx.rotate(cannon.angle);
+  ctx.fillStyle = level.barrel;
+  ctx.beginPath();
+  ctx.roundRect(-4, -14, 68, 28, 8);
+  ctx.fill();
+  ctx.strokeStyle = '#000000';
+  ctx.globalAlpha = 0.25;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  // muzzle
+  ctx.fillStyle = level.color;
+  ctx.beginPath();
+  ctx.arc(64, 0, 10, -Math.PI / 2, Math.PI / 2);
+  ctx.lineTo(58, 12);
+  ctx.lineTo(58, -12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  // Level pip on the base (upright, always visible).
+  ctx.save();
+  ctx.translate(baseX, baseY + 12);
+  ctx.fillStyle = level.color;
+  ctx.beginPath();
+  ctx.arc(0, 0, 12, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#0d1a2a';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 14px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(level.level), 0, 0);
+  ctx.restore();
+}
+function drawBullet(ctx, bullet, level) {
+  ctx.save();
+  ctx.translate(bullet.x, bullet.y);
+  ctx.rotate(bullet.angle);
+  ctx.shadowColor = level.color;
+  ctx.shadowBlur = 12;
+  const g = ctx.createRadialGradient(0, 0, 1, 0, 0, bullet.radius);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(1, level.color);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, bullet.radius * 1.4, bullet.radius, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+function drawNet(ctx, net, level) {
+  const t = net.age / net.duration;
+  const r = net.radius * (0.6 + 0.6 * t);
+  ctx.save();
+  ctx.translate(net.x, net.y);
+  ctx.strokeStyle = level.color;
+  ctx.globalAlpha = 1 - t;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, TAU);
+  ctx.stroke();
+  ctx.lineWidth = 1.2;
+  const rings = 3;
+  for (let i = 1; i <= rings; i++) {
+    ctx.beginPath();
+    ctx.arc(0, 0, r * (i / (rings + 1)), 0, TAU);
+    ctx.stroke();
+  }
+  const spokes = 12;
+  for (let i = 0; i < spokes; i++) {
+    const a = (i / spokes) * TAU;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawMuzzleFlash(ctx, cannon, level, life) {
+  const r = 22 * (1 - life);
+  const cx = cannon.baseX + Math.cos(cannon.angle) * (62 + 10);
+  const cy = cannon.baseY + Math.sin(cannon.angle) * (62 + 10);
+  const grad = ctx.createRadialGradient(cx, cy, 1, cx, cy, r);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.5, level.color);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+function drawItemIcon(ctx, x, y, size, item) {
+  const g = ctx.createRadialGradient(x, y, 2, x, y, size);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.4, item.color);
+  g.addColorStop(1, 'rgba(6,22,36,0.85)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = item.color;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = '#0b1a24';
+  ctx.font = `bold ${Math.round(size * 1.1)}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(item.label, x, y + 1);
+}
+function drawFishShadow(ctx, fish, floorY) {
+  const dropDist = floorY - fish.y;
+  if (dropDist <= 0) return;
+  const scale = Math.max(0.35, 1 - dropDist / 900);
+  const alpha = Math.max(0.05, 0.4 * scale);
+  const rx = fish.size * 0.75 * scale;
+  const ry = fish.size * 0.22 * scale;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(fish.x, floorY - 4, rx, ry, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+function drawCoin(ctx, x, y, r) {
+  const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r);
+  g.addColorStop(0, '#fff2b8');
+  g.addColorStop(1, '#d69712');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#8a5b06';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+
+// === fish.js ===
+
+let fishNextId = 1;
+class Fish {
+  constructor(type, spawnState) {
+    this.id = fishNextId++;
+    this.type = type;
+    this.hp = type.hp;
+    this.maxHp = type.hp;
+    this.size = type.size;
+    this.phase = Math.random() * Math.PI * 2;
+    this.dying = false;
+    this.dyingT = 0;
+    this.dead = false;
+    this.slowUntil = 0;
+    this.pathT = 0;
+
+    // Choose an entry side, path type, and target trajectory.
+    const side = Math.random() < 0.5 ? 'left' : 'right';
+    const dir = side === 'left' ? 1 : -1;
+    const startX = side === 'left' ? -type.size - 40 : LOGICAL_W + type.size + 40;
+    const baseY = 100 + Math.random() * (LOGICAL_H - 240);
+    this.dir = dir;
+    this.x = startX;
+    this.y = baseY;
+    this.baseY = baseY;
+    this.speed = type.speed * (0.85 + Math.random() * 0.3);
+    if (spawnState && spawnState.speedBoost) this.speed *= spawnState.speedBoost;
+    this.heading = dir === 1 ? 0 : Math.PI;
+    const roll = Math.random();
+    if (type.special === 'boss') {
+      this.pathKind = 'boss';
+      this.speed *= 0.85;
+    } else if (roll < 0.55) {
+      this.pathKind = 'sine';
+      this.amp = 20 + Math.random() * 60;
+      this.freq = 0.002 + Math.random() * 0.002;
+    } else if (roll < 0.8) {
+      this.pathKind = 'straight';
+    } else {
+      this.pathKind = 'arc';
+      this.arcCenterY = baseY + (Math.random() < 0.5 ? -1 : 1) * (80 + Math.random() * 80);
+      this.arcRadius = Math.abs(this.arcCenterY - baseY);
+      this.arcAng = Math.atan2(baseY - this.arcCenterY, startX);
+      this.arcSpin = dir * (0.4 + Math.random() * 0.4);
+    }
+  }
+
+  update(dt, now, freezeUntil = 0) {
+    if (this.dying) {
+      this.dyingT += dt / 700;
+      if (this.dyingT >= 1) this.dead = true;
+      return;
+    }
+    let vx = 0, vy = 0;
+    const frozen = now < freezeUntil;
+    const s = frozen ? 0 : ((now < this.slowUntil) ? 0.35 : 1);
+    const speed = this.speed * s;
+    switch (this.pathKind) {
+      case 'straight':
+        vx = this.dir * speed;
+        break;
+      case 'sine':
+        vx = this.dir * speed;
+        this.y = this.baseY + Math.sin(this.x * this.freq + this.phase) * this.amp;
+        vy = 0;
+        break;
+      case 'arc': {
+        this.arcAng += this.arcSpin * (dt / 1000);
+        this.x = LOGICAL_W / 2 + Math.cos(this.arcAng) * (LOGICAL_W / 2 + 60) * this.dir;
+        this.y = this.arcCenterY + Math.sin(this.arcAng) * this.arcRadius;
+        break;
+      }
+      case 'boss': {
+        vx = this.dir * speed;
+        this.y = this.baseY + Math.sin(now * 0.0006 + this.phase) * 40;
+        break;
+      }
+    }
+    if (this.pathKind !== 'arc') {
+      this.x += vx * (dt / 1000);
+      if (this.pathKind === 'sine') {
+        const next = this.baseY + Math.sin((this.x + this.dir * 5) * this.freq + this.phase) * this.amp;
+        vy = (next - this.y);
+      }
+    }
+    this.heading = Math.atan2(vy, vx * this.dir) + (this.dir === 1 ? 0 : Math.PI);
+    const off = 200;
+    if (this.pathKind === 'arc') {
+      // arc fish loops around; die after 1 full pass
+      if (Math.abs(this.arcAng) > Math.PI + 0.5) this.dead = true;
+    } else if (this.x < -off || this.x > LOGICAL_W + off) {
+      this.dead = true;
+    }
+  }
+
+  hit(damage, now) {
+    this.hp -= damage;
+    this.slowUntil = now + 220;
+    if (this.hp <= 0 && !this.dying) {
+      this.dying = true;
+      return true;
+    }
+    return false;
+  }
+
+  boundsRadius() {
+    return this.size * 0.7;
+  }
+}
+class Spawner {
+  constructor() {
+    this.timer = 0;
+    this.elapsedMs = 0;
+    this.lastBoss = 0;
+    this.lastGolden = 0;
+    this.lastSchool = 0;
+    this.lastRain = 0;
+    this.rainUntil = 0;
+    this.rainTimer = 0;
+    this.weightedList = this._buildWeightedList(FISH_TYPES.filter(t => !t.special));
+    this.pendingBoss = false;
+  }
+
+  _buildWeightedList(types) {
+    const arr = [];
+    for (const t of types) {
+      for (let i = 0; i < t.weight; i++) arr.push(t);
+    }
+    return arr;
+  }
+
+  update(dt, now, fish) {
+    this.timer += dt;
+    this.elapsedMs += dt;
+    const rampT = Math.min(1, this.elapsedMs / (SPAWN.intervalRampSeconds * 1000));
+    const interval = SPAWN.baseInterval - (SPAWN.baseInterval - SPAWN.minInterval) * rampT;
+
+    if (this.pendingBoss && this.timer >= 800) {
+      const boss = FISH_TYPES.find(t => t.special === 'boss');
+      fish.push(new Fish(boss));
+      this.pendingBoss = false;
+      this.lastBoss = this.elapsedMs;
+      this.timer = 0;
+    }
+
+    if (this.timer >= interval) {
+      this.timer = 0;
+      fish.push(new Fish(this.pickCommon()));
+    }
+
+    if (this.elapsedMs - this.lastGolden > SPAWN.goldenIntervalMs && Math.random() < 0.5) {
+      const g = FISH_TYPES.find(t => t.special === 'golden');
+      fish.push(new Fish(g));
+      this.lastGolden = this.elapsedMs;
+    }
+
+    if (this.elapsedMs - this.lastSchool > SCHOOL.intervalMs) {
+      this._spawnSchool(fish);
+      this.lastSchool = this.elapsedMs;
+    }
+
+    // Golden rain event.
+    if (this.rainUntil > 0 && this.elapsedMs < this.rainUntil) {
+      this.rainTimer += dt;
+      if (this.rainTimer >= 350) {
+        this.rainTimer = 0;
+        const g = FISH_TYPES.find(t => t.special === 'golden');
+        fish.push(new Fish(g, { speedBoost: 1.15 }));
+      }
+    } else if (this.elapsedMs - this.lastRain > SPAWN.goldenRainIntervalMs && Math.random() < 0.6) {
+      this.rainUntil = this.elapsedMs + SPAWN.goldenRainDurationMs;
+      this.lastRain = this.elapsedMs;
+    }
+  }
+
+  isRaining() {
+    return this.rainUntil > 0 && this.elapsedMs < this.rainUntil;
+  }
+
+  _spawnSchool(fish) {
+    const eligible = FISH_TYPES.filter(t => SCHOOL.eligibleIds.includes(t.id));
+    const type = eligible[(Math.random() * eligible.length) | 0];
+    const count = SCHOOL.minCount + Math.floor(Math.random() * (SCHOOL.maxCount - SCHOOL.minCount + 1));
+    for (let i = 0; i < count; i++) {
+      const f = new Fish(type);
+      // stagger them along a diagonal line for a school-like look
+      const off = (i - count / 2) * 34;
+      f.x += -Math.sign(f.dir) * off;
+      f.baseY += (i % 2 === 0 ? 1 : -1) * 12 + Math.random() * 8;
+      f.y = f.baseY;
+      f.phase = i * 0.4;
+      fish.push(f);
+    }
+  }
+
+  triggerBossSoon() {
+    if (this.elapsedMs - this.lastBoss < SPAWN.bossIntervalMs) return false;
+    this.pendingBoss = true;
+    return true;
+  }
+
+  pickCommon() {
+    return this.weightedList[(Math.random() * this.weightedList.length) | 0];
+  }
+}
+
+
+// === bullet.js ===
+
+let bulletNextId = 1;
+class Bullet {
+  constructor(x, y, angle, damage) {
+    this.id = bulletNextId++;
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.vx = Math.cos(angle) * BULLET.speed;
+    this.vy = Math.sin(angle) * BULLET.speed;
+    this.radius = BULLET.radius;
+    this.damage = damage;
+    this.dead = false;
+  }
+
+  update(dt) {
+    this.x += this.vx * dt / 1000;
+    this.y += this.vy * dt / 1000;
+    if (this.x < -40 || this.x > LOGICAL_W + 40 || this.y < -40 || this.y > LOGICAL_H + 40) {
+      this.dead = true;
+    }
+  }
+}
+
+let nextNetId = 1;
+class Net {
+  constructor(x, y, damage) {
+    this.id = nextNetId++;
+    this.x = x;
+    this.y = y;
+    this.damage = damage;
+    this.radius = BULLET.netRadius;
+    this.age = 0;
+    this.duration = BULLET.netDuration;
+    this.hitApplied = false;
+    this.dead = false;
+  }
+
+  update(dt) {
+    this.age += dt;
+    if (this.age >= this.duration) this.dead = true;
+  }
+
+  // Apply damage exactly once at first frame.
+  applyDamage(fishList, now, onCatch) {
+    if (this.hitApplied) return;
+    this.hitApplied = true;
+    for (const f of fishList) {
+      if (f.dying) continue;
+      const dx = f.x - this.x;
+      const dy = f.y - this.y;
+      if (dx * dx + dy * dy <= (this.radius + f.boundsRadius()) ** 2) {
+        const killed = f.hit(this.damage, now);
+        if (killed) onCatch(f);
+      }
+    }
+  }
+}
+
+
+// === cannon.js ===
+class Cannon {
+  constructor(getLevel) {
+    this.baseX = CANNON.baseX;
+    this.baseY = CANNON.baseY;
+    this.angle = -Math.PI / 2;
+    this.lastFire = -Infinity;
+    this.getLevel = getLevel;
+    this.recoil = 0;
+  }
+
+  currentLevel() {
+    return CANNON.levels[this.getLevel() - 1];
+  }
+
+  aimAt(x, y) {
+    let a = Math.atan2(y - this.baseY, x - this.baseX);
+    // Cannon only aims into the upper half of the screen. Clamp the two lower
+    // quadrants to the nearest horizontal edge (right or left).
+    if (a >= 0) {
+      a = (x >= this.baseX) ? CANNON.maxAngle : CANNON.minAngle;
+    } else {
+      a = Math.max(CANNON.minAngle, Math.min(CANNON.maxAngle, a));
+    }
+    this.angle = a;
+  }
+
+  tryFire(now, spendCoinsFn, spawnBullet) {
+    const level = this.currentLevel();
+    if (now - this.lastFire < CANNON.fireDelay) return false;
+    if (!spendCoinsFn(level.cost)) return false;
+    this.lastFire = now;
+    this.recoil = 8;
+    const bx = this.baseX + Math.cos(this.angle) * (CANNON.barrelLength + 10);
+    const by = this.baseY + Math.sin(this.angle) * (CANNON.barrelLength + 10);
+    spawnBullet(new Bullet(bx, by, this.angle, level.damage));
+    return true;
+  }
+
+  update(dt) {
+    if (this.recoil > 0) this.recoil = Math.max(0, this.recoil - dt * 0.05);
+  }
+}
+
+
+// === particles.js ===
+class ParticleSystem {
+  constructor() {
+    this.items = [];
+  }
+
+  add(p) { this.items.push(p); }
+
+  spawnCoinBurst(x, y, count, value) {
+    for (let i = 0; i < count; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.4;
+      const sp = 180 + Math.random() * 220;
+      this.items.push({
+        kind: 'coin',
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp,
+        life: 800 + Math.random() * 400,
+        age: 0,
+        size: 8 + Math.random() * 4,
+        value
+      });
+    }
+  }
+
+  spawnFloatText(x, y, text, color = '#ffd54a') {
+    this.items.push({ kind: 'text', x, y, vy: -60, life: 900, age: 0, text, color });
+  }
+
+  spawnBubble(x, y, r) {
+    this.items.push({ kind: 'bubble', x, y, r, vy: -30 - Math.random() * 20, wobble: Math.random() * Math.PI * 2, life: 3000, age: 0 });
+  }
+
+  spawnSplash(x, y) {
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = 60 + Math.random() * 120;
+      this.items.push({ kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 260, age: 0 });
+    }
+  }
+
+  update(dt) {
+    const g = 480; // px/s^2
+    for (const p of this.items) {
+      p.age += dt;
+      switch (p.kind) {
+        case 'coin':
+          p.vy += g * dt / 1000;
+          p.x += p.vx * dt / 1000;
+          p.y += p.vy * dt / 1000;
+          break;
+        case 'text':
+          p.y += p.vy * dt / 1000;
+          break;
+        case 'bubble':
+          p.wobble += dt / 300;
+          p.x += Math.sin(p.wobble) * 8 * dt / 1000;
+          p.y += p.vy * dt / 1000;
+          break;
+        case 'spark':
+          p.x += p.vx * dt / 1000;
+          p.y += p.vy * dt / 1000;
+          p.vx *= 0.94;
+          p.vy *= 0.94;
+          break;
+      }
+    }
+    this.items = this.items.filter(p => p.age < p.life);
+  }
+
+  render(ctx, drawCoin) {
+    for (const p of this.items) {
+      const t = p.age / p.life;
+      switch (p.kind) {
+        case 'coin':
+          ctx.globalAlpha = 1 - t * 0.4;
+          drawCoin(ctx, p.x, p.y, p.size);
+          break;
+        case 'text':
+          ctx.globalAlpha = 1 - t;
+          ctx.fillStyle = p.color;
+          ctx.font = 'bold 20px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.text, p.x, p.y);
+          break;
+        case 'bubble':
+          ctx.globalAlpha = (1 - t) * 0.4;
+          ctx.strokeStyle = '#b7e4ff';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        case 'spark':
+          ctx.globalAlpha = 1 - t;
+          ctx.fillStyle = '#ffe89a';
+          ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+          break;
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+
+// === scene.js ===
+
+const SEAWEED = [];
+for (let i = 0; i < 14; i++) {
+  SEAWEED.push({
+    x: 40 + Math.random() * (LOGICAL_W - 80),
+    baseY: LOGICAL_H,
+    height: 90 + Math.random() * 120,
+    hue: 100 + Math.random() * 40,
+    sway: Math.random() * Math.PI * 2,
+    freq: 0.6 + Math.random() * 0.6,
+    thickness: 4 + Math.random() * 4
+  });
+}
+
+const CORAL = [];
+for (let i = 0; i < 6; i++) {
+  CORAL.push({
+    x: 60 + Math.random() * (LOGICAL_W - 120),
+    y: LOGICAL_H - 20 - Math.random() * 10,
+    r: 30 + Math.random() * 40,
+    hue: [340, 30, 190, 260][i % 4]
+  });
+}
+
+let bgBubbleTimer = 0;
+const bgBubbles = [];
+function updateScene(dt) {
+  bgBubbleTimer += dt;
+  if (bgBubbleTimer > 380) {
+    bgBubbleTimer = 0;
+    bgBubbles.push({
+      x: Math.random() * LOGICAL_W,
+      y: LOGICAL_H + 20,
+      r: 3 + Math.random() * 8,
+      vy: -30 - Math.random() * 40,
+      wobble: Math.random() * Math.PI * 2,
+      life: 5200,
+      age: 0
+    });
+  }
+  for (const b of bgBubbles) {
+    b.age += dt;
+    b.wobble += dt / 400;
+    b.x += Math.sin(b.wobble) * 8 * dt / 1000;
+    b.y += b.vy * dt / 1000;
+  }
+  while (bgBubbles.length && bgBubbles[0].age >= bgBubbles[0].life) bgBubbles.shift();
+}
+function drawScene(ctx, t) {
+  const grad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+  grad.addColorStop(0, COLORS.deepTop);
+  grad.addColorStop(0.55, COLORS.deepMid);
+  grad.addColorStop(1, COLORS.deepBottom);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+  // God rays
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) {
+    const rayX = 200 + i * 220 + Math.sin(t * 0.0002 + i) * 40;
+    const rg = ctx.createLinearGradient(rayX, 0, rayX + 160, LOGICAL_H);
+    rg.addColorStop(0, 'rgba(180,235,255,0.08)');
+    rg.addColorStop(1, 'rgba(180,235,255,0)');
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.moveTo(rayX - 40, 0);
+    ctx.lineTo(rayX + 40, 0);
+    ctx.lineTo(rayX + 180, LOGICAL_H);
+    ctx.lineTo(rayX + 20, LOGICAL_H);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // Seafloor
+  const floorGrad = ctx.createLinearGradient(0, LOGICAL_H - 90, 0, LOGICAL_H);
+  floorGrad.addColorStop(0, 'rgba(6,20,32,0)');
+  floorGrad.addColorStop(1, '#02121f');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, LOGICAL_H - 90, LOGICAL_W, 90);
+
+  // Coral
+  for (const c of CORAL) {
+    ctx.fillStyle = `hsl(${c.hue} 55% 30%)`;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = `hsl(${c.hue} 55% 40%)`;
+    for (let i = 0; i < 4; i++) {
+      const bx = c.x - c.r * 0.7 + i * (c.r * 0.4);
+      const by = c.y - c.r * 0.4 - (i % 2) * 6;
+      ctx.beginPath();
+      ctx.arc(bx, by, c.r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Seaweed
+  for (const w of SEAWEED) {
+    ctx.strokeStyle = `hsl(${w.hue} 45% 28%)`;
+    ctx.lineWidth = w.thickness;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(w.x, w.baseY);
+    const segs = 6;
+    for (let i = 1; i <= segs; i++) {
+      const p = i / segs;
+      const wx = w.x + Math.sin(t * 0.001 * w.freq + w.sway + p * 2) * 10 * p;
+      const wy = w.baseY - w.height * p;
+      ctx.lineTo(wx, wy);
+    }
+    ctx.stroke();
+  }
+
+  // Background bubbles
+  ctx.strokeStyle = 'rgba(180,235,255,0.35)';
+  ctx.lineWidth = 1.2;
+  for (const b of bgBubbles) {
+    const a = 1 - b.age / b.life;
+    ctx.globalAlpha = a * 0.7;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+
+// === items.js ===
+
+// Returns an item id ("freeze" | "bomb" | "lightning") if the roll succeeds.
+function rollItemDrop(fishType) {
+  const key = fishType.special === 'boss' ? 'boss'
+            : fishType.special === 'golden' ? 'golden'
+            : fishType.id === 'shark' ? 'shark'
+            : 'other';
+  const tier = ITEM_DROP[key];
+  if (Math.random() > tier.any) return null;
+  return pickWeighted(tier.distribution);
+}
+
+function pickWeighted(distribution) {
+  let r = Math.random();
+  for (const [id, weight] of Object.entries(distribution)) {
+    r -= weight;
+    if (r <= 0) return id;
+  }
+  return Object.keys(distribution)[0];
+}
+
+// A visible lightning bolt drawn between chained fish.
+class LightningBolt {
+  constructor(points) {
+    this.points = points;
+    this.age = 0;
+    this.duration = 260;
+    this.dead = false;
+  }
+  update(dt) {
+    this.age += dt;
+    if (this.age >= this.duration) this.dead = true;
+  }
+  render(ctx) {
+    const t = this.age / this.duration;
+    ctx.save();
+    ctx.strokeStyle = ITEMS.lightning.color;
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 1 - t;
+    ctx.shadowColor = ITEMS.lightning.color;
+    ctx.shadowBlur = 18;
+    for (let pass = 0; pass < 2; pass++) {
+      ctx.lineWidth = pass === 0 ? 5 : 2;
+      ctx.globalAlpha = (1 - t) * (pass === 0 ? 0.35 : 1);
+      ctx.beginPath();
+      for (let i = 0; i < this.points.length - 1; i++) {
+        const a = this.points[i], b = this.points[i + 1];
+        this._jag(ctx, a.x, a.y, b.x, b.y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  _jag(ctx, x1, y1, x2, y2) {
+    ctx.moveTo(x1, y1);
+    const segs = 5;
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    if (len < 1) { ctx.lineTo(x2, y2); return; }
+    const nx = -dy / len, ny = dx / len;
+    for (let i = 1; i < segs; i++) {
+      const p = i / segs;
+      const wobble = (Math.random() - 0.5) * 30;
+      ctx.lineTo(x1 + dx * p + nx * wobble, y1 + dy * p + ny * wobble);
+    }
+    ctx.lineTo(x2, y2);
+  }
+}
+
+// A visible bomb shockwave over the whole play area.
+class BombWave {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.age = 0;
+    this.duration = 520;
+    this.dead = false;
+  }
+  update(dt) {
+    this.age += dt;
+    if (this.age >= this.duration) this.dead = true;
+  }
+  render(ctx) {
+    const t = this.age / this.duration;
+    const r = 800 * t;
+    ctx.save();
+    ctx.strokeStyle = ITEMS.bomb.color;
+    ctx.lineWidth = 6;
+    ctx.globalAlpha = 1 - t;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = (1 - t) * 0.6;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, r * 0.8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+class ItemSystem {
+  constructor() {
+    this.inventory = { freeze: 0, bomb: 0, lightning: 0 };
+    this.freezeUntil = 0;
+    this.effects = []; // active LightningBolt / BombWave
+  }
+
+  grant(id) {
+    if (this.inventory[id] === undefined) return;
+    this.inventory[id] = Math.min(9, this.inventory[id] + 1);
+  }
+
+  count(id) { return this.inventory[id] || 0; }
+
+  // Attempt to use item at cursor location; returns true if used.
+  use(id, ctxState) {
+    if (!this.inventory[id]) return false;
+    this.inventory[id]--;
+    const { fishList, now, onCatch, cursor } = ctxState;
+    switch (id) {
+      case 'freeze':
+        this.freezeUntil = now + ITEMS.freeze.durationMs;
+        break;
+      case 'bomb':
+        this.effects.push(new BombWave(cursor.x, cursor.y));
+        for (const f of fishList) {
+          if (f.dying) continue;
+          const dx = f.x - cursor.x;
+          const dy = f.y - cursor.y;
+          if (dx * dx + dy * dy <= 260 * 260) {
+            const killed = f.hit(9999, now);
+            if (killed) onCatch(f, id);
+          } else if (dx * dx + dy * dy <= 500 * 500) {
+            const killed = f.hit(80, now);
+            if (killed) onCatch(f, id);
+          }
+        }
+        break;
+      case 'lightning': {
+        // Chain: closest fish to cursor, then jump to the next-closest live fish up to 5 hops.
+        const jumps = 5;
+        const chain = [];
+        let anchor = { x: cursor.x, y: cursor.y };
+        const remaining = fishList.filter(f => !f.dying);
+        for (let i = 0; i < jumps; i++) {
+          let best = null; let bestD = Infinity;
+          for (const f of remaining) {
+            if (chain.includes(f)) continue;
+            const dx = f.x - anchor.x, dy = f.y - anchor.y;
+            const d = dx * dx + dy * dy;
+            if (d < bestD) { bestD = d; best = f; }
+          }
+          if (!best) break;
+          chain.push(best);
+          anchor = { x: best.x, y: best.y };
+        }
+        if (chain.length) {
+          const points = [{ x: cursor.x, y: cursor.y }, ...chain.map(f => ({ x: f.x, y: f.y }))];
+          this.effects.push(new LightningBolt(points));
+          for (const f of chain) {
+            const killed = f.hit(150, now);
+            if (killed) onCatch(f, id);
+          }
+        } else {
+          // no target — refund
+          this.inventory[id]++;
+          return false;
+        }
+        break;
+      }
+    }
+    return true;
+  }
+
+  update(dt) {
+    for (const e of this.effects) e.update(dt);
+    this.effects = this.effects.filter(e => !e.dead);
+  }
+
+  render(ctx) {
+    for (const e of this.effects) e.render(ctx);
+  }
+}
+
+
+// === missions.js ===
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+class MissionSystem {
+  constructor(saved) {
+    this.missions = null;
+    this.dayStart = 0;
+    this.completedToasts = [];
+    this._hydrate(saved);
+  }
+
+  _hydrate(saved) {
+    const now = Date.now();
+    if (saved && saved.dayStart && now - saved.dayStart < DAY_MS && Array.isArray(saved.missions) && saved.missions.length) {
+      this.dayStart = saved.dayStart;
+      this.missions = saved.missions.map(m => ({ ...m }));
+    } else {
+      this._roll(now);
+    }
+  }
+
+  _roll(nowStamp) {
+    const pool = [...MISSION_POOL];
+    const picks = [];
+    for (let i = 0; i < 3 && pool.length; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      picks.push(pool.splice(idx, 1)[0]);
+    }
+    this.missions = picks.map(p => ({ id: p.id, progress: 0, done: false, claimed: false }));
+    this.dayStart = nowStamp;
+  }
+
+  serialize() {
+    return { dayStart: this.dayStart, missions: this.missions.map(m => ({ ...m })) };
+  }
+
+  templateOf(m) { return MISSION_POOL.find(p => p.id === m.id); }
+
+  labelOf(m) {
+    const t = this.templateOf(m);
+    if (t.type === 'species_kill') {
+      const sp = FISH_TYPES.find(f => f.id === t.speciesId);
+      return t.text(t.goal, sp ? sp.name : t.speciesId);
+    }
+    if (t.type === 'item_use') {
+      const it = ITEMS[t.itemId];
+      return t.text(t.goal, it ? it.name : t.itemId);
+    }
+    return t.text(t.goal);
+  }
+
+  // Advance any missions matching this event; returns array of newly-completed templates for toasts.
+  _tick(matchFn, amount = 1) {
+    const completed = [];
+    for (const m of this.missions) {
+      if (m.done) continue;
+      const t = this.templateOf(m);
+      if (!matchFn(t)) continue;
+      m.progress = Math.min(t.goal, m.progress + amount);
+      if (m.progress >= t.goal) { m.done = true; completed.push(t); }
+    }
+    return completed;
+  }
+
+  trackCatch(fishType) {
+    const done1 = this._tick(t => t.type === 'catch');
+    const done2 = this._tick(t => t.type === 'species_kill' && t.speciesId === fishType.id);
+    return [...done1, ...done2];
+  }
+
+  trackCombo(comboCount) {
+    return this._tick(t => t.type === 'combo' && t.goal <= comboCount ? true : false, 999).filter(t => true);
+  }
+
+  // Combo tick: mark done if comboCount >= goal.
+  trackComboReached(comboCount) {
+    const completed = [];
+    for (const m of this.missions) {
+      if (m.done) continue;
+      const t = this.templateOf(m);
+      if (t.type !== 'combo') continue;
+      if (comboCount >= t.goal) { m.progress = t.goal; m.done = true; completed.push(t); }
+    }
+    return completed;
+  }
+
+  trackItemUse(itemId) {
+    return this._tick(t => t.type === 'item_use' && t.itemId === itemId);
+  }
+
+  trackCoinsEarned(amount) {
+    return this._tick(t => t.type === 'earn_coins', amount);
+  }
+
+  // Claim reward coins for a done+unclaimed mission.
+  claim(missionId) {
+    const m = this.missions.find(x => x.id === missionId);
+    if (!m || !m.done || m.claimed) return 0;
+    m.claimed = true;
+    return this.templateOf(m).reward;
+  }
+
+  // Auto-claim all done+unclaimed and return total.
+  claimAllReady() {
+    let total = 0;
+    for (const m of this.missions) {
+      if (m.done && !m.claimed) {
+        m.claimed = true;
+        total += this.templateOf(m).reward;
+      }
+    }
+    return total;
+  }
+
+  // Refresh if day rolled over.
+  maybeRoll() {
+    const now = Date.now();
+    if (now - this.dayStart >= DAY_MS) this._roll(now);
+  }
+}
+
+
+// === achievements.js ===
+class AchievementTracker {
+  constructor(unlocked = []) {
+    this.unlocked = new Set(unlocked);
+    this.toasts = [];
+  }
+
+  check(stats) {
+    const newly = [];
+    for (const a of ACHIEVEMENTS) {
+      if (this.unlocked.has(a.id)) continue;
+      if (a.check(stats)) {
+        this.unlocked.add(a.id);
+        newly.push(a);
+      }
+    }
+    if (newly.length) {
+      const baseNow = performance.now();
+      newly.forEach((a, i) => {
+        this.toasts.push({
+          id: a.id,
+          name: a.name,
+          desc: a.desc,
+          start: baseNow + i * 320,
+          duration: 3200
+        });
+      });
+    }
+    return newly;
+  }
+
+  updateToasts(now) {
+    this.toasts = this.toasts.filter(t => now - t.start < t.duration);
+  }
+
+  render(ctx, now, drawItemIcon) {
+    const startX = 20;
+    let y = 80;
+    for (const t of this.toasts) {
+      const age = now - t.start;
+      if (age < 0) continue;
+      const p = age / t.duration;
+      const slideIn = Math.min(1, age / 200);
+      const fadeOut = age > t.duration - 300 ? (t.duration - age) / 300 : 1;
+      const alpha = slideIn * fadeOut;
+      const x = startX - 40 * (1 - slideIn);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      const w = 300, h = 62;
+      ctx.fillStyle = 'rgba(6, 22, 36, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#ffd54a';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      ctx.fillStyle = '#ffd54a';
+      ctx.font = 'bold 16px system-ui, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.fillText('🏆 成就解锁 · ' + t.name, x + 14, y + 10);
+      ctx.fillStyle = '#e6f4ff';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText(t.desc, x + 14, y + 36);
+      ctx.restore();
+      y += h + 8;
+    }
+  }
+}
+
+
+// === ui.js ===
+class UI {
+  constructor(game) {
+    this.game = game;
+    this.buttons = this._layout();
+  }
+
+  _layout() {
+    const y = LOGICAL_H - 66;
+    return {
+      levelDown: { x: 20, y, w: 44, h: 44, label: '-' },
+      levelUp:   { x: LOGICAL_W - 64, y, w: 44, h: 44, label: '+' },
+      autofire:  { x: LOGICAL_W - 274, y: 22, w: 88, h: 40, label: '连发' },
+      mute:      { x: LOGICAL_W - 178, y: 22, w: 88, h: 40, label: '声音' },
+      pause:     { x: LOGICAL_W - 82, y: 22, w: 60, h: 40, label: '⏸' },
+      settings:  { x: LOGICAL_W - 340, y: 22, w: 60, h: 40, label: '⚙' },
+      itemFreeze:    { x: LOGICAL_W / 2 - 96,  y: 74, w: 56, h: 56, label: '❄' },
+      itemBomb:      { x: LOGICAL_W / 2 - 28,  y: 74, w: 56, h: 56, label: '💣' },
+      itemLightning: { x: LOGICAL_W / 2 + 40,  y: 74, w: 56, h: 56, label: '⚡' }
+    };
+  }
+
+  hitTest(x, y) {
+    for (const [id, b] of Object.entries(this.buttons)) {
+      if (id.startsWith('item') && !this.game.items.count(itemIdOf(id))) continue;
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return id;
+    }
+    return null;
+  }
+
+  settingsHitTest(x, y) {
+    for (const [id, b] of Object.entries(this._settingsButtons())) {
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return id;
+    }
+    return null;
+  }
+
+  _settingsButtons() {
+    return {
+      settingsClose:    { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' },
+      settingsMissions: { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 - 80, w: 240, h: 44, label: '每日任务' },
+      settingsCodex:    { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 - 20, w: 240, h: 44, label: '鱼类图鉴' },
+      settingsMusic:    { x: LOGICAL_W / 2 - 250, y: LOGICAL_H / 2 + 40, w: 240, h: 44, label: '音乐' },
+      settingsSfx:      { x: LOGICAL_W / 2 + 10,  y: LOGICAL_H / 2 + 40, w: 240, h: 44, label: '音效' },
+      settingsMute:     { x: LOGICAL_W / 2 - 250, y: LOGICAL_H / 2 + 100, w: 240, h: 44, label: '切换声音' },
+      settingsReset:    { x: LOGICAL_W / 2 + 10,  y: LOGICAL_H / 2 + 100, w: 240, h: 44, label: '重置存档' }
+    };
+  }
+
+  _missionsButtons() {
+    return {
+      missionsClose: { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' },
+      missionsClaim: { x: LOGICAL_W / 2 - 130, y: LOGICAL_H - 96, w: 260, h: 48, label: '领取奖励' }
+    };
+  }
+
+  missionsHitTest(x, y) {
+    for (const [id, b] of Object.entries(this._missionsButtons())) {
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return id;
+    }
+    return null;
+  }
+
+  _codexButtons() {
+    return {
+      codexClose: { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' }
+    };
+  }
+
+  codexHitTest(x, y) {
+    for (const [id, b] of Object.entries(this._codexButtons())) {
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return id;
+    }
+    return null;
+  }
+
+  render(ctx, state, items, combo, extras = {}) {
+    ctx.save();
+    // top-left coin panel
+    this._roundPanel(ctx, 20, 22, 260, 40, COLORS.hudPanel);
+    drawCoin(ctx, 40, 42, 14);
+    ctx.fillStyle = COLORS.gold;
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(String(state.coins), 60, 42);
+    ctx.fillStyle = COLORS.hudText;
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillText(`已捕获 ${state.totalCaught}`, 150, 42);
+
+    // right-side chips
+    this._chip(ctx, this.buttons.autofire, state.autofire ? '#2ea56b' : COLORS.hudPanel, state.autofire ? '#e6ffe9' : COLORS.hudText);
+    this._chip(ctx, this.buttons.mute, state.muted ? '#8b2c2c' : COLORS.hudPanel, state.muted ? '#ffe0e0' : COLORS.hudText, state.muted ? '静音' : '声音');
+    this._chip(ctx, this.buttons.pause, COLORS.hudPanel, COLORS.hudText, state.paused ? '▶' : '⏸');
+    this._chip(ctx, this.buttons.settings, COLORS.hudPanel, COLORS.hudText);
+
+    // cannon controls
+    const cannonLevel = CANNON.levels[state.cannonLevel - 1];
+    this._levelPanel(ctx, state);
+    this._chip(ctx, this.buttons.levelDown, COLORS.hudPanel, COLORS.hudText);
+    this._chip(ctx, this.buttons.levelUp, COLORS.hudPanel, COLORS.hudText);
+    ctx.fillStyle = cannonLevel.color;
+    ctx.font = 'bold 15px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Lv ${cannonLevel.level}  ·  伤害 ${cannonLevel.damage}  ·  每发 ${cannonLevel.cost}`, LOGICAL_W / 2, LOGICAL_H - 44);
+
+    // Item bar (only render slots that are non-empty; button is greyed if zero)
+    this._itemSlot(ctx, this.buttons.itemFreeze,    ITEMS.freeze,    items.count('freeze'));
+    this._itemSlot(ctx, this.buttons.itemBomb,      ITEMS.bomb,      items.count('bomb'));
+    this._itemSlot(ctx, this.buttons.itemLightning, ITEMS.lightning, items.count('lightning'));
+
+    // Combo
+    if (combo.count >= COMBO.levels[1].threshold) {
+      const lvl = COMBO.levels[combo.level];
+      ctx.save();
+      ctx.font = 'bold 40px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = lvl.color;
+      ctx.shadowColor = lvl.color;
+      ctx.shadowBlur = 12;
+      ctx.fillText(`${combo.count} 连击  ×${lvl.mult}`, LOGICAL_W / 2, 40);
+      ctx.restore();
+    }
+
+    if (extras.boss) this._bossHpBar(ctx, extras.boss);
+    if (extras.raining) this._rainBanner(ctx);
+    if (state.bossWarning > 0) this._bossBanner(ctx, state.bossWarning);
+    if (extras.missionToasts) this._missionToasts(ctx, extras.missionToasts, performance.now());
+    if (state.codexOpen) this._codexOverlay(ctx, extras.now, state.speciesKills || {});
+    else if (state.missionsOpen) this._missionsOverlay(ctx, extras.missions);
+    else if (state.settingsOpen) this._settingsOverlay(ctx, state);
+    else if (state.paused) this._pauseOverlay(ctx);
+    if (!state.started) this._startOverlay(ctx);
+    if (state.portraitHint) this._portraitHint(ctx);
+
+    ctx.restore();
+  }
+
+  _missionToasts(ctx, toasts, now) {
+    let y = LOGICAL_H - 200;
+    for (const t of toasts) {
+      const age = now - t.start;
+      const p = age / t.duration;
+      const slide = Math.min(1, age / 200);
+      const fade = age > t.duration - 300 ? (t.duration - age) / 300 : 1;
+      ctx.save();
+      ctx.globalAlpha = slide * fade;
+      const x = 20 - 40 * (1 - slide);
+      this._roundPanel(ctx, x, y, 320, 46, 'rgba(60,42,4,0.9)');
+      ctx.fillStyle = '#ffe89a';
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.text, x + 14, y + 23);
+      ctx.restore();
+      y -= 54;
+    }
+  }
+
+  _missionsOverlay(ctx, missions) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.94)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 36px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('📋 每日任务', LOGICAL_W / 2, 44);
+    this._chip(ctx, this._missionsButtons().missionsClose, COLORS.hudPanel, COLORS.hudText);
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillStyle = '#8bb0c8';
+    const hrsLeft = Math.max(0, Math.ceil((24 * 3600 * 1000 - (Date.now() - missions.dayStart)) / 3600000));
+    ctx.fillText(`剩余刷新时间约 ${hrsLeft} 小时`, LOGICAL_W / 2, 90);
+
+    if (!missions || !missions.missions) return;
+    let totalPending = 0;
+    missions.missions.forEach((m, i) => {
+      const t = missions.templateOf(m);
+      const y = 140 + i * 120;
+      const w = 640, x = (LOGICAL_W - w) / 2;
+      this._roundPanel(ctx, x, y, w, 100, 'rgba(12,28,44,0.7)');
+      ctx.fillStyle = m.done ? '#a4f0b7' : '#e6f4ff';
+      ctx.font = 'bold 20px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(missions.labelOf(m), x + 20, y + 16);
+      const bar = { x: x + 20, y: y + 56, w: w - 200, h: 12 };
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(bar.x, bar.y, bar.w, bar.h);
+      ctx.fillStyle = m.done ? '#5ee08a' : '#ffd54a';
+      const p = Math.min(1, m.progress / t.goal);
+      ctx.fillRect(bar.x, bar.y, bar.w * p, bar.h);
+      ctx.fillStyle = '#e6f4ff';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText(`${Math.min(m.progress, t.goal)} / ${t.goal}`, bar.x, bar.y + 22);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ffd54a';
+      ctx.font = 'bold 18px system-ui, sans-serif';
+      ctx.fillText(`+${t.reward} 金币`, x + w - 20, y + 26);
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = m.claimed ? '#8bb0c8' : m.done ? '#5ee08a' : '#8bb0c8';
+      ctx.fillText(m.claimed ? '已领取' : m.done ? '可领取' : '进行中', x + w - 20, y + 58);
+      if (m.done && !m.claimed) totalPending += t.reward;
+    });
+
+    const btn = this._missionsButtons().missionsClaim;
+    const bg = totalPending > 0 ? 'rgba(60,140,80,0.9)' : COLORS.hudPanel;
+    this._chip(ctx, btn, bg, '#ffffff', totalPending > 0 ? `领取 +${totalPending} 金币` : '暂无可领奖励');
+  }
+
+  _codexOverlay(ctx, now, speciesKills) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.94)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 36px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🐟 鱼类图鉴', LOGICAL_W / 2, 44);
+    this._chip(ctx, this._codexButtons().codexClose, COLORS.hudPanel, COLORS.hudText);
+
+    const perRow = 3;
+    const cellW = 380, cellH = 140;
+    const startX = (LOGICAL_W - perRow * cellW) / 2;
+    const startY = 90;
+    FISH_TYPES.forEach((t, i) => {
+      const row = Math.floor(i / perRow), col = i % perRow;
+      const cx = startX + col * cellW + cellW / 2;
+      const cy = startY + row * cellH + cellH / 2;
+      this._roundPanel(ctx, cx - cellW / 2 + 8, cy - cellH / 2 + 8, cellW - 16, cellH - 16, 'rgba(12,28,44,0.7)');
+      // Draw a live sprite preview.
+      const preview = {
+        type: t, x: cx - 100, y: cy, size: Math.min(60, t.size * 0.85),
+        heading: 0, phase: i * 0.5, dying: false, dyingT: 0, hp: t.hp, maxHp: t.hp
+      };
+      ctx.save();
+      drawFish(ctx, preview, now || 0);
+      ctx.restore();
+      // Text.
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffd54a';
+      ctx.font = 'bold 20px system-ui, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText(t.name, cx - 20, cy - 40);
+      ctx.fillStyle = '#e6f4ff';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText(`HP ${t.hp}   金币 ${t.coins}`, cx - 20, cy - 10);
+      ctx.fillStyle = '#8bb0c8';
+      ctx.font = '12px system-ui, sans-serif';
+      const tag = t.special === 'boss' ? 'Boss · 必掉道具'
+                : t.special === 'golden' ? '稀有 · 高掉落'
+                : '常见';
+      ctx.fillText(tag, cx - 20, cy + 14);
+      const kills = (speciesKills[t.id] || 0);
+      ctx.fillStyle = kills > 0 ? '#ffd54a' : '#5a6f80';
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText(`累计 ${kills}`, cx - 20, cy + 34);
+    });
+  }
+
+  _itemSlot(ctx, b, item, count) {
+    const size = 24;
+    const cx = b.x + b.w / 2;
+    const cy = b.y + b.h / 2;
+    ctx.save();
+    if (count === 0) ctx.globalAlpha = 0.35;
+    drawItemIcon(ctx, cx, cy, size, item);
+    if (count > 0) {
+      ctx.fillStyle = '#0b1a24';
+      ctx.beginPath();
+      ctx.arc(cx + size - 4, cy + size - 4, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = item.color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(count), cx + size - 4, cy + size - 3);
+    }
+    ctx.restore();
+  }
+
+  _levelPanel(ctx, state) {
+    const w = 340, h = 44, x = (LOGICAL_W - w) / 2, y = LOGICAL_H - 66;
+    this._roundPanel(ctx, x, y, w, h, COLORS.hudPanel);
+    const filled = state.cannonLevel / CANNON.levels.length;
+    ctx.fillStyle = 'rgba(255,213,74,0.85)';
+    ctx.fillRect(x + 10, y + h - 8, (w - 20) * filled, 3);
+  }
+
+  _chip(ctx, b, bg, fg, override) {
+    this._roundPanel(ctx, b.x, b.y, b.w, b.h, bg);
+    ctx.fillStyle = fg;
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(override ?? b.label, b.x + b.w / 2, b.y + b.h / 2);
+  }
+
+  _roundPanel(ctx, x, y, w, h, fill) {
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 10);
+    ctx.fill();
+    ctx.strokeStyle = COLORS.hudBorder;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  _bossHpBar(ctx, boss) {
+    const w = 560, h = 22, x = (LOGICAL_W - w) / 2, y = 140;
+    this._roundPanel(ctx, x, y, w, h, 'rgba(20,6,12,0.85)');
+    const p = Math.max(0, boss.hp / boss.maxHp);
+    const grad = ctx.createLinearGradient(x, y, x + w, y);
+    grad.addColorStop(0, '#ff5c9c');
+    grad.addColorStop(1, '#ffd54a');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x + 3, y + 3, (w - 6) * p, h - 6, 6);
+    ctx.fill();
+    ctx.fillStyle = '#ffe6ec';
+    ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`海皇 · ${Math.max(0, Math.ceil(boss.hp))} / ${boss.maxHp}`, x + w / 2, y + h / 2);
+  }
+
+  _rainBanner(ctx) {
+    const w = 300, h = 40, x = LOGICAL_W - w - 20, y = 82;
+    this._roundPanel(ctx, x, y, w, h, 'rgba(60,42,4,0.85)');
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 18px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('☂ 金龙暴风 ☂', x + w / 2, y + h / 2);
+  }
+
+  _bossBanner(ctx, ttlMs) {
+    const y = 150;
+    ctx.save();
+    const t = Math.min(1, ttlMs / 400);
+    ctx.globalAlpha = t;
+    this._roundPanel(ctx, LOGICAL_W / 2 - 200, y, 400, 68, 'rgba(60,10,20,0.85)');
+    ctx.fillStyle = '#ffdcdc';
+    ctx.font = 'bold 26px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⚠ 海皇即将出现 ⚠', LOGICAL_W / 2, y + 34);
+    ctx.restore();
+  }
+
+  _pauseOverlay(ctx) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 48px system-ui, sans-serif';
+    ctx.fillText('已暂停', LOGICAL_W / 2, LOGICAL_H / 2 - 30);
+    ctx.font = '18px system-ui, sans-serif';
+    ctx.fillText('点击右上角 ▶ 继续 · 按 P 键也可', LOGICAL_W / 2, LOGICAL_H / 2 + 20);
+  }
+
+  _startOverlay(ctx) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.82)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 68px system-ui, sans-serif';
+    ctx.fillText('鱼乐达人', LOGICAL_W / 2, LOGICAL_H / 2 - 130);
+    ctx.fillStyle = '#e6f4ff';
+    ctx.font = '22px system-ui, sans-serif';
+    ctx.fillText('原创捕鱼游戏', LOGICAL_W / 2, LOGICAL_H / 2 - 80);
+    ctx.font = '17px system-ui, sans-serif';
+    const lines = [
+      '瞄准鱼群，点击/触摸发射炮弹',
+      '击中即弹开鱼网，命中范围内所有鱼',
+      '底部 - / + 切换炮台等级；等级越高伤害越大、每发消耗越多',
+      '击杀 Boss / 金龙 / 鲨鱼 会掉落道具',
+      '道具槽点击或按 1 / 2 / 3 使用 ❄ 💣 ⚡',
+      '连击超过 3 条鱼开启金币倍率',
+      '进度自动保存到本地'
+    ];
+    lines.forEach((s, i) => ctx.fillText(s, LOGICAL_W / 2, LOGICAL_H / 2 - 30 + i * 26));
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 24px system-ui, sans-serif';
+    ctx.fillText('点击任意位置开始', LOGICAL_W / 2, LOGICAL_H / 2 + 190);
+  }
+
+  _settingsOverlay(ctx, state) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.86)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 44px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('设置', LOGICAL_W / 2, LOGICAL_H / 2 - 100);
+    const btns = this._settingsButtons();
+    this._chip(ctx, btns.settingsClose, COLORS.hudPanel, COLORS.hudText);
+    this._chip(ctx, btns.settingsMissions, 'rgba(60,120,180,0.85)', '#e6f4ff');
+    this._chip(ctx, btns.settingsCodex, 'rgba(60,120,180,0.85)', '#e6f4ff');
+    const musicPct = Math.round((state.musicVol ?? 0.55) * 100);
+    const sfxPct = Math.round((state.sfxVol ?? 0.9) * 100);
+    this._chip(ctx, btns.settingsMusic, COLORS.hudPanel, COLORS.hudText, `音乐 ${musicPct}%`);
+    this._chip(ctx, btns.settingsSfx, COLORS.hudPanel, COLORS.hudText, `音效 ${sfxPct}%`);
+    this._chip(ctx, btns.settingsMute, state.muted ? '#8b2c2c' : COLORS.hudPanel, state.muted ? '#ffe0e0' : COLORS.hudText, state.muted ? '取消静音' : '静音');
+    this._chip(ctx, btns.settingsReset, 'rgba(140,32,32,0.85)', '#ffe0e0');
+    ctx.fillStyle = '#8bb0c8';
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillText('版本 0.4.0 · 原创捕鱼 · 本地存档', LOGICAL_W / 2, LOGICAL_H - 60);
+  }
+
+  _portraitHint(ctx) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.75)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 40px system-ui, sans-serif';
+    ctx.fillText('📱 请横屏游玩', LOGICAL_W / 2, LOGICAL_H / 2 - 20);
+    ctx.fillStyle = '#e6f4ff';
+    ctx.font = '20px system-ui, sans-serif';
+    ctx.fillText('Rotate your device to landscape', LOGICAL_W / 2, LOGICAL_H / 2 + 24);
+  }
+}
+
+function itemIdOf(buttonId) {
+  if (buttonId === 'itemFreeze') return 'freeze';
+  if (buttonId === 'itemBomb') return 'bomb';
+  if (buttonId === 'itemLightning') return 'lightning';
+  return '';
+}
+
+
+// === game.js ===
+class Game {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.state = loadState();
+    this.state.paused = false;
+    this.state.started = false;
+    this.state.bossWarning = 0;
+    this.state.totalCaughtThisSession = 0;
+    this.state.settingsOpen = false;
+    this.state.codexOpen = false;
+
+    // Combo runtime state (not persisted — only bestCombo is).
+    this.combo = { count: 0, lastAt: 0, level: 0 };
+
+    this.fish = [];
+    this.bullets = [];
+    this.nets = [];
+    this.particles = new ParticleSystem();
+    this.spawner = new Spawner();
+    this.cannon = new Cannon(() => this.state.cannonLevel);
+    this.input = new Input(canvas);
+    this.ui = new UI(this);
+    this.items = new ItemSystem();
+    this.items.inventory = { ...this.items.inventory, ...(this.state.items || {}) };
+    this.achievements = new AchievementTracker(this.state.achievements || []);
+    this.missions = new MissionSystem(this.state.missions);
+    this.state.speciesKills = this.state.speciesKills || {};
+    this.missionToasts = [];
+    this.comboFlash = 0;
+    this.shake = { intensity: 0, decay: 0 };
+    this.muzzle = 0; // remaining life 0..1
+
+    this.lastNow = performance.now();
+    this.bossTimer = 0;
+
+    this._resize();
+    window.addEventListener('resize', () => this._resize());
+    window.addEventListener('orientationchange', () => this._resize());
+    window.addEventListener('keydown', e => this._onKey(e));
+
+    this.input.onClick((x, y) => this._onClick(x, y));
+    setMuted(this.state.muted);
+    setMusicVolume(this.state.musicVol ?? 0.55);
+    setSfxVolume(this.state.sfxVol ?? 0.9);
+
+    requestAnimationFrame(t => this._loop(t));
+  }
+
+  _resize() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const wCss = window.innerWidth;
+    const hCss = window.innerHeight;
+    this.canvas.style.width = wCss + 'px';
+    this.canvas.style.height = hCss + 'px';
+    this.canvas.width = Math.floor(wCss * dpr);
+    this.canvas.height = Math.floor(hCss * dpr);
+    const scale = Math.min(this.canvas.width / LOGICAL_W, this.canvas.height / LOGICAL_H);
+    this.viewScale = scale;
+    this.viewOffX = (this.canvas.width - LOGICAL_W * scale) / 2;
+    this.viewOffY = (this.canvas.height - LOGICAL_H * scale) / 2;
+    const shortEdge = Math.min(wCss, hCss);
+    this.state.portraitHint = (hCss > wCss && shortEdge < 700);
+  }
+
+  _onKey(e) {
+    if (!this.state.started || this.state.paused) return;
+    if (e.key === '1') this._useItem('freeze');
+    else if (e.key === '2') this._useItem('bomb');
+    else if (e.key === '3') this._useItem('lightning');
+    else if (e.key.toLowerCase() === 'p') this.state.paused = !this.state.paused;
+  }
+
+  _onClick(x, y) {
+    unlockAudio();
+    if (!this.state.started) {
+      this.state.started = true;
+      startMusic();
+      this._tryLockLandscape();
+      return;
+    }
+    if (this.state.codexOpen) {
+      const btn = this.ui.codexHitTest(x, y);
+      if (btn === 'codexClose') this.state.codexOpen = false;
+      return;
+    }
+    if (this.state.missionsOpen) {
+      const btn = this.ui.missionsHitTest(x, y);
+      if (btn === 'missionsClose') this.state.missionsOpen = false;
+      else if (btn === 'missionsClaim') this._claimMissions();
+      return;
+    }
+    if (this.state.settingsOpen) {
+      const btn = this.ui.settingsHitTest(x, y);
+      if (btn === 'settingsClose') this.state.settingsOpen = false;
+      else if (btn === 'settingsCodex') { this.state.codexOpen = true; this.state.settingsOpen = false; }
+      else if (btn === 'settingsMissions') { this.state.missionsOpen = true; this.state.settingsOpen = false; }
+      else if (btn === 'settingsReset') this._resetSave();
+      else if (btn === 'settingsMute') this._toggleMute();
+      else if (btn === 'settingsMusic') this._cycleMusic();
+      else if (btn === 'settingsSfx') this._cycleSfx();
+      return;
+    }
+    const btn = this.ui.hitTest(x, y);
+    if (btn) { this._onButton(btn); return; }
+    if (this.state.paused) return;
+    this.cannon.aimAt(x, y);
+    this._fire();
+  }
+
+  _onButton(id) {
+    switch (id) {
+      case 'levelDown':
+        if (this.state.cannonLevel > 1) { this.state.cannonLevel--; playUpgrade(); this._save(); }
+        break;
+      case 'levelUp':
+        if (this.state.cannonLevel < CANNON.levels.length) { this.state.cannonLevel++; playUpgrade(); this._save(); }
+        break;
+      case 'autofire': this.state.autofire = !this.state.autofire; this._save(); break;
+      case 'mute': this._toggleMute(); break;
+      case 'pause': this.state.paused = !this.state.paused; break;
+      case 'settings': this.state.settingsOpen = true; this.state.paused = true; break;
+      case 'itemFreeze':    this._useItem('freeze'); break;
+      case 'itemBomb':      this._useItem('bomb'); break;
+      case 'itemLightning': this._useItem('lightning'); break;
+    }
+  }
+
+  _toggleMute() {
+    this.state.muted = !this.state.muted;
+    setMuted(this.state.muted);
+    this._save();
+  }
+
+  _cycleMusic() {
+    const cur = this.state.musicVol ?? 0.55;
+    const idx = AUDIO_LEVELS.findIndex(v => Math.abs(v - cur) < 0.05);
+    const next = AUDIO_LEVELS[(idx + 1) % AUDIO_LEVELS.length];
+    this.state.musicVol = next;
+    setMusicVolume(next);
+    this._save();
+  }
+  _cycleSfx() {
+    const cur = this.state.sfxVol ?? 0.9;
+    const idx = AUDIO_LEVELS.findIndex(v => Math.abs(v - cur) < 0.05);
+    const next = AUDIO_LEVELS[(idx + 1) % AUDIO_LEVELS.length];
+    this.state.sfxVol = next;
+    setSfxVolume(next);
+    this._save();
+  }
+
+  _claimMissions() {
+    const gained = this.missions.claimAllReady();
+    if (gained > 0) {
+      this.state.coins += gained;
+      playUpgrade();
+      this._save();
+    }
+  }
+
+  _useItem(id) {
+    if (!this.items.count(id)) return;
+    const used = this.items.use(id, {
+      fishList: this.fish,
+      now: performance.now(),
+      cursor: { x: this.input.pointer.x, y: this.input.pointer.y },
+      onCatch: (f, sourceId) => this._onCatch(f, { source: sourceId })
+    });
+    if (!used) return;
+    if (id === 'freeze') { playFreeze(); this.state.usedFreeze = true; }
+    else if (id === 'bomb') { playBomb(); this.state.usedBomb = true; this._addShake(14, 0.9); }
+    else if (id === 'lightning') { playLightning(); this.state.usedLightning = true; }
+    this.state.items = { ...this.items.inventory };
+    this._trackMissions(this.missions.trackItemUse(id));
+    this._save();
+    this._checkAchievements();
+  }
+
+  _trackMissions(completedTemplates) {
+    if (!completedTemplates || !completedTemplates.length) return;
+    const now = performance.now();
+    for (const t of completedTemplates) {
+      this.missionToasts.push({ text: `📋 ${t.text(t.goal)} 完成 +${t.reward}`, start: now, duration: 3200 });
+    }
+    playAchievement();
+    this.state.missions = this.missions.serialize();
+  }
+
+  _fire() {
+    const now = performance.now();
+    const fired = this.cannon.tryFire(now, cost => {
+      if (this.state.coins < cost) return false;
+      this.state.coins -= cost;
+      return true;
+    }, b => this.bullets.push(b));
+    if (fired) {
+      playShoot();
+      this.muzzle = 1;
+      this._save();
+    }
+  }
+
+  _save() {
+    this.state.bestSession = Math.max(this.state.bestSession, this.state.totalCaughtThisSession);
+    this.state.items = { ...this.items.inventory };
+    this.state.achievements = [...this.achievements.unlocked];
+    this.state.missions = this.missions.serialize();
+    saveState(this.state);
+  }
+
+  _resetSave() {
+    this.state = { ...resetState(),
+      paused: false, started: this.state.started, bossWarning: 0,
+      totalCaughtThisSession: 0, settingsOpen: false, portraitHint: this.state.portraitHint };
+    this.items = new ItemSystem();
+    this.achievements = new AchievementTracker([]);
+    setMuted(this.state.muted);
+  }
+
+  _tryLockLandscape() {
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    } catch { /* not permitted */ }
+  }
+
+  _loop(nowRaw) {
+    const now = nowRaw;
+    let dt = now - this.lastNow;
+    this.lastNow = now;
+    if (dt > 100) dt = 100;
+
+    this.input.beginFrame();
+    if (this.state.started && !this.state.paused) this._update(dt, now);
+    this._render(now);
+    requestAnimationFrame(t => this._loop(t));
+  }
+
+  _update(dt, now) {
+    this.cannon.aimAt(this.input.pointer.x, this.input.pointer.y);
+    this.cannon.update(dt);
+
+    if (this.state.autofire && this.input.pointer.held && !this.input.pointer.downThisFrame) {
+      if (now - this.cannon.lastFire >= CANNON.autofireDelay) this._fire();
+    }
+
+    updateScene(dt);
+
+    this.bossTimer += dt;
+    if (this.bossTimer >= SPAWN.bossIntervalMs) {
+      if (this.spawner.triggerBossSoon()) { this.state.bossWarning = 1600; playBossWarn(); }
+      this.bossTimer = 0;
+    }
+    if (this.state.bossWarning > 0) this.state.bossWarning = Math.max(0, this.state.bossWarning - dt);
+    this.spawner.update(dt, now, this.fish);
+
+    for (const b of this.bullets) b.update(dt);
+    for (const b of this.bullets) {
+      if (b.dead) continue;
+      for (const f of this.fish) {
+        if (f.dying) continue;
+        const dx = f.x - b.x, dy = f.y - b.y;
+        if (dx * dx + dy * dy <= (b.radius + f.boundsRadius()) ** 2) {
+          this.nets.push(new Net(b.x, b.y, b.damage));
+          this.particles.spawnSplash(b.x, b.y);
+          playHit();
+          b.dead = true;
+          break;
+        }
+      }
+    }
+
+    for (const net of this.nets) {
+      net.update(dt);
+      net.applyDamage(this.fish, now, f => this._onCatch(f, { source: 'net' }));
+    }
+
+    for (const f of this.fish) f.update(dt, now, this.items.freezeUntil);
+
+    if (Math.random() < dt / 1400) {
+      this.particles.spawnBubble(Math.random() * LOGICAL_W, LOGICAL_H, 2 + Math.random() * 4);
+    }
+
+    this.particles.update(dt);
+    this.items.update(dt);
+
+    // shake decay
+    if (this.shake.intensity > 0) {
+      this.shake.intensity = Math.max(0, this.shake.intensity - this.shake.decay * dt);
+    }
+
+    // muzzle flash decay
+    if (this.muzzle > 0) this.muzzle = Math.max(0, this.muzzle - dt / 90);
+
+    // combo timeout
+    if (this.combo.count > 0 && now - this.combo.lastAt > COMBO.windowMs) {
+      this.combo.count = 0;
+      this.combo.level = 0;
+    }
+
+    if (this.comboFlash > 0) this.comboFlash = Math.max(0, this.comboFlash - dt / 400);
+
+    this.achievements.updateToasts(now);
+    this.missionToasts = this.missionToasts.filter(t => now - t.start < t.duration);
+    this.missions.maybeRoll();
+
+    this.fish = this.fish.filter(f => !f.dead);
+    this.bullets = this.bullets.filter(b => !b.dead);
+    this.nets = this.nets.filter(n => !n.dead);
+  }
+
+  _onCatch(fish, meta = {}) {
+    const now = performance.now();
+    // combo
+    if (now - this.combo.lastAt < COMBO.windowMs) this.combo.count++;
+    else this.combo.count = 1;
+    this.combo.lastAt = now;
+    const prevLevel = this.combo.level;
+    this.combo.level = 0;
+    for (let i = COMBO.levels.length - 1; i >= 0; i--) {
+      if (this.combo.count >= COMBO.levels[i].threshold) { this.combo.level = i; break; }
+    }
+    if (this.combo.level > prevLevel) this.comboFlash = 1;
+    const mult = COMBO.levels[this.combo.level].mult;
+    const baseCoins = fish.type.coins;
+    const coins = Math.round(baseCoins * mult);
+
+    this.state.coins += coins;
+    this.state.totalCaught++;
+    this.state.totalCaughtThisSession++;
+    if (fish.type.id === 'shark') this.state.shark = (this.state.shark || 0) + 1;
+    if (fish.type.special === 'golden') this.state.golden = (this.state.golden || 0) + 1;
+    if (fish.type.special === 'boss') {
+      this.state.boss = (this.state.boss || 0) + 1;
+      this._addShake(20, 0.6);
+    }
+    this.state.speciesKills[fish.type.id] = (this.state.speciesKills[fish.type.id] || 0) + 1;
+    this.state.bestCombo = Math.max(this.state.bestCombo || 0, this.combo.count);
+
+    this.particles.spawnCoinBurst(fish.x, fish.y, Math.min(20, 6 + Math.floor(coins / 30)), coins);
+    const color = fish.type.special === 'boss' ? '#ffb6d5'
+                : fish.type.special === 'golden' ? '#fff2b8'
+                : mult > 1 ? COMBO.levels[this.combo.level].color
+                : '#ffd54a';
+    const text = mult > 1 ? `+${coins} ×${mult}` : `+${coins}`;
+    this.particles.spawnFloatText(fish.x, fish.y - 20, text, color);
+    playCatch(coins);
+
+    // Item drop roll (only if caught via net — not via already-triggered item effect).
+    if (meta.source !== 'bomb' && meta.source !== 'lightning') {
+      const drop = rollItemDrop(fish.type);
+      if (drop) {
+        this.items.grant(drop);
+        this.state.items = { ...this.items.inventory };
+        this.particles.spawnFloatText(fish.x, fish.y + 10, `+${ITEMS[drop].label} 道具`, ITEMS[drop].color);
+      }
+    }
+
+    // Mission tracking
+    this._trackMissions(this.missions.trackCatch(fish.type));
+    this._trackMissions(this.missions.trackComboReached(this.combo.count));
+    this._trackMissions(this.missions.trackCoinsEarned(coins));
+
+    this._save();
+    this._checkAchievements();
+  }
+
+  _checkAchievements() {
+    const stats = {
+      totalCaught: this.state.totalCaught,
+      coins: this.state.coins,
+      shark: this.state.shark || 0,
+      golden: this.state.golden || 0,
+      boss: this.state.boss || 0,
+      bestCombo: this.state.bestCombo || 0,
+      usedFreeze: !!this.state.usedFreeze,
+      usedBomb: !!this.state.usedBomb,
+      usedLightning: !!this.state.usedLightning
+    };
+    const newly = this.achievements.check(stats);
+    if (newly.length) {
+      playAchievement();
+      this.state.achievements = [...this.achievements.unlocked];
+      saveState(this.state);
+    }
+  }
+
+  _addShake(intensity, decayPerMs) {
+    this.shake.intensity = Math.max(this.shake.intensity, intensity);
+    this.shake.decay = decayPerMs;
+  }
+
+  _render(now) {
+    const ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    let sx = 0, sy = 0;
+    if (this.shake.intensity > 0) {
+      sx = (Math.random() - 0.5) * this.shake.intensity;
+      sy = (Math.random() - 0.5) * this.shake.intensity;
+    }
+    ctx.setTransform(this.viewScale, 0, 0, this.viewScale, this.viewOffX + sx, this.viewOffY + sy);
+
+    drawScene(ctx, now);
+    const floorY = LOGICAL_H - 30;
+    for (const f of this.fish) {
+      if (SHADOW_SPECIES.includes(f.type.id)) drawFishShadow(ctx, f, floorY);
+    }
+    for (const f of this.fish) drawFish(ctx, f, now);
+    for (const n of this.nets) drawNet(ctx, n, this.cannon.currentLevel());
+    for (const b of this.bullets) drawBullet(ctx, b, this.cannon.currentLevel());
+    this.items.render(ctx);
+    this.particles.render(ctx, drawCoin);
+    drawCannon(ctx, this.cannon, this.cannon.currentLevel());
+    if (this.muzzle > 0) drawMuzzleFlash(ctx, this.cannon, this.cannon.currentLevel(), 1 - this.muzzle);
+
+    // Combo flash — full-screen tint on level-up.
+    if (this.comboFlash > 0) {
+      ctx.save();
+      const lvl = COMBO.levels[this.combo.level];
+      ctx.globalAlpha = this.comboFlash * 0.35;
+      ctx.fillStyle = lvl.color;
+      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      ctx.restore();
+    }
+
+    const boss = this.fish.find(f => f.type.special === 'boss' && !f.dying);
+    this.ui.render(ctx, this.state, this.items, this.combo, {
+      boss: boss ? { hp: boss.hp, maxHp: boss.maxHp } : null,
+      raining: this.spawner.isRaining(),
+      missions: this.missions,
+      missionToasts: this.missionToasts,
+      now
+    });
+    this.achievements.render(ctx, now);
+  }
+}
+
+
+// === main.js ===
+
+// CanvasRenderingContext2D.roundRect polyfill for older engines.
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    else if (!Array.isArray(r)) r = [0, 0, 0, 0];
+    if (r.length === 1) r = [r[0], r[0], r[0], r[0]];
+    if (r.length === 2) r = [r[0], r[1], r[0], r[1]];
+    this.moveTo(x + r[0], y);
+    this.arcTo(x + w, y,     x + w, y + h, r[1]);
+    this.arcTo(x + w, y + h, x,     y + h, r[2]);
+    this.arcTo(x,     y + h, x,     y,     r[3]);
+    this.arcTo(x,     y,     x + w, y,     r[0]);
+    return this;
+  };
+}
+
+const canvas = document.getElementById('game');
+window.__game = new Game(canvas);
+
+
+</script>
