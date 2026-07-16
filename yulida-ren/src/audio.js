@@ -2,6 +2,16 @@ let ctx = null;
 let muted = false;
 let musicGain = null;
 let musicNodes = [];
+let musicVol = 0.55;
+let sfxVol = 0.9;
+
+export function setMusicVolume(v) {
+  musicVol = Math.max(0, Math.min(1, v));
+  if (musicGain && !muted) musicGain.gain.setTargetAtTime(0.11 * musicVol, ctx.currentTime, 0.05);
+}
+export function setSfxVolume(v) { sfxVol = Math.max(0, Math.min(1, v)); }
+export function getSfxVol() { return sfxVol; }
+export function getMusicVol() { return musicVol; }
 
 function ensureCtx() {
   if (ctx) return ctx;
@@ -18,7 +28,7 @@ export function unlockAudio() {
 
 export function setMuted(v) {
   muted = !!v;
-  if (musicGain) musicGain.gain.setTargetAtTime(muted ? 0 : 0.06, ctx.currentTime, 0.05);
+  if (musicGain) musicGain.gain.setTargetAtTime(muted ? 0 : 0.11 * musicVol, ctx.currentTime, 0.05);
 }
 
 export function isMuted() {
@@ -208,7 +218,7 @@ export function startMusic() {
   const c = ensureCtx();
   if (!c || musicGain) return;
   musicGain = c.createGain();
-  musicGain.gain.value = muted ? 0 : 0.06;
+  musicGain.gain.value = muted ? 0 : 0.11 * musicVol;
   musicGain.connect(c.destination);
 
   const bass = c.createOscillator();

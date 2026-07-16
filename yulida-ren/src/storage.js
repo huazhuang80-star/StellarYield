@@ -1,4 +1,4 @@
-import { ECONOMY } from './config.js';
+import { ECONOMY, AUDIO_DEFAULTS } from './config.js';
 
 const DEFAULT_STATE = {
   coins: ECONOMY.initialCoins,
@@ -15,7 +15,11 @@ const DEFAULT_STATE = {
   usedFreeze: false,
   usedBomb: false,
   usedLightning: false,
-  achievements: []
+  achievements: [],
+  speciesKills: {},
+  missions: null,
+  musicVol: AUDIO_DEFAULTS.musicVol,
+  sfxVol: AUDIO_DEFAULTS.sfxVol
 };
 
 export function loadState() {
@@ -46,7 +50,11 @@ export function saveState(state) {
       usedFreeze: state.usedFreeze,
       usedBomb: state.usedBomb,
       usedLightning: state.usedLightning,
-      achievements: state.achievements
+      achievements: state.achievements,
+      speciesKills: state.speciesKills,
+      missions: state.missions,
+      musicVol: state.musicVol,
+      sfxVol: state.sfxVol
     };
     localStorage.setItem(ECONOMY.savingsKey, JSON.stringify(persisted));
   } catch {

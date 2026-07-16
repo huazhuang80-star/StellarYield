@@ -39,11 +39,28 @@ export class UI {
 
   _settingsButtons() {
     return {
-      settingsClose: { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' },
-      settingsCodex: { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 - 20, w: 240, h: 44, label: '鱼类图鉴' },
-      settingsReset: { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 + 40, w: 240, h: 44, label: '重置存档' },
-      settingsMute:  { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 + 100, w: 240, h: 44, label: '切换声音' }
+      settingsClose:    { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' },
+      settingsMissions: { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 - 80, w: 240, h: 44, label: '每日任务' },
+      settingsCodex:    { x: LOGICAL_W / 2 - 120, y: LOGICAL_H / 2 - 20, w: 240, h: 44, label: '鱼类图鉴' },
+      settingsMusic:    { x: LOGICAL_W / 2 - 250, y: LOGICAL_H / 2 + 40, w: 240, h: 44, label: '音乐' },
+      settingsSfx:      { x: LOGICAL_W / 2 + 10,  y: LOGICAL_H / 2 + 40, w: 240, h: 44, label: '音效' },
+      settingsMute:     { x: LOGICAL_W / 2 - 250, y: LOGICAL_H / 2 + 100, w: 240, h: 44, label: '切换声音' },
+      settingsReset:    { x: LOGICAL_W / 2 + 10,  y: LOGICAL_H / 2 + 100, w: 240, h: 44, label: '重置存档' }
     };
+  }
+
+  _missionsButtons() {
+    return {
+      missionsClose: { x: LOGICAL_W - 100, y: 60, w: 60, h: 40, label: '关闭' },
+      missionsClaim: { x: LOGICAL_W / 2 - 130, y: LOGICAL_H - 96, w: 260, h: 48, label: '领取奖励' }
+    };
+  }
+
+  missionsHitTest(x, y) {
+    for (const [id, b] of Object.entries(this._missionsButtons())) {
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return id;
+    }
+    return null;
   }
 
   _codexButtons() {
@@ -112,7 +129,9 @@ export class UI {
     if (extras.boss) this._bossHpBar(ctx, extras.boss);
     if (extras.raining) this._rainBanner(ctx);
     if (state.bossWarning > 0) this._bossBanner(ctx, state.bossWarning);
-    if (state.codexOpen) this._codexOverlay(ctx, extras.now);
+    if (extras.missionToasts) this._missionToasts(ctx, extras.missionToasts, performance.now());
+    if (state.codexOpen) this._codexOverlay(ctx, extras.now, state.speciesKills || {});
+    else if (state.missionsOpen) this._missionsOverlay(ctx, extras.missions);
     else if (state.settingsOpen) this._settingsOverlay(ctx, state);
     else if (state.paused) this._pauseOverlay(ctx);
     if (!state.started) this._startOverlay(ctx);
@@ -121,7 +140,78 @@ export class UI {
     ctx.restore();
   }
 
-  _codexOverlay(ctx, now) {
+  _missionToasts(ctx, toasts, now) {
+    let y = LOGICAL_H - 200;
+    for (const t of toasts) {
+      const age = now - t.start;
+      const p = age / t.duration;
+      const slide = Math.min(1, age / 200);
+      const fade = age > t.duration - 300 ? (t.duration - age) / 300 : 1;
+      ctx.save();
+      ctx.globalAlpha = slide * fade;
+      const x = 20 - 40 * (1 - slide);
+      this._roundPanel(ctx, x, y, 320, 46, 'rgba(60,42,4,0.9)');
+      ctx.fillStyle = '#ffe89a';
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.text, x + 14, y + 23);
+      ctx.restore();
+      y -= 54;
+    }
+  }
+
+  _missionsOverlay(ctx, missions) {
+    ctx.fillStyle = 'rgba(4, 16, 30, 0.94)';
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.fillStyle = '#ffd54a';
+    ctx.font = 'bold 36px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('📋 每日任务', LOGICAL_W / 2, 44);
+    this._chip(ctx, this._missionsButtons().missionsClose, COLORS.hudPanel, COLORS.hudText);
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillStyle = '#8bb0c8';
+    const hrsLeft = Math.max(0, Math.ceil((24 * 3600 * 1000 - (Date.now() - missions.dayStart)) / 3600000));
+    ctx.fillText(`剩余刷新时间约 ${hrsLeft} 小时`, LOGICAL_W / 2, 90);
+
+    if (!missions || !missions.missions) return;
+    let totalPending = 0;
+    missions.missions.forEach((m, i) => {
+      const t = missions.templateOf(m);
+      const y = 140 + i * 120;
+      const w = 640, x = (LOGICAL_W - w) / 2;
+      this._roundPanel(ctx, x, y, w, 100, 'rgba(12,28,44,0.7)');
+      ctx.fillStyle = m.done ? '#a4f0b7' : '#e6f4ff';
+      ctx.font = 'bold 20px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(missions.labelOf(m), x + 20, y + 16);
+      const bar = { x: x + 20, y: y + 56, w: w - 200, h: 12 };
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(bar.x, bar.y, bar.w, bar.h);
+      ctx.fillStyle = m.done ? '#5ee08a' : '#ffd54a';
+      const p = Math.min(1, m.progress / t.goal);
+      ctx.fillRect(bar.x, bar.y, bar.w * p, bar.h);
+      ctx.fillStyle = '#e6f4ff';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText(`${Math.min(m.progress, t.goal)} / ${t.goal}`, bar.x, bar.y + 22);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ffd54a';
+      ctx.font = 'bold 18px system-ui, sans-serif';
+      ctx.fillText(`+${t.reward} 金币`, x + w - 20, y + 26);
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = m.claimed ? '#8bb0c8' : m.done ? '#5ee08a' : '#8bb0c8';
+      ctx.fillText(m.claimed ? '已领取' : m.done ? '可领取' : '进行中', x + w - 20, y + 58);
+      if (m.done && !m.claimed) totalPending += t.reward;
+    });
+
+    const btn = this._missionsButtons().missionsClaim;
+    const bg = totalPending > 0 ? 'rgba(60,140,80,0.9)' : COLORS.hudPanel;
+    this._chip(ctx, btn, bg, '#ffffff', totalPending > 0 ? `领取 +${totalPending} 金币` : '暂无可领奖励');
+  }
+
+  _codexOverlay(ctx, now, speciesKills) {
     ctx.fillStyle = 'rgba(4, 16, 30, 0.94)';
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
     ctx.fillStyle = '#ffd54a';
@@ -163,6 +253,10 @@ export class UI {
                 : t.special === 'golden' ? '稀有 · 高掉落'
                 : '常见';
       ctx.fillText(tag, cx - 20, cy + 14);
+      const kills = (speciesKills[t.id] || 0);
+      ctx.fillStyle = kills > 0 ? '#ffd54a' : '#5a6f80';
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText(`累计 ${kills}`, cx - 20, cy + 34);
     });
   }
 
@@ -308,12 +402,17 @@ export class UI {
     ctx.fillText('设置', LOGICAL_W / 2, LOGICAL_H / 2 - 100);
     const btns = this._settingsButtons();
     this._chip(ctx, btns.settingsClose, COLORS.hudPanel, COLORS.hudText);
+    this._chip(ctx, btns.settingsMissions, 'rgba(60,120,180,0.85)', '#e6f4ff');
     this._chip(ctx, btns.settingsCodex, 'rgba(60,120,180,0.85)', '#e6f4ff');
+    const musicPct = Math.round((state.musicVol ?? 0.55) * 100);
+    const sfxPct = Math.round((state.sfxVol ?? 0.9) * 100);
+    this._chip(ctx, btns.settingsMusic, COLORS.hudPanel, COLORS.hudText, `音乐 ${musicPct}%`);
+    this._chip(ctx, btns.settingsSfx, COLORS.hudPanel, COLORS.hudText, `音效 ${sfxPct}%`);
+    this._chip(ctx, btns.settingsMute, state.muted ? '#8b2c2c' : COLORS.hudPanel, state.muted ? '#ffe0e0' : COLORS.hudText, state.muted ? '取消静音' : '静音');
     this._chip(ctx, btns.settingsReset, 'rgba(140,32,32,0.85)', '#ffe0e0');
-    this._chip(ctx, btns.settingsMute, state.muted ? '#8b2c2c' : COLORS.hudPanel, state.muted ? '#ffe0e0' : COLORS.hudText);
     ctx.fillStyle = '#8bb0c8';
     ctx.font = '14px system-ui, sans-serif';
-    ctx.fillText('版本 0.3.0 · 原创捕鱼 · 本地存档', LOGICAL_W / 2, LOGICAL_H - 100);
+    ctx.fillText('版本 0.4.0 · 原创捕鱼 · 本地存档', LOGICAL_W / 2, LOGICAL_H - 60);
   }
 
   _portraitHint(ctx) {

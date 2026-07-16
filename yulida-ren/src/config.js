@@ -77,6 +77,27 @@ export const SCHOOL = {
   eligibleIds: ['guppy', 'sardine', 'clown', 'angel']
 };
 
+export const MISSION_POOL = [
+  { id: 'catch_10',     type: 'catch',        goal: 10,  reward: 60,   text: n => `捕获任意鱼 ${n} 条` },
+  { id: 'catch_30',     type: 'catch',        goal: 30,  reward: 180,  text: n => `捕获任意鱼 ${n} 条` },
+  { id: 'shark_3',      type: 'species_kill', speciesId: 'shark',  goal: 3,  reward: 300, text: (n, name) => `捕获 ${name} ${n} 条` },
+  { id: 'golden_1',     type: 'species_kill', speciesId: 'golden', goal: 1,  reward: 400, text: (n, name) => `捕获 ${name} ${n} 条` },
+  { id: 'boss_1',       type: 'species_kill', speciesId: 'kraken', goal: 1,  reward: 800, text: (n, name) => `击败 ${name}` },
+  { id: 'combo_5',      type: 'combo',        goal: 5,   reward: 150,  text: n => `触发 ${n}× 连击` },
+  { id: 'combo_10',     type: 'combo',        goal: 10,  reward: 400,  text: n => `触发 ${n}× 连击` },
+  { id: 'freeze_use',   type: 'item_use',     itemId: 'freeze',    goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'bomb_use',     type: 'item_use',     itemId: 'bomb',      goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'lightning_use',type: 'item_use',     itemId: 'lightning', goal: 2, reward: 120, text: (n, name) => `使用 ${name} 道具 ${n} 次` },
+  { id: 'coins_500',    type: 'earn_coins',   goal: 500, reward: 100,  text: n => `本日再赚 ${n} 金币` }
+];
+
+export const AUDIO_DEFAULTS = {
+  musicVol: 0.55,
+  sfxVol: 0.9
+};
+
+export const AUDIO_LEVELS = [0, 0.25, 0.5, 0.75, 1.0];
+
 export const ACHIEVEMENTS = [
   { id: 'first_catch',   name: '初次收获',   desc: '捕获第一条鱼',    check: s => s.totalCaught >= 1 },
   { id: 'ten_catches',   name: '渔场熟手',   desc: '累计捕获 10 条',  check: s => s.totalCaught >= 10 },

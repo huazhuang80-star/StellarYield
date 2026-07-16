@@ -4,7 +4,16 @@
 
 ## 运行
 
-游戏是纯静态站点，无构建步骤，无外部依赖。用任意静态服务器打开 `yulida-ren/index.html` 即可：
+游戏是纯静态站点，无构建步骤，无外部依赖。
+
+### 线上体验（iPhone / 桌面浏览器均可）
+
+- GitHub Pages（自动部署本目录）：
+  `https://huazhuang80-star.github.io/StellarYield/`
+- iPhone Safari 打开后，右下角「分享 → 添加到主屏幕」即可像原生 App 一样启动，横屏全屏、无浏览器地址栏
+- 首次发布前需要在仓库 Settings → Pages → Source 选「GitHub Actions」
+
+### 本地起服务
 
 ```bash
 cd yulida-ren
@@ -82,7 +91,7 @@ yulida-ren/
     └── game.js          # 主循环 + 屏幕震屏 + 炮口闪光
 ```
 
-## 已实现的功能（v0.2）
+## 已实现的功能（v0.4）
 
 - 12 种鱼，程序化矢量绘制，尾巴摆动 / 水母收缩 / 龙须飘动 / Boss 触手波动
 - 直线 / 正弦 / 弧线 / 鱼群 4 种游动模式，波次随时间加快
