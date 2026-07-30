@@ -10,7 +10,8 @@
   --pink: #ffb6c1;
 
   --accent: var(--green);
-  --accent-soft: #e6f4ec;
+  /* 从 accent 与当前 surface 派生，这样物种主题与浅/深色主题不会互相覆盖 */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
 
   --bg: #fdf8f2;
   --bg-soft: #fffdfa;
@@ -26,13 +27,14 @@
 }
 
 /* 物种主题：只改强调色与柔光底色，保持整体温度一致 */
-[data-species='meow'] { --accent: #6b5b95; --accent-soft: #efeaf7; }
-[data-species='woof'] { --accent: #e07b39; --accent-soft: #fdeee2; }
-[data-species='bunny'] { --accent: #d9788f; --accent-soft: #fbeaef; }
-[data-species='tiny'] { --accent: #c89b3c; --accent-soft: #fbf3df; }
-[data-species='feather'] { --accent: #2f8fbf; --accent-soft: #e5f2f9; }
-[data-species='scale'] { --accent: #3f7d5c; --accent-soft: #e6f1ea; }
+[data-species='meow'] { --accent: #6b5b95; }
+[data-species='woof'] { --accent: #e07b39; }
+[data-species='bunny'] { --accent: #d9788f; }
+[data-species='tiny'] { --accent: #c89b3c; }
+[data-species='feather'] { --accent: #2f8fbf; }
+[data-species='scale'] { --accent: #3f7d5c; }
 
+/* 深色模式的实际取值集中在这里，浅色/深色两套只改 token，组件一律通过 token 取色 */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #171a18;
@@ -41,9 +43,29 @@
     --ink: #e8efe9;
     --ink-soft: #a3b0a8;
     --line: #313a35;
-    --accent-soft: #23302a;
     --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
   }
+}
+
+/* 显式主题开关（宿主环境可能在 <html> 上写 data-theme），必须能双向覆盖系统偏好 */
+:root[data-theme='dark'] {
+  --bg: #171a18;
+  --bg-soft: #1d211f;
+  --surface: #222724;
+  --ink: #e8efe9;
+  --ink-soft: #a3b0a8;
+  --line: #313a35;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme='light'] {
+  --bg: #fdf8f2;
+  --bg-soft: #fffdfa;
+  --surface: #ffffff;
+  --ink: #24312b;
+  --ink-soft: #5d6b63;
+  --line: #ece3d8;
+  --shadow: 0 6px 24px rgba(46, 139, 87, 0.08);
 }
 
 * { box-sizing: border-box; }

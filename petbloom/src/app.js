@@ -72,8 +72,10 @@ function render(opts = {}) {
 window.addEventListener('hashchange', () => render({ scrollTop: true }));
 render();
 
-// 离线可用：症状自查最需要的时刻，可能正是网络最差的时候
-if ('serviceWorker' in navigator) {
+// 离线可用：症状自查最需要的时刻，可能正是网络最差的时候。
+// 单文件打包版本本身就是离线的（没有外部请求），不需要也没有 Service Worker 可注册。
+const SINGLE_FILE = typeof __PB_SINGLE_FILE__ !== 'undefined';
+if (!SINGLE_FILE && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   });

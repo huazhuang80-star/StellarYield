@@ -2,15 +2,26 @@
 
 全物种宠物饲养管理与陪伴 PWA。这是产品方案 V1.0 中 Phase 2 的 MVP 实现：**建档系统 + 精准饮食处方 + 5 分钟症状自查 + 行为图鉴**。
 
-零依赖、零构建步骤、纯静态、离线可用 —— 因为最需要它的场景（凌晨三点发现猫吐了）往往也是网络最差的时候。
+运行时零依赖、纯静态、离线可用 —— 因为最需要它的场景（凌晨三点发现猫吐了）往往也是网络最差的时候。
 
 ```bash
 cd petbloom
-npm run dev          # http://localhost:4173
+npm run dev          # http://localhost:4173  开发用（多文件 + Service Worker）
 npm test             # 71 个单测，覆盖全部纯逻辑
+npm run build        # 打成单文件 dist/petbloom.html
 ```
 
-> ES 模块与 Service Worker 需要 `http://` 才能加载，所以请用上面的本地服务器打开，不要直接双击 `index.html`。
+> 开发模式下 ES 模块与 Service Worker 需要 `http://` 才能加载，所以请用上面的本地服务器打开，不要直接双击 `index.html`。
+
+## 想直接用：单文件版
+
+`dist/petbloom.html` 是打包好的完整 App —— 一个 HTML 文件，**双击就能用**，没有任何外部请求（CSS 内联、JS 打成一个 IIFE、图标是 data URI），因此天生离线可用，也可以直接发给别人或放进任何静态托管。
+
+- 手机上想当 App 用：在浏览器打开后「添加到主屏幕」
+- 想装成 PWA（带图标与离线缓存）：用开发模式那份 `index.html`，它有 manifest 与 Service Worker
+- `dist/` 按仓库既有约定不入版本库（根 `.gitignore` 忽略 `dist/`），克隆后跑一次 `npm run build` 即可生成：
+  - `petbloom.html` —— 完整文档
+  - `petbloom-artifact.html` —— 只有页面内容（无 doctype/head/body），供自带骨架的托管环境使用
 
 ## MVP 验证的核心指标
 
@@ -64,7 +75,10 @@ petbloom/
 ├── manifest.webmanifest    PWA 清单（含"症状自查"快捷方式）
 ├── service-worker.js       离线缓存
 ├── styles/app.css          视觉系统 + 6 套物种主题 + 深色模式
-├── scripts/serve.js        零依赖本地服务器
+├── scripts/
+│   ├── serve.js            零依赖本地服务器
+│   └── build-single-file.js 单文件打包（esbuild）
+├── dist/                   构建产物：单文件版 App
 ├── src/
 │   ├── app.js              hash 路由 + 主题切换 + 底部导航
 │   ├── ui.js               模板拼接与转义（无框架）

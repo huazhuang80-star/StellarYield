@@ -2,10 +2,14 @@
   "name": "petbloom",
   "version": "0.1.0",
   "private": true,
-  "description": "PetBloom · 宠物花园 —— 全物种宠物饲养管理与陪伴 PWA（零依赖，无构建步骤）",
+  "description": "PetBloom · 宠物花园 —— 全物种宠物饲养管理与陪伴 PWA（运行时零依赖；单文件打包用 esbuild）",
   "type": "module",
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
-    "dev": "node ./scripts/serve.js"
+    "dev": "node ./scripts/serve.js",
+    "build": "node ./scripts/build-single-file.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }
