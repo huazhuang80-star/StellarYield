@@ -1,0 +1,20 @@
+{
+  "name": "PetBloom · 宠物花园",
+  "short_name": "PetBloom",
+  "description": "全物种宠物饲养管理与陪伴：终身档案、精准饮食处方、行为翻译与 5 分钟症状自查。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fdf8f2",
+  "theme_color": "#2E8B57",
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "它好像不舒服", "short_name": "症状自查", "url": "./index.html#triage" },
+    { "name": "今天该吃多少", "short_name": "饮食处方", "url": "./index.html#nutrition" }
+  ]
+}
