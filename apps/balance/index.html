@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F6C74">
+<title>BALANCE 双向体重管理</title>
+</head>
+<body>
+<!--APP-START-->
+<style>
+/* ── tokens ───────────────────────────────────────────── */
+:root{
+  --paper:#EDF1EE; --card:#FFFFFF; --card-2:#F6F8F6;
+  --ink:#16211D; --muted:#5F6E67; --faint:#8A9791;
+  --line:#D3DCD6; --line-strong:#B9C6BF;
+  --accent:#1F6C74; --accent-ink:#0F3F45; --accent-soft:#DBE9E9;
+  --good:#2F6D4F; --limit:#8A6A2B; --avoid:#A8382C;
+  --good-bg:#E4EEE7; --limit-bg:#F3EBDA; --avoid-bg:#F6E4E1;
+  --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","Songti TC",Georgia,serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --base:15px; --r:10px;
+  --shell:480px;
+}
+:root[data-skin="die"]{
+  --paper:#EDF2F0; --card:#FFFFFF; --card-2:#F4F9F7;
+  --ink:#152220; --muted:#5B6E69; --line:#D2E0DB;
+  --accent:#0E7C6B; --accent-ink:#08453C; --accent-soft:#D6EBE5;
+}
+:root[data-skin="yang"]{
+  --paper:#F0F0EA; --card:#FFFFFF; --card-2:#F7F7F1;
+  --ink:#1D2118; --muted:#5F6553; --line:#D8D9CC;
+  --accent:#4A6B3A; --accent-ink:#2A3F20; --accent-soft:#E2E9DA;
+  --base:17px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0E1512; --card:#161F1B; --card-2:#1C2621;
+    --ink:#E6EDE8; --muted:#94A39C; --faint:#71807A;
+    --line:#26332D; --line-strong:#354640;
+    --accent:#63B4AF; --accent-ink:#A9D9D4; --accent-soft:#1B2F30;
+    --good:#6FB78C; --limit:#C9A961; --avoid:#DE8C80;
+    --good-bg:#172A20; --limit-bg:#2A2418; --avoid-bg:#2C1D1B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1512; --card:#161F1B; --card-2:#1C2621;
+  --ink:#E6EDE8; --muted:#94A39C; --faint:#71807A;
+  --line:#26332D; --line-strong:#354640;
+  --accent:#63B4AF; --accent-ink:#A9D9D4; --accent-soft:#1B2F30;
+  --good:#6FB78C; --limit:#C9A961; --avoid:#DE8C80;
+  --good-bg:#172A20; --limit-bg:#2A2418; --avoid-bg:#2C1D1B;
+}
+:root[data-theme="light"]{
+  --paper:#EDF1EE; --card:#FFFFFF; --card-2:#F6F8F6;
+  --ink:#16211D; --muted:#5F6E67; --faint:#8A9791;
+  --line:#D3DCD6; --line-strong:#B9C6BF;
+  --accent:#1F6C74; --accent-ink:#0F3F45; --accent-soft:#DBE9E9;
+  --good:#2F6D4F; --limit:#8A6A2B; --avoid:#A8382C;
+  --good-bg:#E4EEE7; --limit-bg:#F3EBDA; --avoid-bg:#F6E4E1;
+}
+:root[data-theme="light"][data-skin="die"]{ --accent:#0E7C6B; --accent-soft:#D6EBE5; }
+:root[data-theme="light"][data-skin="yang"]{ --accent:#4A6B3A; --accent-soft:#E2E9DA; --paper:#F0F0EA; }
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font:var(--base)/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--serif); font-weight:600; text-wrap:balance; margin:0; letter-spacing:.01em}
+button{font:inherit; color:inherit; cursor:pointer}
+input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important} }
+
+/* ── shell ────────────────────────────────────────────── */
+#app{max-width:var(--shell); margin:0 auto; min-height:100vh; background:var(--paper);
+  display:flex; flex-direction:column; position:relative}
+@media (min-width:560px){
+  body{background:var(--card-2)}
+  #app{border-left:1px solid var(--line); border-right:1px solid var(--line); min-height:100vh}
+}
+.topbar{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  padding:.7rem 1rem; display:flex; align-items:center; gap:.7rem}
+.avatar{width:38px; height:38px; border-radius:50%; background:var(--accent-soft);
+  display:grid; place-items:center; font-size:20px; flex:none; border:1px solid var(--line)}
+.topmeta{flex:1; min-width:0}
+.topmeta b{font-family:var(--serif); font-size:.98rem; display:block; line-height:1.3}
+.topmeta span{font-size:.74rem; color:var(--muted); display:block}
+.chip{font-size:.7rem; padding:.16rem .5rem; border:1px solid var(--line-strong); border-radius:20px;
+  color:var(--muted); white-space:nowrap; background:var(--card)}
+.chip.on{background:var(--accent-soft); border-color:transparent; color:var(--accent-ink); font-weight:600}
+main{flex:1; padding:1rem 1rem 5.5rem}
+.tabs{position:fixed; bottom:0; left:0; right:0; z-index:30; display:flex;
+  background:color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter:blur(12px);
+  border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom)}
+@media (min-width:560px){ .tabs{max-width:var(--shell); margin:0 auto; border-left:1px solid var(--line); border-right:1px solid var(--line)} }
+.tabs button{flex:1; background:none; border:0; padding:.55rem .2rem .6rem; display:grid; gap:.12rem;
+  justify-items:center; color:var(--muted); font-size:.68rem; letter-spacing:.03em}
+.tabs button i{font-style:normal; font-size:19px; line-height:1}
+.tabs button[aria-current="page"]{color:var(--accent); font-weight:600}
+
+/* ── primitives ───────────────────────────────────────── */
+.stack{display:flex; flex-direction:column; gap:.85rem}
+.row{display:flex; align-items:center; gap:.6rem}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:1rem}
+.card.flat{background:var(--card-2)}
+.eyebrow{font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+  font-family:var(--sans); font-weight:600}
+.lede{color:var(--muted); font-size:.86rem; margin:.3rem 0 0}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.btn{background:var(--accent); color:#fff; border:0; border-radius:8px; padding:.68rem 1rem;
+  font-weight:600; font-size:.92rem; width:100%; transition:opacity .15s}
+.btn:hover{opacity:.9}
+.btn.ghost{background:transparent; color:var(--accent); border:1px solid var(--line-strong)}
+.btn.mini{width:auto; padding:.4rem .75rem; font-size:.8rem}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+label.field{display:block; font-size:.8rem; color:var(--muted); margin-bottom:.9rem}
+label.field b{display:block; color:var(--ink); font-weight:600; margin-bottom:.3rem; font-size:.85rem}
+input[type=text],input[type=number],select{width:100%; padding:.6rem .7rem; border:1px solid var(--line-strong);
+  border-radius:8px; background:var(--card)}
+.seg{display:flex; border:1px solid var(--line-strong); border-radius:8px; overflow:hidden; background:var(--card)}
+.seg button{flex:1; background:none; border:0; padding:.55rem .4rem; font-size:.85rem; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:600}
+.tag{font-size:.7rem; padding:.1rem .42rem; border-radius:4px; font-weight:600; white-space:nowrap}
+.tag.good{background:var(--good-bg); color:var(--good)}
+.tag.limit{background:var(--limit-bg); color:var(--limit)}
+.tag.avoid{background:var(--avoid-bg); color:var(--avoid)}
+.note{font-size:.76rem; color:var(--muted); line-height:1.6}
+.hr{height:1px; background:var(--line); border:0; margin:.2rem 0}
+.scroll-x{overflow-x:auto; -webkit-overflow-scrolling:touch}
+
+/* ── dashboard ────────────────────────────────────────── */
+.kcal{display:flex; align-items:center; gap:1rem}
+.kcal .big{font-family:var(--mono); font-size:2.1rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+.kcal .of{color:var(--muted); font-size:.8rem}
+.bar{height:7px; background:var(--card-2); border-radius:99px; overflow:hidden; border:1px solid var(--line)}
+.bar>i{display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .4s}
+.bar>i.over{background:var(--avoid)}
+.macros{display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-top:.8rem}
+.macro{background:var(--card-2); border-radius:8px; padding:.5rem .6rem}
+.macro span{font-size:.7rem; color:var(--muted); display:block}
+.macro b{font-family:var(--mono); font-size:.95rem; font-variant-numeric:tabular-nums}
+.meal{display:flex; gap:.7rem; align-items:flex-start; padding:.6rem 0; border-bottom:1px solid var(--line)}
+.meal:last-child{border-bottom:0}
+.meal .slot{font-size:.7rem; color:var(--faint); width:2.4rem; flex:none; padding-top:.15rem}
+.meal .body{flex:1; min-width:0}
+.meal .body b{font-weight:600; font-size:.9rem}
+.meal .kc{font-family:var(--mono); font-size:.85rem; color:var(--muted); flex:none; font-variant-numeric:tabular-nums}
+.del{background:none; border:0; color:var(--faint); padding:.1rem .3rem; font-size:1rem; line-height:1}
+
+/* ── quiz ─────────────────────────────────────────────── */
+.q{border:1px solid var(--line); border-radius:var(--r); padding:.9rem; background:var(--card); margin-bottom:.7rem}
+.q p{margin:0 0 .6rem; font-size:.92rem; line-height:1.5}
+.q .qn{font-family:var(--mono); color:var(--faint); font-size:.75rem; margin-right:.4rem}
+.likert{display:grid; grid-template-columns:repeat(5,1fr); gap:.3rem}
+.likert button{background:var(--card-2); border:1px solid var(--line); border-radius:6px;
+  padding:.45rem .1rem; font-size:.68rem; color:var(--muted); line-height:1.25}
+.likert button[aria-pressed="true"]{background:var(--accent); color:#fff; border-color:transparent; font-weight:600}
+.progress{position:sticky; top:56px; z-index:10; background:var(--paper); padding:.5rem 0 .7rem}
+
+/* ── radar / chart ────────────────────────────────────── */
+svg.chart{display:block; width:100%; height:auto; overflow:visible}
+.legend{display:flex; flex-wrap:wrap; gap:.3rem .7rem; font-size:.75rem; color:var(--muted)}
+.scorerow{display:flex; align-items:center; gap:.5rem; font-size:.82rem; padding:.22rem 0}
+.scorerow .nm{width:3.6rem; flex:none}
+.scorerow .tr{flex:1; height:6px; background:var(--card-2); border-radius:99px; border:1px solid var(--line); overflow:hidden}
+.scorerow .tr>i{display:block; height:100%; background:var(--accent)}
+.scorerow .vl{width:2.3rem; text-align:right; font-family:var(--mono); font-size:.78rem; flex:none}
+
+/* ── SOS ──────────────────────────────────────────────── */
+.sos-ring{display:grid; place-items:center; margin:.5rem auto 1rem}
+.sos-ring .t{font-family:var(--mono); font-size:2.6rem; font-weight:600; font-variant-numeric:tabular-nums}
+.sos-ring .l{font-size:.75rem; color:var(--muted)}
+.choices{display:grid; gap:.5rem}
+.choice{text-align:left; background:var(--card); border:1px solid var(--line-strong); border-radius:8px;
+  padding:.7rem .85rem; font-size:.88rem}
+.choice[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.choice b{display:block; font-size:.9rem}
+.choice span{font-size:.76rem; color:var(--muted)}
+
+/* ── misc ─────────────────────────────────────────────── */
+.badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:.6rem}
+.badge{text-align:center; padding:.7rem .3rem; border:1px solid var(--line); border-radius:var(--r);
+  background:var(--card-2); opacity:.42}
+.badge.got{opacity:1; background:var(--card); border-color:var(--accent)}
+.badge i{font-style:normal; font-size:22px; display:block; line-height:1.4}
+.badge span{font-size:.7rem; display:block; line-height:1.3}
+.foodrow{display:flex; align-items:center; gap:.6rem; padding:.55rem 0; border-bottom:1px solid var(--line)}
+.foodrow:last-child{border-bottom:0}
+.foodrow .nm{flex:1; min-width:0; font-size:.9rem}
+.foodrow .nm small{display:block; color:var(--muted); font-size:.72rem; font-family:var(--mono)}
+.warn{background:var(--limit-bg); border:1px solid color-mix(in srgb,var(--limit) 35%, transparent);
+  border-radius:var(--r); padding:.75rem .85rem; font-size:.82rem; line-height:1.6}
+.danger{background:var(--avoid-bg); border:1px solid color-mix(in srgb,var(--avoid) 35%, transparent);
+  border-radius:var(--r); padding:.85rem; font-size:.85rem; line-height:1.65}
+.disclaim{font-size:.72rem; color:var(--faint); line-height:1.6; padding:.5rem 0 1rem}
+.empty{text-align:center; color:var(--muted); font-size:.85rem; padding:1.5rem .5rem}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:.6rem}
+.stat{background:var(--card-2); border:1px solid var(--line); border-radius:8px; padding:.6rem .7rem}
+.stat span{font-size:.7rem; color:var(--muted); display:block}
+.stat b{font-family:var(--mono); font-size:1.15rem; font-variant-numeric:tabular-nums; font-weight:600}
+</style>
+
+<div id="app">
+  <div class="topbar" id="topbar"></div>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════════════════════
+   BALANCE — 双向体重管理
+   知体 · 调心 · 正食 · 平衡
+   本文件为完整可运行原型，无外部依赖，数据存于 localStorage。
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 九种体质 ─────────────────────────────────────────── */
+const TYPES = {
+  pinghe:{n:"平和质", feat:["面色红润有光泽","精力充沛、睡眠良好","对气候环境适应力强"],
+    loss:"你的底子好。体重管理只需守住规律三餐和活动量，不要为了求快去做极端节食 —— 那反而会把好体质耗掉。",
+    gain:"你的底子好。增重靠稳定的热量盈余加力量训练即可，不需要特殊调理。",
+    ex:"任何你能长期坚持的运动都合适，每周 3–5 次。", drink:"温水、淡茶。"},
+  qixu:{n:"气虚质", feat:["容易疲劳、气短懒言","稍动就出汗","容易感冒，抵抗力偏弱"],
+    loss:"你不是吃太多，是气不足带不动代谢。节食会让气更虚、越减越没力气。先把三餐吃稳、把觉睡够，再谈减量。",
+    gain:"气虚是增重的常见底色 —— 不是吃不胖，是脾胃没力气把食物变成身体。少食多餐、把食物做软烂好消化，比硬塞更有效。",
+    ex:"八段锦、散步、慢速力量训练。避免练到大汗淋漓，那会更耗气。", drink:"黄芪水、红枣枸杞茶。忌浓茶。"},
+  yangxu:{n:"阳虚质", feat:["怕冷，手脚常年发凉","喜热饮热食","精神不振，容易腹泻"],
+    loss:"沙拉和冰饮对你是负担 —— 阳气不足，生冷会让运化更慢，水湿更容易堆积。把菜做熟做温，比吃生更能瘦。",
+    gain:"阳虚的人吃下去不容易吸收。饭菜要温热，晚上别吃凉的，早睡养阳，体重才能稳住。",
+    ex:"晒背、快走、太极。避免清晨空腹在寒风里运动。", drink:"姜枣茶、桂圆红茶。忌冰饮、冷啤酒。"},
+  yinxu:{n:"阴虚质", feat:["口干咽干，手足心热","容易失眠、大便偏干","性情急躁，容易上火"],
+    loss:"辛辣、烧烤、油炸会加重你的燥。清淡滋润的做法既降火也降热量，方向是一致的。",
+    gain:"阴虚的人容易吃了就上火、越吃越瘦。增重要走滋润路线：银耳、山药、蛋奶，避开烤炸辣。",
+    ex:"游泳、瑜伽、傍晚散步。避免正午暴晒下的高强度运动。", drink:"银耳汤、百合莲子、雪梨水。忌咖啡过量、辛辣。"},
+  tanshi:{n:"痰湿质", feat:["体型偏胖，腹部肥满松软","面部油脂多，容易困倦","痰多，身重不爽，喜食肥甘"],
+    loss:"你的胖不是“吃得多”，是“运化差”—— 脾胃化不掉水湿，就堆成了脂肪。单纯饿着会进一步伤脾，越减越虚。先祛湿、把主食换成杂粮，比数卡路里管用。",
+    gain:"痰湿体质本就偏胖，如果你仍想增重，要增的是肌肉不是湿。以蛋白质和力量训练为主，避开甜腻。",
+    ex:"八段锦、快走、游泳。出微汗即可，忌大汗伤阳。", drink:"荷叶茶、陈皮普洱、红豆薏米水。忌含糖饮料。"},
+  shire:{n:"湿热质", feat:["面部油腻易长痘","口苦口干，大便黏滞不爽","小便偏黄，身重困倦"],
+    loss:"烧烤配啤酒是你的雷区。清热利湿的吃法会同时改善痘和体重 —— 这两件事是一个原因。",
+    gain:"先把湿热清一清再谈增重，否则增的多是负担。以清淡优质蛋白为主。",
+    ex:"游泳、快走、球类。运动后及时擦汗更衣，别让汗湿黏着。", drink:"绿豆汤、苦瓜茶、菊花茶。忌酒、忌甜饮。"},
+  xueyu:{n:"血瘀质", feat:["面色偏暗，容易有瘀斑","口唇偏暗，皮肤干燥","容易忘事，情绪不畅"],
+    loss:"血行不畅的人光靠少吃效果差，运动带来的活血比节食更关键。",
+    gain:"增重同时要活血，否则营养送不到该去的地方。规律运动配合优质蛋白。",
+    ex:"任何能让你微微出汗、心跳加快的运动，规律比强度重要。", drink:"山楂茶、玫瑰花茶、红糖姜茶。"},
+  qiyu:{n:"气郁质", feat:["情绪低落，容易多愁善感","胸闷、喜叹气","咽中似有异物，睡眠浅"],
+    loss:"你的进食多半和情绪绑在一起 —— 不是嘴馋，是情绪找不到出口。先处理情绪，食欲会自己回落。工具页的“冲动急救”对你最有用。",
+    gain:"气郁的人一紧张就吃不下。把吃饭环境弄轻松、别边吃边看工作消息，比强迫自己多吃有效。",
+    ex:"户外有氧、跑步、跳舞、集体运动。晒太阳对你格外重要。", drink:"陈皮水、佛手柑茶、茉莉花茶。"},
+  tebing:{n:"特禀质", feat:["容易过敏，起疹打喷嚏","对季节变化、气味、食物敏感","皮肤划痕后易发红"],
+    loss:"你的重点不是热量，是找出并避开让你过敏的食物 —— 过敏引起的水肿常被误当成胖。",
+    gain:"增重要在不诱发过敏的前提下扩大食物范围，逐样试、慢慢加。",
+    ex:"温和规律的运动。花粉季减少户外。", drink:"温水为主。慎用蜂蜜、花类茶。"}
+};
+const TID = Object.keys(TYPES);
+const BIAS = TID.filter(t=>t!=="pinghe");
+
+/* ── 体质测评（30 题，简版量表）────────────────────────
+   计分参照《中医体质分类与判定》的转化分算法：
+   转化分 =(原始分 - 条目数)/(条目数×4)×100
+   判定：平和质≥60 且偏颇均<30 → 平和；偏颇≥40 是，30–39 倾向。
+   注意：这是缩短版，仅供自我了解，不是标准量表本身。      */
+const QUIZ = [
+  ["你精力充沛吗？","pinghe"],["你睡眠良好吗？","pinghe"],["你对环境和气候变化适应良好吗？","pinghe"],
+  ["你容易疲乏吗？","qixu"],["你说话没力气、容易气短吗？","qixu"],["你稍微活动就容易出汗吗？","qixu"],
+  ["你比别人容易感冒吗？","qixu"],
+  ["你手脚发凉吗？","yangxu"],["你胃部、背部或腰膝怕冷吗？","yangxu"],["你比别人更怕冷、衣服穿得更多吗？","yangxu"],
+  ["你吃或喝凉的东西会不舒服吗？","yangxu"],
+  ["你感到手心脚心发热吗？","yinxu"],["你口干咽干、总想喝水吗？","yinxu"],["你容易便干或大便干燥吗？","yinxu"],
+  ["你感到身体沉重、不轻松吗？","tanshi"],["你腹部肥满松软吗？","tanshi"],["你面部或鼻部有油腻感吗？","tanshi"],
+  ["你嘴里有黏黏的感觉，或痰多吗？","tanshi"],["你喜欢吃肥肉、甜食或油炸食品吗？","tanshi"],
+  ["你面部或鼻部容易长痘、生疮吗？","shire"],["你感到口苦或嘴里有异味吗？","shire"],
+  ["你大便黏滞不爽、解不干净吗？","shire"],
+  ["你身上容易出现青紫瘀斑吗？","xueyu"],["你面色晦暗，或有褐色斑块吗？","xueyu"],["你口唇颜色偏暗吗？","xueyu"],
+  ["你感到闷闷不乐、情绪低沉吗？","qiyu"],["你容易紧张、焦虑不安吗？","qiyu"],["你无缘无故叹气吗？","qiyu"],
+  ["你没有感冒时也会打喷嚏、鼻塞吗？","tebing"],["你容易过敏（药物、食物、花粉、季节）吗？","tebing"]
+];
+const LIKERT = ["没有","很少","有时","经常","总是"];
+
+/* ── 食物库 ────────────────────────────────────────────
+   [名称, kcal, 蛋白, 碳水, 脂肪 /100g, 性, 标记[], 常见份量g]
+   性：cold寒 cool凉 neutral平 warm温 hot热
+   标记：sweet甜腻 fried油炸 spicy辛辣 raw生冷 damp利湿 yin滋阴
+         qi补气 blood活血 liver疏肝 allergen发物 fatty肥甘 pro优质蛋白 grain杂粮  */
+const FOODS = [
+ ["米饭",116,2.6,25.9,0.3,"neutral",[],200],["糙米饭",112,2.6,23,0.9,"neutral",["grain"],200],
+ ["小米粥",46,1.4,8.4,0.7,"neutral",["qi","grain"],300],["薏米",361,12.8,71.1,3.3,"cool",["damp","grain"],50],
+ ["红豆",324,20.2,63.4,0.6,"neutral",["damp","grain"],50],["燕麦片",367,15,61,6.7,"neutral",["grain"],40],
+ ["全麦面包",246,9,45,3.5,"neutral",["grain"],60],["白面包",312,8.3,58,5.1,"neutral",[],60],
+ ["馒头",223,7,47,1.1,"neutral",[],100],["面条(煮)",110,3.9,22,0.4,"neutral",[],250],
+ ["红薯",86,1.6,20.1,0.2,"neutral",["qi"],150],["紫薯",82,1.4,19,0.2,"neutral",["qi"],150],
+ ["土豆",77,2,17,0.1,"neutral",["qi"],150],["山药",57,1.9,12.4,0.2,"neutral",["qi"],150],
+ ["玉米",112,4,22.8,1.2,"neutral",["grain"],150],["南瓜",26,1,6.5,0.1,"warm",["qi"],200],
+ ["芋头",79,2.2,18,0.2,"neutral",[],150],["荞麦面",280,9.3,58,2.3,"cool",["grain"],80],
+
+ ["鸡胸肉",133,29.6,1.1,1.9,"warm",["pro","qi"],120],["鸡腿(带皮)",181,16,0,13,"warm",["fatty"],120],
+ ["红烧鸡腿",210,17,4,14,"warm",["fatty"],150],["牛肉(瘦)",143,20.9,1.2,6.2,"warm",["pro","qi","blood"],120],
+ ["肥牛",250,17,1,20,"warm",["fatty","pro"],120],["猪里脊",155,20.2,1.5,7.9,"neutral",["pro"],120],
+ ["五花肉",518,9,0,54,"neutral",["fatty"],80],["红烧肉",470,10,6,46,"neutral",["fatty","sweet"],100],
+ ["羊肉",203,19,0,14.1,"hot",["pro","qi"],120],["鸭肉",240,15.5,0.2,19.7,"cool",["yin","pro"],120],
+ ["鸡蛋",144,13.3,2.8,8.8,"neutral",["pro","yin"],55],["水煮蛋",144,13.3,2.8,8.8,"neutral",["pro"],55],
+ ["鲫鱼",108,17.1,0.1,2.7,"neutral",["pro","qi"],150],["清蒸鱼",120,20,1,4,"neutral",["pro"],150],
+ ["三文鱼",139,17.2,0,8.1,"neutral",["pro"],120],["虾",93,18.6,2.8,0.8,"warm",["pro","allergen"],100],
+ ["蟹",103,17.5,2.3,2.6,"cold",["allergen","pro"],100],["带鱼",127,17.7,3.1,4.9,"warm",["allergen","pro"],120],
+ ["豆腐",82,8.1,4.2,3.7,"cool",["pro"],150],["豆浆",31,3,1.8,1.6,"neutral",["pro"],250],
+ ["黄豆",390,35,34.2,16,"neutral",["pro"],40],["炸鸡",279,17,12,18,"warm",["fried","fatty"],150],
+ ["炸薯条",312,3.4,41,15,"warm",["fried"],100],
+
+ ["白菜",17,1.5,3.2,0.1,"cool",["damp"],200],["菠菜",24,2.6,2.8,0.3,"cool",["blood","yin"],150],
+ ["芹菜",14,1.2,3.3,0.2,"cool",["damp"],150],["苦瓜",19,1,3.5,0.1,"cold",["damp"],150],
+ ["冬瓜",11,0.4,2.6,0.2,"cool",["damp"],200],["黄瓜",15,0.8,2.9,0.2,"cool",["damp","raw"],150],
+ ["白萝卜",21,0.9,5,0.1,"cool",["damp"],200],["海带",13,1.2,2.1,0.1,"cold",["damp"],100],
+ ["西兰花",36,4.1,4.3,0.6,"neutral",["yin"],150],["生菜",15,1.3,2,0.3,"cool",["raw"],100],
+ ["番茄",20,0.9,4,0.2,"cool",["yin"],150],["茄子",23,1.1,4.9,0.2,"cool",[],150],
+ ["韭菜",26,2.4,4.6,0.4,"warm",["qi","allergen"],100],["洋葱",40,1.1,9,0.2,"warm",["blood"],100],
+ ["木耳",21,1.5,3.4,0.2,"neutral",["blood"],100],["银耳",200,10,67,1.4,"neutral",["yin"],15],
+ ["香菇",26,2.2,5.2,0.3,"neutral",["qi"],100],["清炒时蔬",45,2,5,2,"neutral",[],150],
+ ["蔬菜沙拉",60,2,6,3,"cool",["raw"],200],
+
+ ["苹果",53,0.2,13.5,0.2,"cool",[],200],["梨",51,0.4,13.3,0.2,"cool",["yin"],200],
+ ["香蕉",93,1.4,22,0.2,"cool",["qi"],120],["西瓜",31,0.6,8,0.1,"cold",["damp","raw"],300],
+ ["蓝莓",57,0.7,14.5,0.3,"neutral",[],100],["葡萄",44,0.5,10.3,0.2,"neutral",["blood"],150],
+ ["橙子",48,0.8,11.1,0.2,"cool",["liver"],200],["山楂",102,0.5,25.1,0.6,"warm",["blood"],50],
+ ["桂圆",71,1.2,16.6,0.1,"warm",["qi"],80],["红枣",317,3.2,67.8,0.5,"warm",["qi"],20],
+ ["芒果",35,0.6,8.3,0.2,"neutral",["allergen"],150],["榴莲",147,2.6,28.3,3.3,"hot",["fatty"],100],
+
+ ["牛奶",54,3,3.4,3.2,"neutral",["pro","yin"],250],["全脂牛奶",65,3.3,4.8,3.6,"neutral",["pro","fatty"],250],
+ ["希腊酸奶",97,9,4,5,"neutral",["pro"],150],["酸奶(含糖)",86,2.5,12,3.2,"neutral",["sweet"],150],
+ ["奶酪",328,25,3.5,24,"neutral",["fatty","pro"],30],["蛋白粉",380,80,5,4,"neutral",["pro"],30],
+
+ ["核桃",646,14.9,19.1,58.8,"warm",["fatty"],20],["花生",567,25,16,49,"neutral",["fatty"],25],
+ ["花生酱",588,25,20,50,"neutral",["fatty"],20],["杏仁",578,21,22,50,"neutral",["fatty"],20],
+ ["黑芝麻",559,19.1,24,46.1,"warm",["yin","blood"],15],["牛油果",161,2,8.5,14.7,"neutral",["fatty"],100],
+
+ ["蛋糕",347,5,50,15,"neutral",["sweet","fatty"],80],["奶茶",90,1,17,2,"neutral",["sweet"],400],
+ ["可乐",43,0,10.8,0,"cool",["sweet"],330],["黑咖啡",2,0.2,0,0,"neutral",[],240],
+ ["巧克力(黑)",546,6,46,35,"neutral",["fatty"],20],["薯片",548,7,50,35,"neutral",["fried","fatty"],50],
+ ["冰淇淋",127,2.5,17.3,5.3,"cold",["sweet","raw"],100],["啤酒",32,0.3,2.5,0,"cool",["damp"],500],
+ ["白酒",298,0,0.1,0,"hot",["spicy"],50],["烧烤肉串",280,18,3,22,"hot",["spicy","fried","fatty"],120],
+ ["麻辣烫",180,8,12,11,"hot",["spicy","fatty"],400],["火锅(麻辣)",220,12,8,16,"hot",["spicy","fatty"],400],
+ ["水饺",240,9,30,9,"neutral",[],250],["包子",227,7,38,5,"neutral",[],120],
+ ["油条",386,6.9,51,17.6,"warm",["fried"],60],["豆浆油条",200,5,28,8,"warm",["fried"],200],
+ ["方便面",472,9.5,60,21,"warm",["fried"],100],["味噌汤",40,3,4,1.5,"warm",["qi"],200],
+ ["荷叶茶",0,0,0,0,"cool",["damp"],250],["姜枣茶",25,0.2,6,0,"warm",["qi"],250],
+ ["绿豆汤",60,3,12,0.3,"cool",["damp"],300],["银耳羹",50,1,12,0.1,"neutral",["yin","sweet"],250],
+ ["红豆薏米水",45,2,9,0.2,"cool",["damp"],300]
+];
+
+/* 体质 × 食物 → 宜 / 少 / 忌 */
+const RULES = {
+  yangxu:{ avoid:f=>f[5]==="cold"||f[6].includes("raw"), limit:f=>f[5]==="cool",
+    good:f=>["warm","hot"].includes(f[5])||f[6].includes("qi"),
+    why:{avoid:"性寒或生冷，阳虚者伤阳",limit:"偏凉，少量并加热食用",good:"温性或补气，助阳"} },
+  yinxu:{ avoid:f=>f[6].includes("spicy")||f[6].includes("fried")||f[5]==="hot",
+    limit:f=>f[5]==="warm", good:f=>f[6].includes("yin")||["cool","cold"].includes(f[5]),
+    why:{avoid:"辛辣油炸或大热，助火伤阴",limit:"偏温，控制份量",good:"滋阴清润"} },
+  tanshi:{ avoid:f=>f[6].includes("sweet")||f[6].includes("fried"), limit:f=>f[6].includes("fatty"),
+    good:f=>f[6].includes("damp")||f[6].includes("grain"),
+    why:{avoid:"甜腻或油炸，生湿助痰",limit:"肥甘厚味，减量或换做法",good:"利湿或杂粮，助运化"} },
+  shire:{ avoid:f=>f[6].includes("spicy")||f[6].includes("fried")||f[5]==="hot",
+    limit:f=>f[6].includes("sweet")||f[6].includes("fatty"),
+    good:f=>f[6].includes("damp")&&["cool","cold"].includes(f[5]),
+    why:{avoid:"辛辣烧烤助湿热",limit:"甜腻加重湿热",good:"清热利湿"} },
+  qixu:{ avoid:f=>f[6].includes("raw")||f[5]==="cold", limit:f=>f[5]==="cool",
+    good:f=>f[6].includes("qi"), why:{avoid:"生冷伤脾，气虚者忌",limit:"偏凉，建议加热",good:"补气健脾"} },
+  xueyu:{ avoid:()=>false, limit:f=>f[6].includes("fatty"), good:f=>f[6].includes("blood"),
+    why:{limit:"过于油腻不利血行",good:"活血化瘀"} },
+  qiyu:{ avoid:()=>false, limit:f=>f[6].includes("sweet"), good:f=>f[6].includes("liver"),
+    why:{limit:"靠甜食安抚情绪易形成依赖",good:"疏肝理气"} },
+  tebing:{ avoid:f=>f[6].includes("allergen"), limit:f=>f[6].includes("spicy"), good:()=>false,
+    why:{avoid:"常见发物，过敏体质慎食",limit:"辛辣易诱发反应"} },
+  pinghe:{ avoid:()=>false, limit:f=>f[6].includes("fried")||f[6].includes("sweet"), good:()=>false,
+    why:{limit:"油炸甜腻，任何体质都宜少"} }
+};
+function advise(food, cid){
+  const r = RULES[cid] || RULES.pinghe;
+  if(r.avoid(food)) return {lv:"avoid", t:"忌", why:r.why.avoid};
+  if(r.limit(food)) return {lv:"limit", t:"少", why:r.why.limit};
+  if(r.good(food))  return {lv:"good",  t:"宜", why:r.why.good};
+  return null;
+}
+
+/* ── 24 节气 ─────────────────────────────────────────── */
+const TERMS=[[1,6,"小寒","温补避寒","羊肉、桂圆、核桃、生姜"],[1,20,"大寒","固护阳气","黑芝麻、山药、红枣、栗子"],
+[2,4,"立春","增甘减酸，助阳升发","山药、红枣、菠菜、豆芽"],[2,19,"雨水","健脾祛湿","薏米、红豆、山药、鲫鱼"],
+[3,6,"惊蛰","润燥养肝","梨、银耳、菠菜、春笋"],[3,21,"春分","平补阴阳","韭菜、荠菜、鸡蛋、豆腐"],
+[4,5,"清明","清肝明目","荠菜、菠菜、桑叶茶、螺"],[4,20,"谷雨","祛湿健脾","薏米、冬瓜、香椿、鲫鱼"],
+[5,6,"立夏","养心清热","莲子、绿豆、苦瓜、番茄"],[5,21,"小满","清热利湿","黄瓜、冬瓜、绿豆、丝瓜"],
+[6,6,"芒种","解暑生津","乌梅、绿豆、西瓜、薄荷"],[6,21,"夏至","清热解暑","绿豆、苦瓜、西瓜、莲藕"],
+[7,7,"小暑","健脾消暑","荷叶、冬瓜、丝瓜、莲子"],[7,23,"大暑","益气生津","绿豆汤、苦瓜、番茄、酸梅汤"],
+[8,8,"立秋","润肺防燥","梨、百合、银耳、莲藕"],[8,23,"处暑","滋阴润燥","银耳、蜂蜜、鸭肉、山药"],
+[9,8,"白露","养肺润燥","梨、百合、杏仁、白萝卜"],[9,23,"秋分","滋阴润燥","银耳、百合、梨、芝麻"],
+[10,8,"寒露","温润防燥","芝麻、核桃、山药、南瓜"],[10,24,"霜降","健脾补肾","栗子、山药、白萝卜、柿子"],
+[11,8,"立冬","温补养藏","羊肉、桂圆、黑豆、核桃"],[11,22,"小雪","温肾助阳","羊肉、韭菜、黑芝麻、山药"],
+[12,7,"大雪","补肾防寒","羊肉、栗子、核桃、桂圆"],[12,22,"冬至","温补阳气","羊肉、桂圆、黑芝麻、饺子"]];
+function currentTerm(d){
+  const m=d.getMonth()+1, day=d.getDate();
+  let best=TERMS[TERMS.length-1];
+  for(const t of TERMS){ if(m>t[0]||(m===t[0]&&day>=t[1])) best=t; }
+  if(m===1&&day<6) best=TERMS[23];
+  return best;
+}
+
+/* ── 成长形态 ─────────────────────────────────────────── */
+const STAGES={
+  loss:[[0,"🥚","茧期","觉醒之前，被体重困扰"],[1,"🐛","幼虫期","开始改变，脆弱但努力"],
+    [8,"🛡","结茧期","内在转化，看不见但正在发生"],[31,"🦋","破茧期","蜕变显现，轻盈自由"],
+    [91,"🦋","飞舞期","完全掌控，从容自信"],[181,"🌸","传粉期","开始帮助他人"]],
+  gain:[[0,"🌱","幼苗期","瘦弱但充满希望"],[1,"🌿","扎根期","开始吸收营养"],
+    [8,"🎋","拔节期","节节高升，力量增长"],[31,"🌳","茁壮期","根基稳固，枝繁叶茂"],
+    [91,"🐻","丰收期","强壮有力，温暖可靠"],[181,"🦁","守护期","从容有力，可以保护他人"]]
+};
+function stageOf(mode,days){ const L=STAGES[mode]; let s=L[0]; for(const x of L) if(days>=x[0]) s=x; return s; }
+
+/* ── 情绪 → 替代活动 ─────────────────────────────────── */
+const EMOTIONS=[
+ ["焦虑","做 5 分钟呼吸练习：吸气 4 秒，屏住 4 秒，呼气 6 秒。焦虑时的进食冲动，多半在呼吸稳下来后就散了。"],
+ ["无聊","出门走 10 分钟，戴上耳机听点东西。无聊型进食是最容易被替换的一种 —— 它要的是刺激，不是食物。"],
+ ["孤独","给一个人发条消息，随便说点什么。孤独引起的食欲，吃再多也填不满，因为缺的不是热量。"],
+ ["愤怒","做 20 个俯卧撑，或者用冷水洗把脸。愤怒需要的是出口，运动比咀嚼更快消解它。"],
+ ["疲惫","去睡 20 分钟。累的时候身体会误把“需要休息”翻译成“需要糖”，先补觉再判断。"],
+ ["压力","写下现在最让你烦的那一件事，只写一句。把它从脑子里挪到纸上，胃里的紧绷会松一点。"]
+];
+const SWAPS={
+  loss:[["想吃蛋糕","希腊酸奶 + 蓝莓 + 一小勺蜂蜜"],["想吃薯片","海苔、烤鹰嘴豆或一小把坚果"],
+    ["想喝奶茶","无糖茶 + 少量牛奶，或气泡水加柠檬"],["想吃冰淇淋","冷冻香蕉打成泥，口感很接近"],
+    ["想吃炸鸡","空气炸锅版鸡胸肉或烤鸡腿去皮"]],
+  gain:[["吃不下饭","坚果酱香蕉吐司 + 全脂牛奶，液体热量更好入口"],["没胃口","少食多餐，把一顿拆成两次，饭菜做软烂"],
+    ["想吃零食","奶酪、坚果、全脂酸奶 —— 热量密度高又不占肚子"],["运动后","蛋白粉奶昔 + 香蕉，趁窗口期补上"],
+    ["晚上饿","睡前一杯全脂奶或一小碗银耳羹"]]
+};
+
+/* ── 徽章 ─────────────────────────────────────────────── */
+const BADGES=[
+ ["first","📷","首餐记录",s=>totalMeals(s)>=1],
+ ["d7","🔥","7 天坚持",s=>streak(s)>=7],
+ ["d21","🪶","21 天习惯",s=>streak(s)>=21],
+ ["quiz","☯","知体",s=>s.constitution.done],
+ ["tune","🌿","体质调理师",s=>daysFollowingConstitution(s)>=30],
+ ["d90","📊","数据达人",s=>loggedDays(s).length>=90],
+ ["sos","🧘","冲动管理",s=>allImpulses(s).filter(i=>i.resolved).length>=5],
+ ["goal","👑","身体解放",s=>reachedGoal(s)]
+];
+
+/* ══ 状态 ══════════════════════════════════════════════ */
+const KEY="balance.v1";
+const BLANK={
+  v:1, onboarded:false, step:0,
+  profile:{sex:"female", age:28, height:165, weight:62, target:55, activity:1.375, mode:"loss", start:today()},
+  screen:{done:false, yes:0, flagged:false},
+  constitution:{done:false, scores:{}, primary:null, tend:[]},
+  logs:{}, weights:{}, skin:"balance", costPerMeal:25, tab:"today", sos:null, quizAns:[]
+};
+let S = load();
+function load(){
+  try{
+    const r=JSON.parse(localStorage.getItem(KEY));
+    if(r&&r.v===1) return Object.assign(structuredClone(BLANK), r);
+  }catch(e){}
+  return structuredClone(BLANK);
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){
+    /* 配额满了：照片是唯一会长这么大的东西，丢掉它们再存一次。 */
+    let dropped=0;
+    for(const k in S.logs) for(const m of S.logs[k].meals) if(m.photo){ delete m.photo; dropped++; }
+    try{
+      localStorage.setItem(KEY, JSON.stringify(S));
+      if(dropped) alert("本机存储已满，已清除 "+dropped+" 张餐食照片以保住记录数据。文字记录都还在。");
+    }catch(e2){ alert("本机存储已满，这次改动没能保存。可以到「我的」导出后清空数据。"); }
+  }
+}
+function today(){ const d=new Date(); return ymd(d); }
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dayLog(k){ k=k||today(); if(!S.logs[k]) S.logs[k]={meals:[],impulses:[]}; return S.logs[k]; }
+function loggedDays(s){ return Object.keys(s.logs).filter(k=>(s.logs[k].meals||[]).length>0).sort(); }
+function totalMeals(s){ return loggedDays(s).reduce((n,k)=>n+s.logs[k].meals.length,0); }
+function allImpulses(s){ return Object.keys(s.logs).flatMap(k=>s.logs[k].impulses||[]); }
+function streak(s){
+  const set=new Set(loggedDays(s)); let n=0; const d=new Date();
+  for(;;){ if(set.has(ymd(d))){ n++; d.setDate(d.getDate()-1); } else break; }
+  return n;
+}
+function daysSinceStart(){
+  const a=new Date(S.profile.start+"T00:00:00"), b=new Date(today()+"T00:00:00");
+  return Math.max(0, Math.round((b-a)/864e5));
+}
+function daysFollowingConstitution(s){
+  if(!s.constitution.done) return 0;
+  const cid=s.constitution.primary;
+  return loggedDays(s).filter(k=>{
+    const ms=s.logs[k].meals; if(!ms.length) return false;
+    return !ms.some(m=>{ const f=FOODS[m.fi]; return f && (advise(f,cid)||{}).lv==="avoid"; });
+  }).length;
+}
+function reachedGoal(s){
+  const ws=Object.keys(s.weights).sort(); if(!ws.length) return false;
+  const w=s.weights[ws[ws.length-1]], t=s.profile.target;
+  return s.profile.mode==="loss" ? w<=t : w>=t;
+}
+
+/* ══ 计算 ══════════════════════════════════════════════ */
+function bmi(w,h){ return w/Math.pow(h/100,2); }
+function bmr(p){
+  const b=10*p.weight+6.25*p.height-5*p.age;
+  return p.sex==="male"? b+5 : b-161;
+}
+function tdee(p){ return bmr(p)*p.activity; }
+/* 目标热量：减脂 -20% 但设下限；增重 +15% */
+function targetKcal(p){
+  const t=tdee(p);
+  if(p.mode==="gain") return Math.round(t*1.15);
+  const floor=Math.max(bmr(p)*1.1, p.sex==="male"?1500:1200);
+  return Math.round(Math.max(t*0.8, floor));
+}
+function macroTargets(p){
+  const k=targetKcal(p);
+  const r = p.mode==="loss" ? [0.30,0.40,0.30] : [0.25,0.50,0.25];
+  return { p:Math.round(k*r[0]/4), c:Math.round(k*r[1]/4), f:Math.round(k*r[2]/9), kcal:k };
+}
+function dayTotals(k){
+  const t={kcal:0,p:0,c:0,f:0};
+  for(const m of dayLog(k).meals){ t.kcal+=m.kcal; t.p+=m.p; t.c+=m.c; t.f+=m.f; }
+  for(const x in t) t[x]=Math.round(t[x]);
+  return t;
+}
+/* 转化分 */
+function scoreQuiz(ans){
+  const raw={}, cnt={};
+  QUIZ.forEach((q,i)=>{ const t=q[1]; raw[t]=(raw[t]||0)+(ans[i]||1); cnt[t]=(cnt[t]||0)+1; });
+  const out={};
+  for(const t of TID) out[t]=Math.round(((raw[t]-cnt[t])/(cnt[t]*4))*100);
+  return out;
+}
+function judge(sc){
+  const biasMax=Math.max(...BIAS.map(t=>sc[t]));
+  if(sc.pinghe>=60 && biasMax<30) return {primary:"pinghe", tend:[]};
+  const yes=BIAS.filter(t=>sc[t]>=40).sort((a,b)=>sc[b]-sc[a]);
+  const tend=BIAS.filter(t=>sc[t]>=30&&sc[t]<40).sort((a,b)=>sc[b]-sc[a]);
+  if(yes.length) return {primary:yes[0], tend:yes.slice(1).concat(tend)};
+  if(tend.length) return {primary:tend[0], tend:tend.slice(1)};
+  return {primary:"pinghe", tend:[]};
+}
+
+/* ══ 渲染工具 ══════════════════════════════════════════ */
+const h=(s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=(id)=>document.getElementById(id);
+function go(t){ S.tab=t; S.sos=null; save(); render(); }
+
+/* ══ 引导 ══════════════════════════════════════════════ */
+function viewOnboard(){
+  const p=S.profile;
+  if(S.step===0) return `
+    <div class="stack" style="padding-top:1.5rem">
+      <div>
+        <p class="eyebrow">知体 · 调心 · 正食 · 平衡</p>
+        <h1 style="font-size:1.9rem; margin-top:.4rem">BALANCE</h1>
+        <p class="lede">不是让你管住嘴，而是让你懂自己的身体。<br>同一套系统，同时服务想瘦下来和想胖起来的人。</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem">你想往哪个方向调？</h3>
+        <p class="note" style="margin:.3rem 0 .8rem">随时可以改。我们不评判方向，只帮你到达身体舒服的位置。</p>
+        <div class="stack" style="gap:.5rem">
+          <button class="choice" data-act="mode" data-v="loss" aria-pressed="${p.mode==="loss"}">
+            <b>我想减脂 🦋</b><span>目标是减少脂肪，同时不损伤脾胃和代谢</span></button>
+          <button class="choice" data-act="mode" data-v="gain" aria-pressed="${p.mode==="gain"}">
+            <b>我想增重 🌱</b><span>目标是健康长肉，养好脾胃让吸收变好</span></button>
+        </div>
+      </div>
+      <button class="btn" data-act="step" data-v="1">下一步</button>
+      <p class="disclaim">本应用提供的是生活方式建议，不构成医疗诊断或治疗方案。如有疾病、正在服药、怀孕或哺乳，请先咨询医师。</p>
+    </div>`;
+
+  if(S.step===1) return `
+    <div class="stack" style="padding-top:.5rem">
+      <div><p class="eyebrow">第 1 步 / 3</p><h2 style="font-size:1.35rem">你的身体数据</h2>
+      <p class="lede">用来算出你的基础代谢和每日目标热量。</p></div>
+      <div class="card">
+        <label class="field"><b>生理性别</b>
+          <div class="seg">
+            <button data-act="sex" data-v="female" aria-pressed="${p.sex==="female"}">女</button>
+            <button data-act="sex" data-v="male" aria-pressed="${p.sex==="male"}">男</button>
+          </div>
+          <span class="note">影响基础代谢公式，与性别认同无关。</span>
+        </label>
+        <div class="grid2">
+          <label class="field"><b>年龄</b><input type="number" id="f-age" value="${p.age}" min="14" max="90"></label>
+          <label class="field"><b>身高 cm</b><input type="number" id="f-h" value="${p.height}" min="120" max="220"></label>
+          <label class="field"><b>当前体重 kg</b><input type="number" id="f-w" value="${p.weight}" min="30" max="200" step="0.1"></label>
+          <label class="field"><b>目标体重 kg</b><input type="number" id="f-t" value="${p.target}" min="30" max="200" step="0.1"></label>
+        </div>
+        <label class="field"><b>日常活动量</b>
+          <select id="f-act">
+            <option value="1.2" ${p.activity==1.2?"selected":""}>几乎不动（久坐办公）</option>
+            <option value="1.375" ${p.activity==1.375?"selected":""}>轻度活动（每周 1–3 次运动）</option>
+            <option value="1.55" ${p.activity==1.55?"selected":""}>中度活动（每周 3–5 次）</option>
+            <option value="1.725" ${p.activity==1.725?"selected":""}>高强度（每周 6–7 次）</option>
+          </select>
+        </label>
+        <div id="f-warn"></div>
+      </div>
+      <button class="btn" data-act="saveProfile">下一步</button>
+      <button class="btn ghost" data-act="step" data-v="0">返回</button>
+    </div>`;
+
+  if(S.step===2){
+    const q=["你是否会因为吃得不舒服而设法把吃下去的东西弄出来？","你是否担心自己已经失去对进食量的控制？",
+      "最近 3 个月你是否瘦了 6 公斤以上？","别人说你太瘦时，你是否仍觉得自己胖？",
+      "你是否觉得食物占据了你生活中很大一部分？"];
+    return `
+    <div class="stack" style="padding-top:.5rem">
+      <div><p class="eyebrow">第 2 步 / 3</p><h2 style="font-size:1.35rem">开始之前</h2>
+      <p class="lede">5 个问题。任何以热量为中心的工具，对一部分人来说会造成伤害而不是帮助 —— 我们需要先确认它适合你。</p></div>
+      <div class="card stack" style="gap:.8rem">
+        ${q.map((t,i)=>`<div>
+          <p style="margin:0 0 .45rem; font-size:.9rem">${h(t)}</p>
+          <div class="seg">
+            <button data-act="scoff" data-i="${i}" data-v="1" aria-pressed="${(S.screen.a||[])[i]===1}">是</button>
+            <button data-act="scoff" data-i="${i}" data-v="0" aria-pressed="${(S.screen.a||[])[i]===0}">否</button>
+          </div></div>`).join("")}
+      </div>
+      <button class="btn" data-act="scoffDone">继续</button>
+      <p class="disclaim">此为 SCOFF 自评问卷，用于提示风险，不能作为诊断依据。</p>
+    </div>`;
+  }
+  return "";
+}
+function viewFlagged(){
+  return `<div class="stack" style="padding-top:1rem">
+    <h2 style="font-size:1.3rem">先照顾你，再谈体重</h2>
+    <div class="danger">
+      你的回答里有几项提示，你和食物的关系可能正让你不好过。这种情况下，一个盯着热量数字的工具很可能让事情变糟，而不是变好。<br><br>
+      所以我把热量目标和体重打卡关掉了。你仍然可以用体质测评、节气食谱和冲动急救 —— 这些不涉及计数。
+    </div>
+    <div class="card">
+      <h3 style="font-size:.98rem">建议做的一件事</h3>
+      <p class="note" style="margin-top:.4rem">和一个人说出来 —— 家人、朋友，或者专业人士。进食障碍是可治疗的，而且越早越容易。</p>
+      <hr class="hr" style="margin:.7rem 0">
+      <p class="note"><b>北京心理危机研究与干预中心</b><br>010-8295-1332（24 小时）</p>
+      <p class="note"><b>希望 24 热线</b><br>400-161-9995</p>
+      <p class="note">或到三甲医院的临床心理科／精神科门诊，进食障碍专科最佳。</p>
+    </div>
+    <button class="btn" data-act="enterSafe">进入（不含热量计数）</button>
+    <button class="btn ghost" data-act="unflag">我理解风险，仍要开启热量功能</button>
+    <p class="disclaim">你随时可以在「我的」里改变这个选择。</p>
+  </div>`;
+}
+
+/* ══ 今日 ══════════════════════════════════════════════ */
+function viewToday(){
+  const p=S.profile, tt=dayTotals(), mt=macroTargets(p), safe=S.screen.flagged;
+  const cid=S.constitution.primary, term=currentTerm(new Date());
+  const pct=Math.min(100, Math.round(tt.kcal/mt.kcal*100)), over=tt.kcal>mt.kcal*1.05;
+  const meals=dayLog().meals;
+  const b=bmi(p.weight,p.height);
+
+  let kcalCard;
+  if(safe){
+    kcalCard=`<div class="card"><p class="eyebrow">今日结构</p>
+      <p class="lede" style="margin-top:.35rem">热量计数已关闭。看的是吃得够不够齐，而不是够不够少。</p>
+      <div class="macros">
+        <div class="macro"><span>蛋白质来源</span><b>${meals.filter(m=>FOODS[m.fi][6].includes("pro")).length}</b></div>
+        <div class="macro"><span>蔬果</span><b>${meals.filter(m=>FOODS[m.fi][1]<60).length}</b></div>
+        <div class="macro"><span>主食</span><b>${meals.filter(m=>FOODS[m.fi][3]>15).length}</b></div>
+      </div></div>`;
+  }else{
+    kcalCard=`<div class="card">
+      <div class="kcal">
+        <div style="flex:1">
+          <p class="eyebrow">今日摄入</p>
+          <div class="row" style="align-items:baseline; gap:.4rem; margin:.15rem 0 .5rem">
+            <span class="big">${tt.kcal}</span><span class="of">/ ${mt.kcal} kcal</span>
+          </div>
+          <div class="bar"><i class="${over?"over":""}" style="width:${pct}%"></i></div>
+          <p class="note" style="margin-top:.4rem">
+            ${p.mode==="loss"
+              ? (over?"今天超了。一天超标不会毁掉一周 —— 明天照常就好。":`还剩 <b class="num">${Math.max(0,mt.kcal-tt.kcal)}</b> kcal 额度`)
+              : (tt.kcal<mt.kcal?`还差 <b class="num">${mt.kcal-tt.kcal}</b> kcal 才够盈余`:"今天的盈余够了，很好。")}
+          </p>
+        </div>
+      </div>
+      <div class="macros">
+        <div class="macro"><span>蛋白 g</span><b>${tt.p}<small style="color:var(--muted); font-size:.7rem">/${mt.p}</small></b></div>
+        <div class="macro"><span>碳水 g</span><b>${tt.c}<small style="color:var(--muted); font-size:.7rem">/${mt.c}</small></b></div>
+        <div class="macro"><span>脂肪 g</span><b>${tt.f}<small style="color:var(--muted); font-size:.7rem">/${mt.f}</small></b></div>
+      </div></div>`;
+  }
+
+  const cCard = S.constitution.done ? `
+    <div class="card">
+      <div class="row"><p class="eyebrow" style="flex:1">体质建议 · ${h(TYPES[cid].n)}</p>
+        <button class="btn ghost mini" data-act="tab" data-v="body">报告</button></div>
+      <p style="font-size:.88rem; margin:.5rem 0 0">${h(p.mode==="loss"?TYPES[cid].loss:TYPES[cid].gain)}</p>
+      <hr class="hr" style="margin:.7rem 0">
+      <p class="note"><b>运动</b>　${h(TYPES[cid].ex)}</p>
+      <p class="note"><b>饮品</b>　${h(TYPES[cid].drink)}</p>
+    </div>` : `
+    <div class="card flat">
+      <h3 style="font-size:.98rem">还没测体质</h3>
+      <p class="note" style="margin:.35rem 0 .7rem">体质决定了同样的食物对你是补还是伤。没有它，这个 app 就只是个计算器。</p>
+      <button class="btn" data-act="tab" data-v="body">做体质测评（30 题，约 3 分钟）</button>
+    </div>`;
+
+  const bmiWarn = (!safe && p.mode==="gain" && b>=24) ? `<div class="warn">
+      你现在的 BMI 是 <b class="num">${b.toFixed(1)}</b>，已在偏重范围。如果目标是增肌而非增脂，建议把重点放在力量训练和蛋白质上，热量盈余控制得更小一些。</div>`
+    : (!safe && p.mode==="loss" && bmi(p.target,p.height)<18.5) ? `<div class="warn">
+      你的目标体重对应 BMI <b class="num">${bmi(p.target,p.height).toFixed(1)}</b>，低于 18.5 的健康下限。过瘦会影响免疫力、骨密度和生育能力。建议把目标调整到 <b class="num">${(18.5*Math.pow(p.height/100,2)).toFixed(1)}</b> kg 以上。</div>`
+    : (!safe && b<18.5 && p.mode==="loss") ? `<div class="warn">
+      你现在的 BMI 是 <b class="num">${b.toFixed(1)}</b>，已经低于健康下限。继续减重有风险，建议先咨询医师。</div>` : "";
+
+  const st=stageOf(p.mode, daysSinceStart());
+  return `<div class="stack">
+    ${bmiWarn}
+    ${kcalCard}
+    <div class="card">
+      <div class="row" style="align-items:flex-start">
+        <div style="font-size:2.4rem; line-height:1">${st[1]}</div>
+        <div style="flex:1">
+          <b style="font-family:var(--serif); font-size:1rem">${h(st[2])}</b>
+          <p class="note" style="margin:.1rem 0 0">${h(st[3])}</p>
+          <p class="note" style="margin:.3rem 0 0">已坚持 <b class="num">${streak(S)}</b> 天 · 累计记录 <b class="num">${loggedDays(S).length}</b> 天</p>
+        </div>
+      </div>
+    </div>
+    ${cCard}
+    <div class="card">
+      <div class="row"><p class="eyebrow" style="flex:1">今日餐食</p>
+        <button class="btn ghost mini" data-act="tab" data-v="log">＋ 记一餐</button></div>
+      ${meals.length? `<div style="margin-top:.4rem">${meals.map((m,i)=>{
+          const f=FOODS[m.fi], a=cid?advise(f,cid):null;
+          return `<div class="meal">
+            <span class="slot">${h(m.slot)}</span>
+            ${m.photo?`<img src="${m.photo}" alt="" style="width:38px; height:38px; object-fit:cover;
+              border-radius:6px; border:1px solid var(--line); flex:none">`:""}
+            <div class="body"><b>${h(f[0])}</b>
+              ${a?`<span class="tag ${a.lv}" style="margin-left:.35rem">${a.t}</span>`:""}
+              <div class="note"><span class="num">${m.g}g</span>${a?` · ${h(a.why)}`:""}</div></div>
+            ${safe?"":`<span class="kc">${Math.round(m.kcal)}</span>`}
+            <button class="del" data-act="delMeal" data-i="${i}" aria-label="删除">✕</button>
+          </div>`;}).join("")}</div>`
+        : `<p class="empty">还没记录。拍照或搜索都可以，30 秒的事。</p>`}
+    </div>
+    <div class="card flat">
+      <p class="eyebrow">节气 · ${h(term[2])}</p>
+      <p style="font-size:.9rem; margin:.35rem 0 .2rem"><b>${h(term[3])}</b></p>
+      <p class="note">当季宜食：${h(term[4])}</p>
+    </div>
+    ${safe?"":`<div class="card">
+      <p class="eyebrow">体重</p>
+      <div class="row" style="margin-top:.5rem">
+        <input type="number" id="w-in" step="0.1" placeholder="${p.weight}" style="flex:1" aria-label="今日体重 kg">
+        <button class="btn mini" data-act="logWeight">记录</button>
+      </div>
+      ${weightChart()}
+    </div>`}
+    <button class="btn ghost" data-act="sosStart">我现在很想吃 —— 打开冲动急救</button>
+    <p class="disclaim">本应用不提供医疗诊断。体质内容源于中医传统理论，供参考，不替代医师意见。</p>
+  </div>`;
+}
+function weightChart(){
+  const ks=Object.keys(S.weights).sort();
+  if(ks.length<2) return `<p class="note" style="margin-top:.5rem">记录 2 天以上就会出现趋势线。</p>`;
+  const vs=ks.map(k=>S.weights[k]);
+  const mn=Math.min(...vs)-.5, mx=Math.max(...vs)+.5, W=300,H=80;
+  const pts=vs.map((v,i)=>[(i/(vs.length-1))*W, H-((v-mn)/(mx-mn))*H]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const area=line+` L${W} ${H} L0 ${H} Z`;
+  const last=pts[pts.length-1];
+  return `<svg class="chart" viewBox="-4 -6 ${W+8} ${H+16}" role="img"
+      aria-label="体重趋势，从 ${vs[0]} 到 ${vs[vs.length-1]} 公斤">
+    <path d="${area}" fill="var(--accent)" opacity=".1"></path>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"></path>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.5" fill="var(--accent)"></circle>
+    <text x="${W}" y="${H+12}" text-anchor="end" font-size="9" fill="var(--muted)"
+      font-family="var(--mono)">${vs[vs.length-1]} kg</text>
+    <text x="0" y="${H+12}" font-size="9" fill="var(--muted)" font-family="var(--mono)">${vs[0]} kg</text>
+  </svg>`;
+}
+
+/* ══ 记录 ══════════════════════════════════════════════ */
+let q="", slot="午餐", pendingPhoto=null;
+function viewLog(){
+  const cid=S.constitution.primary;
+  const hits=(q?FOODS.map((f,i)=>[f,i]).filter(([f])=>f[0].includes(q)):FOODS.map((f,i)=>[f,i]).slice(0,24));
+  return `<div class="stack">
+    <div>
+      <h2 style="font-size:1.3rem">记一餐</h2>
+      <p class="lede">搜索菜名，或先拍张照留底再选。识别的准确度取决于份量，能自己改最好。</p>
+    </div>
+    <div class="card">
+      <div class="seg" style="margin-bottom:.7rem">
+        ${["早餐","午餐","晚餐","加餐"].map(s=>`<button data-act="slot" data-v="${s}" aria-pressed="${slot===s}">${s}</button>`).join("")}
+      </div>
+      <label class="field" style="margin-bottom:.6rem"><b>拍照留底（可选）</b>
+        <input type="file" accept="image/*" capture="environment" id="cam" style="font-size:.82rem">
+        <span class="note">照片压缩后存在本机，用来回看当时吃了什么。自动识别菜名需要接入视觉模型 API，本原型未启用 —— 请在下面手动选择。</span>
+      </label>
+      ${pendingPhoto?`<div class="row" style="margin-bottom:.6rem">
+        <img src="${pendingPhoto}" alt="待记录的餐食照片" style="width:56px; height:56px; object-fit:cover;
+          border-radius:8px; border:1px solid var(--line)">
+        <span class="note" style="flex:1">照片已就绪，会附在你下一条记录上。</span>
+        <button class="btn ghost mini" data-act="dropPhoto">移除</button></div>`:""}
+      <label class="field" style="margin-bottom:0"><b>搜索食物</b>
+        <input type="text" id="q" value="${h(q)}" placeholder="例如 米饭 / 鸡腿 / 奶茶" autocomplete="off">
+      </label>
+    </div>
+    <div class="card">
+      <p class="eyebrow">${q?`“${h(q)}” 的结果`:"常见食物"}　共 ${hits.length} 项</p>
+      <div style="margin-top:.3rem">
+        ${hits.length?hits.map(([f,i])=>{
+          const a=cid?advise(f,cid):null;
+          return `<div class="foodrow">
+            <div class="nm">${h(f[0])} ${a?`<span class="tag ${a.lv}">${a.t}</span>`:""}
+              <small>${f[1]} kcal/100g · 蛋 ${f[2]} 碳 ${f[3]} 脂 ${f[4]}</small></div>
+            <input type="number" class="g" data-i="${i}" value="${f[7]}" style="width:4.6rem" aria-label="${h(f[0])} 克数">
+            <button class="btn mini" data-act="add" data-i="${i}">加</button>
+          </div>`;}).join("")
+        :`<p class="empty">没找到「${h(q)}」。本原型内置 ${FOODS.length} 种常见食物，正式版需要接入完整食物库。</p>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ══ 体质 ══════════════════════════════════════════════ */
+function viewBody(){
+  if(!S.constitution.done) return viewQuiz();
+  const sc=S.constitution.scores, cid=S.constitution.primary, T=TYPES[cid], p=S.profile;
+  const goods=FOODS.map((f,i)=>[f,i]).filter(([f])=>(advise(f,cid)||{}).lv==="good").slice(0,10);
+  const bads=FOODS.map((f,i)=>[f,i]).filter(([f])=>(advise(f,cid)||{}).lv==="avoid").slice(0,10);
+  return `<div class="stack">
+    <div><p class="eyebrow">体质分析报告</p><h2 style="font-size:1.5rem; margin-top:.25rem">${h(T.n)}</h2>
+      <p class="lede">${S.constitution.tend.length?`兼有 ${S.constitution.tend.map(t=>TYPES[t].n).join("、")} 倾向`:"无明显兼杂"}</p></div>
+    <div class="card">${radar(sc)}
+      <div style="margin-top:.6rem">
+        ${TID.map(t=>`<div class="scorerow"><span class="nm">${h(TYPES[t].n.replace("质",""))}</span>
+          <span class="tr"><i style="width:${Math.max(0,sc[t])}%; background:${t===cid?"var(--accent)":"var(--line-strong)"}"></i></span>
+          <span class="vl">${sc[t]}</span></div>`).join("")}
+      </div>
+      <p class="note" style="margin-top:.5rem">转化分 0–100。偏颇体质 ≥40 判定为「是」，30–39 为「倾向」。</p>
+    </div>
+    <div class="card">
+      <p class="eyebrow">体质画像</p>
+      <ul style="margin:.5rem 0 0; padding-left:1.1rem; font-size:.88rem">${T.feat.map(f=>`<li>${h(f)}</li>`).join("")}</ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">${p.mode==="loss"?"减脂方案":"增重方案"}</p>
+      <p style="font-size:.92rem; margin:.45rem 0 .7rem">${h(p.mode==="loss"?T.loss:T.gain)}</p>
+      <hr class="hr"><p class="note" style="margin-top:.6rem"><b>运动</b>　${h(T.ex)}</p>
+      <p class="note"><b>饮品</b>　${h(T.drink)}</p>
+    </div>
+    <div class="card">
+      <p class="eyebrow">宜食</p>
+      <p style="font-size:.88rem; margin:.4rem 0 .8rem">${goods.map(([f])=>h(f[0])).join("、")||"无特别推荐"}</p>
+      <p class="eyebrow">忌食 / 少食</p>
+      <p style="font-size:.88rem; margin:.4rem 0 0">${bads.map(([f])=>h(f[0])).join("、")||"无特别禁忌"}</p>
+      <p class="note" style="margin-top:.6rem">记录饮食时，每样食物会自动按你的体质标上 <span class="tag good">宜</span> <span class="tag limit">少</span> <span class="tag avoid">忌</span>。</p>
+    </div>
+    <button class="btn ghost" data-act="requiz">重新测评</button>
+    <p class="disclaim">本测评为《中医体质分类与判定》的缩短自评版本，条目经过精简，结果仅供自我了解，不等同于标准量表判定，也不构成诊断。体质会随生活方式改变，建议每 3 个月复测。</p>
+  </div>`;
+}
+function radar(sc){
+  const R=68, C=90, n=TID.length;
+  const pt=(i,r)=>{ const a=-Math.PI/2+i*2*Math.PI/n; return [C+Math.cos(a)*r, C+Math.sin(a)*r]; };
+  const ring=(f)=>TID.map((_,i)=>pt(i,R*f)).map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  const shape=TID.map((t,i)=>pt(i,R*Math.max(4,sc[t])/100)).map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  return `<svg class="chart" viewBox="0 0 180 190" role="img" aria-label="九种体质转化分雷达图">
+    ${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="var(--line)" stroke-width=".8"></polygon>`).join("")}
+    ${TID.map((_,i)=>{const p=pt(i,R);return `<line x1="${C}" y1="${C}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="var(--line)" stroke-width=".8"></line>`;}).join("")}
+    <polygon points="${shape}" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="1.6"></polygon>
+    ${TID.map((t,i)=>{const p=pt(i,R+13);return `<text x="${p[0].toFixed(1)}" y="${(p[1]+3).toFixed(1)}" font-size="8.5"
+      text-anchor="middle" fill="var(--muted)">${TYPES[t].n.replace("质","")}</text>`;}).join("")}
+  </svg>`;
+}
+function viewQuiz(){
+  const ans=S.quizAns, done=ans.filter(x=>x).length;
+  return `<div class="stack">
+    <div><p class="eyebrow">知体 · 第一步</p><h2 style="font-size:1.35rem">体质测评</h2>
+      <p class="lede">请按最近一年的通常情况回答，不用纠结个别例外。共 30 题。</p></div>
+    <div class="progress">
+      <div class="bar"><i style="width:${done/QUIZ.length*100}%"></i></div>
+      <p class="note" style="margin-top:.3rem">已答 <b class="num">${done}</b> / ${QUIZ.length}</p>
+    </div>
+    <div>${QUIZ.map((qq,i)=>`<div class="q">
+      <p><span class="qn">${String(i+1).padStart(2,"0")}</span>${h(qq[0])}</p>
+      <div class="likert">${LIKERT.map((l,v)=>`<button data-act="ans" data-i="${i}" data-v="${v+1}"
+        aria-pressed="${ans[i]===v+1}">${l}</button>`).join("")}</div></div>`).join("")}</div>
+    <button class="btn" data-act="finishQuiz" ${done<QUIZ.length?"disabled":""}>
+      ${done<QUIZ.length?`还有 ${QUIZ.length-done} 题`:"生成体质报告"}</button>
+  </div>`;
+}
+
+/* ══ 工具 ══════════════════════════════════════════════ */
+function viewTools(){
+  if(S.sos) return viewSOS();
+  const p=S.profile, home=loggedDays(S).reduce((n,k)=>n+S.logs[k].meals.filter(m=>m.home).length,0);
+  const saved=home*S.costPerMeal;
+  return `<div class="stack">
+    <div><h2 style="font-size:1.3rem">工具</h2></div>
+    <div class="card">
+      <h3 style="font-size:1rem">冲动急救</h3>
+      <p class="note" style="margin:.35rem 0 .8rem">食欲高峰通常 15–20 分钟自然消退。这个流程帮你把那段时间过去。</p>
+      <button class="btn" data-act="sosStart">我现在很想吃</button>
+      ${allImpulses(S).length?`<p class="note" style="margin-top:.6rem">已记录 <b class="num">${allImpulses(S).length}</b> 次冲动，其中 <b class="num">${allImpulses(S).filter(i=>i.resolved).length}</b> 次撑过去了。</p>`:""}
+    </div>
+    <div class="card">
+      <p class="eyebrow">${p.mode==="loss"?"低热量替代":"高营养密度加餐"}</p>
+      <div style="margin-top:.4rem">${SWAPS[p.mode].map(s=>`<div class="foodrow">
+        <div class="nm"><b>${h(s[0])}</b><small style="font-family:var(--sans); font-size:.78rem">${h(s[1])}</small></div>
+      </div>`).join("")}</div>
+    </div>
+    <div class="card">
+      <p class="eyebrow">徽章</p>
+      <div class="badges" style="margin-top:.6rem">
+        ${BADGES.map(b=>{const got=b[3](S);return `<div class="badge ${got?"got":""}">
+          <i>${b[1]}</i><span>${h(b[2])}</span></div>`;}).join("")}
+      </div>
+    </div>
+    <div class="card">
+      <p class="eyebrow">${p.mode==="loss"?"少点外卖省下的钱":"营养投入"}</p>
+      <div class="grid2" style="margin-top:.5rem">
+        <div class="stat"><span>自己做的餐数</span><b>${home}</b></div>
+        <div class="stat"><span>估算${p.mode==="loss"?"节省":"投入"}</span><b>¥${saved}</b></div>
+      </div>
+      <label class="field" style="margin:.7rem 0 0"><b>每餐外卖按多少钱算？</b>
+        <input type="number" id="cost" value="${S.costPerMeal}" min="5" max="200">
+        <span class="note">这是你自己设的假设值，不是实测数据 —— 改成你当地的真实价格才有意义。</span>
+      </label>
+      <button class="btn ghost mini" data-act="setCost" style="margin-top:.5rem">更新</button>
+    </div>
+  </div>`;
+}
+function viewSOS(){
+  const s=S.sos, p=S.profile;
+  if(s.step===1) return `<div class="stack">
+    <div><p class="eyebrow">冲动急救 · 1 / 3</p><h2 style="font-size:1.3rem">你是真的饿了吗？</h2></div>
+    <div class="card">
+      <p class="eyebrow">生理性饥饿</p>
+      <p class="note" style="margin:.3rem 0 .7rem">胃里空、咕咕叫、有点头晕乏力，什么都能吃，来得慢。</p>
+      <p class="eyebrow">情绪性饥饿</p>
+      <p class="note" style="margin:.3rem 0 0">突然发作，只想吃某一种特定的东西，常跟着一件事或一种情绪来。</p>
+    </div>
+    <button class="btn" data-act="sosHungry">是生理性饥饿 —— 那就去吃</button>
+    <button class="btn ghost" data-act="sosStep" data-v="2">像是情绪性的</button>
+  </div>`;
+
+  if(s.step===2) return `<div class="stack">
+    <div><p class="eyebrow">冲动急救 · 2 / 3</p><h2 style="font-size:1.3rem">现在是什么感觉？</h2>
+      <p class="lede">先认出来，冲动就已经小了一半。</p></div>
+    <div class="choices">${EMOTIONS.map((e,i)=>`<button class="choice" data-act="sosEmo" data-i="${i}"
+      aria-pressed="${s.emo===i}"><b>${h(e[0])}</b></button>`).join("")}</div>
+    ${s.emo!=null?`<div class="card"><p class="eyebrow">试试这个</p>
+      <p style="font-size:.9rem; margin:.4rem 0 0">${h(EMOTIONS[s.emo][1])}</p></div>
+      <button class="btn" data-act="sosStep" data-v="3">开始 15 分钟冷静期</button>`:""}
+  </div>`;
+
+  const left=Math.max(0, s.until-Date.now()), mm=Math.floor(left/60000), ss=Math.floor(left%60000/1000);
+  const frac=1-left/(15*60000), R=62, CIRC=2*Math.PI*R;
+  const over=left<=0;
+  return `<div class="stack">
+    <div><p class="eyebrow">冲动急救 · 3 / 3</p><h2 style="font-size:1.3rem">${over?"15 分钟过去了":"给它 15 分钟"}</h2></div>
+    <div class="card">
+      <div class="sos-ring">
+        <svg viewBox="0 0 160 160" style="width:180px; height:180px" role="img" aria-label="剩余 ${mm} 分 ${ss} 秒">
+          <circle cx="80" cy="80" r="${R}" fill="none" stroke="var(--line)" stroke-width="8"></circle>
+          <circle cx="80" cy="80" r="${R}" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="${CIRC.toFixed(1)}"
+            stroke-dashoffset="${(CIRC*(1-frac)).toFixed(1)}"
+            transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1s linear"></circle>
+          <text x="80" y="80" text-anchor="middle" dominant-baseline="central"
+            font-size="26" font-family="var(--mono)" font-weight="600" fill="var(--ink)">
+            ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}</text>
+        </svg>
+      </div>
+      ${s.emo!=null?`<p style="font-size:.9rem; margin:0">${h(EMOTIONS[s.emo][1])}</p>`:""}
+    </div>
+    ${over?`<div class="card flat"><p style="font-size:.92rem; margin:0">
+      冲动的高峰已经过了。现在再问一次自己：还想吃吗？<br>
+      如果还想 —— 那就吃，选个体面的选择，别惩罚自己。</p></div>`:""}
+    <div class="card">
+      <p class="eyebrow">如果还是想吃</p>
+      <div style="margin-top:.4rem">${SWAPS[p.mode].slice(0,3).map(x=>`<div class="foodrow">
+        <div class="nm"><b>${h(x[0])}</b><small style="font-family:var(--sans); font-size:.78rem">${h(x[1])}</small></div>
+      </div>`).join("")}</div>
+    </div>
+    <button class="btn" data-act="sosEnd" data-v="1">我撑过去了</button>
+    <button class="btn ghost" data-act="sosEnd" data-v="0">我还是吃了 —— 记录下来就好</button>
+    <p class="disclaim">吃了不算失败。记录下来，下次就多一点线索。</p>
+  </div>`;
+}
+
+/* ══ 我的 ══════════════════════════════════════════════ */
+function viewMe(){
+  const p=S.profile, b=bmi(p.weight,p.height);
+  return `<div class="stack">
+    <div><h2 style="font-size:1.3rem">我的</h2></div>
+    <div class="card">
+      <div class="grid2">
+        <div class="stat"><span>BMI</span><b>${b.toFixed(1)}</b></div>
+        <div class="stat"><span>基础代谢</span><b>${Math.round(bmr(p))}</b></div>
+        <div class="stat"><span>每日消耗</span><b>${Math.round(tdee(p))}</b></div>
+        <div class="stat"><span>目标热量</span><b>${S.screen.flagged?"—":targetKcal(p)}</b></div>
+      </div>
+      <p class="note" style="margin-top:.6rem">基础代谢用 Mifflin-St Jeor 公式估算，个体差异约 ±10%。真实消耗还受非运动活动（NEAT）影响，那部分的差别通常比基础代谢更大。</p>
+    </div>
+    <div class="card">
+      <label class="field"><b>调节方向</b>
+        <div class="seg">
+          <button data-act="mode2" data-v="loss" aria-pressed="${p.mode==="loss"}">减脂 🦋</button>
+          <button data-act="mode2" data-v="gain" aria-pressed="${p.mode==="gain"}">增重 🌱</button>
+        </div>
+        <span class="note">切换后，热量目标、食谱建议和成长形态都会跟着换。已有记录不会丢。</span>
+      </label>
+      <div class="grid2">
+        <label class="field"><b>当前体重 kg</b><input type="number" id="m-w" value="${p.weight}" step="0.1"></label>
+        <label class="field"><b>目标体重 kg</b><input type="number" id="m-t" value="${p.target}" step="0.1"></label>
+        <label class="field"><b>年龄</b><input type="number" id="m-age" value="${p.age}"></label>
+        <label class="field"><b>身高 cm</b><input type="number" id="m-h" value="${p.height}"></label>
+      </div>
+      <label class="field"><b>活动量</b>
+        <select id="m-act">
+          <option value="1.2" ${p.activity==1.2?"selected":""}>几乎不动</option>
+          <option value="1.375" ${p.activity==1.375?"selected":""}>轻度活动</option>
+          <option value="1.55" ${p.activity==1.55?"selected":""}>中度活动</option>
+          <option value="1.725" ${p.activity==1.725?"selected":""}>高强度</option>
+        </select>
+      </label>
+      <button class="btn" data-act="saveMe">保存</button>
+    </div>
+    <div class="card">
+      <label class="field" style="margin:0"><b>主题</b>
+        <div class="seg">
+          <button data-act="skin" data-v="balance" aria-pressed="${S.skin==="balance"}">平衡</button>
+          <button data-act="skin" data-v="die" aria-pressed="${S.skin==="die"}">蝶变</button>
+          <button data-act="skin" data-v="yang" aria-pressed="${S.skin==="yang"}">养生</button>
+        </div>
+        <span class="note">「养生」会放大字号，适合看小字费劲的时候。深浅色跟随系统。</span>
+      </label>
+    </div>
+    <div class="card">
+      <p class="eyebrow">热量计数</p>
+      <p class="note" style="margin:.35rem 0 .7rem">
+        ${S.screen.flagged?"当前已关闭。你之前的自评提示，盯数字可能对你有害。":"当前已开启。如果你发现自己开始被数字困住，可以随时关掉。"}</p>
+      <button class="btn ghost mini" data-act="toggleNumbers">${S.screen.flagged?"开启热量计数":"关闭热量计数"}</button>
+    </div>
+    <div class="card">
+      <p class="eyebrow">数据</p>
+      <p class="note" style="margin:.35rem 0 .7rem">全部数据只存在这台设备的浏览器里，没有服务器，也不上传。清掉浏览器数据就会消失。</p>
+      <button class="btn ghost mini" data-act="export">导出 JSON</button>
+      <button class="btn ghost mini" data-act="reset" style="margin-top:.5rem; color:var(--avoid)">清空全部数据</button>
+    </div>
+    <p class="disclaim">
+      BALANCE 是一个原型，用于验证「双向调节 + 中医体质 + 认知重构」的产品设想。<br><br>
+      <b>它不是医疗产品。</b>体质判定来自缩短版自评问卷，饮食宜忌基于中医传统理论的食性归类，均未经临床验证。热量数值为公式估算。如你有慢性病、进食障碍史、正在服药、怀孕或哺乳，请以医师意见为准。
+    </p>
+  </div>`;
+}
+
+/* ══ 外壳 ══════════════════════════════════════════════ */
+const TABS=[["today","☰","今日"],["log","＋","记录"],["body","☯","体质"],["tools","◇","工具"],["me","●","我的"]];
+function render(){
+  document.documentElement.dataset.skin=S.skin;
+  const onboarding = !S.onboarded;
+  const flagged = S.screen.done && S.screen.flagged && !S.onboarded;
+
+  if(onboarding){
+    $("topbar").style.display="none"; $("tabs").style.display="none";
+    $("main").innerHTML = flagged? viewFlagged() : viewOnboard();
+    $("main").style.paddingBottom="2rem";
+    return;
+  }
+  $("topbar").style.display=""; $("tabs").style.display=""; $("main").style.paddingBottom="";
+  const st=stageOf(S.profile.mode, daysSinceStart());
+  $("topbar").innerHTML=`
+    <div class="avatar" aria-hidden="true">${st[1]}</div>
+    <div class="topmeta"><b>${h(st[2])}</b><span>连续 ${streak(S)} 天 · ${h(currentTerm(new Date())[2])}</span></div>
+    <span class="chip on">${S.profile.mode==="loss"?"减脂":"增重"}</span>
+    ${S.constitution.done?`<span class="chip">${h(TYPES[S.constitution.primary].n)}</span>`:""}`;
+  $("tabs").innerHTML=TABS.map(t=>`<button data-act="tab" data-v="${t[0]}"
+    ${S.tab===t[0]?'aria-current="page"':""}><i>${t[1]}</i>${t[2]}</button>`).join("");
+  const V={today:viewToday, log:viewLog, body:viewBody, tools:viewTools, me:viewMe};
+  $("main").innerHTML=(V[S.tab]||viewToday)();
+  if(S.tab==="log"){ const el=$("q"); if(el){ el.oninput=e=>{ q=e.target.value; renderSoft(); }; } }
+}
+function renderSoft(){
+  const V={today:viewToday, log:viewLog, body:viewBody, tools:viewTools, me:viewMe};
+  const el=$("q"), pos=el?el.selectionStart:null;
+  $("main").innerHTML=(V[S.tab]||viewToday)();
+  if(S.tab==="log"){ const n=$("q"); if(n){ n.oninput=e=>{ q=e.target.value; renderSoft(); };
+    n.focus(); if(pos!=null) n.setSelectionRange(pos,pos); } }
+}
+
+/* ══ 交互 ══════════════════════════════════════════════ */
+document.addEventListener("click", (e)=>{
+  const t=e.target.closest("[data-act]"); if(!t) return;
+  const a=t.dataset.act, v=t.dataset.v, i=+t.dataset.i;
+
+  switch(a){
+    case "mode": S.profile.mode=v; save(); render(); break;
+    case "mode2": S.profile.mode=v; save(); render(); break;
+    case "step": S.step=+v; save(); render(); break;
+    case "sex": S.profile.sex=v; save(); render(); break;
+    case "skin": S.skin=v; save(); render(); break;
+    case "tab": go(v); break;
+    case "slot": slot=v; renderSoft(); break;
+
+    case "saveProfile": {
+      const p=S.profile;
+      p.age=clamp(+$("f-age").value,14,90); p.height=clamp(+$("f-h").value,120,220);
+      p.weight=clamp(+$("f-w").value,30,250); p.target=clamp(+$("f-t").value,30,250);
+      p.activity=+$("f-act").value;
+      S.step=2; save(); render(); break;
+    }
+    case "scoff": { S.screen.a=S.screen.a||[]; S.screen.a[i]=+v; save(); render(); break; }
+    case "scoffDone": {
+      const arr=S.screen.a||[];
+      if(arr.filter(x=>x!=null).length<5){ alert("还有问题没回答。"); break; }
+      S.screen.done=true; S.screen.yes=arr.filter(x=>x===1).length;
+      S.screen.flagged=S.screen.yes>=2;
+      if(!S.screen.flagged){ S.onboarded=true; S.profile.start=today(); }
+      save(); render(); break;
+    }
+    case "enterSafe": S.onboarded=true; S.profile.start=today(); save(); render(); break;
+    case "unflag": S.screen.flagged=false; S.onboarded=true; S.profile.start=today(); save(); render(); break;
+    case "toggleNumbers": S.screen.flagged=!S.screen.flagged; save(); render(); break;
+
+    case "ans": S.quizAns[i]=+v; save(); renderSoft(); break;
+    case "finishQuiz": {
+      const sc=scoreQuiz(S.quizAns), j=judge(sc);
+      S.constitution={done:true, scores:sc, primary:j.primary, tend:j.tend};
+      save(); render(); window.scrollTo(0,0); break;
+    }
+    case "requiz": S.quizAns=[]; S.constitution={done:false,scores:{},primary:null,tend:[]}; save(); render(); break;
+    case "dropPhoto": pendingPhoto=null; renderSoft(); break;
+
+    case "add": {
+      const f=FOODS[i], g=clamp(+document.querySelector(`.g[data-i="${i}"]`).value,1,2000);
+      const k=g/100;
+      const rec={fi:i, slot, g, home:true, kcal:f[1]*k, p:f[2]*k, c:f[3]*k, f:f[4]*k};
+      if(pendingPhoto){ rec.photo=pendingPhoto; pendingPhoto=null; }
+      dayLog().meals.push(rec);
+      save(); go("today"); window.scrollTo(0,0); break;
+    }
+    case "delMeal": dayLog().meals.splice(i,1); save(); render(); break;
+    case "logWeight": {
+      const w=+$("w-in").value; if(!w){ break; }
+      S.weights[today()]=clamp(w,25,300); S.profile.weight=clamp(w,25,300); save(); render(); break;
+    }
+    case "setCost": S.costPerMeal=clamp(+$("cost").value,5,500); save(); render(); break;
+    case "saveMe": {
+      const p=S.profile;
+      p.weight=clamp(+$("m-w").value,30,250); p.target=clamp(+$("m-t").value,30,250);
+      p.age=clamp(+$("m-age").value,14,90); p.height=clamp(+$("m-h").value,120,220);
+      p.activity=+$("m-act").value; save(); render(); break;
+    }
+    case "export": {
+      const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+      const u=URL.createObjectURL(blob), l=document.createElement("a");
+      l.href=u; l.download="balance-data.json"; l.click(); URL.revokeObjectURL(u); break;
+    }
+    case "reset": if(confirm("清空全部数据？无法恢复。")){ S=structuredClone(BLANK); save(); render(); } break;
+
+    case "sosStart": S.sos={step:1, emo:null}; S.tab="tools"; save(); render(); window.scrollTo(0,0); break;
+    case "sosStep": {
+      S.sos.step=+v;
+      if(+v===3){ S.sos.until=Date.now()+15*60000; startTick(); }
+      save(); render(); window.scrollTo(0,0); break;
+    }
+    case "sosEmo": S.sos.emo=i; save(); render(); break;
+    case "sosHungry": {
+      dayLog().impulses.push({t:Date.now(), physical:true, resolved:true});
+      S.sos=null; save(); go("log"); break;
+    }
+    case "sosEnd": {
+      dayLog().impulses.push({t:Date.now(), emo:S.sos.emo, resolved:v==="1"});
+      S.sos=null; stopTick(); save(); render(); window.scrollTo(0,0); break;
+    }
+  }
+});
+function clamp(n,a,b){ n=+n; if(!isFinite(n)) return a; return Math.min(b,Math.max(a,n)); }
+
+let tick=null;
+function startTick(){ stopTick(); tick=setInterval(()=>{ if(S.sos&&S.sos.step===3) render(); else stopTick(); },1000); }
+function stopTick(){ if(tick){ clearInterval(tick); tick=null; } }
+
+/* 照片压到最长边 320px 再转 JPEG —— 原图 base64 会几张就撑爆 localStorage。 */
+document.addEventListener("change",(e)=>{
+  if(e.target.id!=="cam" || !e.target.files || !e.target.files[0]) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const m=320, sc=Math.min(1, m/Math.max(img.width,img.height));
+      const cv=document.createElement("canvas");
+      cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      pendingPhoto=cv.toDataURL("image/jpeg",.7);
+      renderSoft();
+    };
+    img.onerror=()=>alert("这张图片读不出来，换一张试试。");
+    img.src=r.result;
+  };
+  r.readAsDataURL(e.target.files[0]);
+});
+
+if(S.sos&&S.sos.step===3) startTick();
+render();
+</script>
+<!--APP-END-->
+</body>
+</html>
