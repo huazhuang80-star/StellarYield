@@ -1,219 +1,15 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   西宁自建房 · 实时渲染与日照模拟
-   WebGL2 · 阴影贴图 · 程序化材质 · 真实太阳轨迹
-   坐标系：X = 东，Y = 北（地块纵深方向），Z = 上。临路面朝南。
-   ═══════════════════════════════════════════════════════════════════════ */
-(function(){
-'use strict';
-const cv = document.getElementById('c3d');
-const gl = cv.getContext('webgl2', {antialias:true, alpha:false, powerPreference:'high-performance'});
-if(!gl){
-  const w = cv.parentElement;
-  w.innerHTML = '<div style="padding:48px 24px;text-align:center;font-family:var(--sans);color:var(--muted)">'
-    + '<p style="font-size:1.1rem;color:var(--ink);margin-bottom:8px">此设备不支持 WebGL2</p>'
-    + '<p style="font-size:.9rem">实时渲染需要 WebGL2。请用较新的 Chrome、Safari 或 Edge 打开本页；'
-    + '下方的平面图、立面图与剖面图不受影响，可正常查看。</p></div>';
-  return;
-}
-
-/* ───────────────────────── 1. 数学 ───────────────────────── */
-const M4 = {
-  mul(a,b,o){ o=o||new Float32Array(16);
-    for(let c=0;c<4;c++) for(let r=0;r<4;r++){ let s=0;
-      for(let k=0;k<4;k++) s += a[k*4+r]*b[c*4+k]; o[c*4+r]=s; }
-    return o; },
-  persp(fovy,asp,n,f){ const t=1/Math.tan(fovy/2), o=new Float32Array(16);
-    o[0]=t/asp; o[5]=t; o[10]=(f+n)/(n-f); o[11]=-1; o[14]=2*f*n/(n-f); return o; },
-  ortho(l,r,b,t,n,f){ const o=new Float32Array(16);
-    o[0]=2/(r-l); o[5]=2/(t-b); o[10]=-2/(f-n); o[15]=1;
-    o[12]=-(r+l)/(r-l); o[13]=-(t+b)/(t-b); o[14]=-(f+n)/(f-n); return o; },
-  look(e,c,u){ const z=V.n(V.s(e,c)), x=V.n(V.c(u,z)), y=V.c(z,x), o=new Float32Array(16);
-    o[0]=x[0];o[1]=y[0];o[2]=z[0];o[3]=0; o[4]=x[1];o[5]=y[1];o[6]=z[1];o[7]=0;
-    o[8]=x[2];o[9]=y[2];o[10]=z[2];o[11]=0;
-    o[12]=-V.d(x,e); o[13]=-V.d(y,e); o[14]=-V.d(z,e); o[15]=1; return o; }
-};
-const V = {
-  s:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
-  a:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
-  m:(a,k)=>[a[0]*k,a[1]*k,a[2]*k],
-  d:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
-  c:(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
-  n(a){ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; },
-  len:a=>Math.hypot(a[0],a[1],a[2])
-};
-
-/* ───────────────────────── 2. 材质 ─────────────────────────
-   kind: 0 抹灰 1 金属瓦 2 地砖 3 草 4 水 5 木 6 玻璃 7 混凝土
-         8 清水砖 9 泥土 10 泳池砖 11 陶瓷洁具 12 织物 13 树叶
-         14 沥青 15 深色金属 16 石材 17 绿篱 18 布料 19 自发光       */
-const MATS = [];
-function mat(name, rgb, rough, kind, opts){
-  MATS.push({name, c:[rgb[0]/255,rgb[1]/255,rgb[2]/255], r:rough, k:kind,
-             emi:(opts&&opts.emi)||0, alpha:(opts&&opts.alpha)!==undefined?opts.alpha:1});
-  return MATS.length-1;
-}
-const M = {
-  wallOut:   mat('外墙涂料',   [238,235,226], .92, 0),
-  wallIn:    mat('内墙涂料',   [244,242,236], .94, 0),
-  wallAccent:mat('深灰饰面',   [ 92, 94, 92], .85, 0),
-  plinth:    mat('勒脚',       [122,116,105], .90, 7),
-  roofMetal: mat('隔热彩钢瓦', [ 66, 68, 70], .58, 1),
-  roofTile:  mat('仿瓦屋面',   [128, 74, 56], .78, 1),
-  fascia:    mat('檐口收边',   [ 58, 60, 60], .70, 15),
-  slab:      mat('楼板',       [178,174,164], .93, 7),
-  ceil:      mat('吊顶',       [246,245,240], .95, 0),
-  floorTile: mat('地砖',       [214,208,196], .35, 2),
-  wetTile:   mat('卫浴墙砖',   [222,226,226], .30, 2),
-  poolTile:  mat('泳池砖',     [ 86,170,190], .25, 10),
-  woodDk:    mat('深木',       [104, 70, 44], .72, 5),
-  woodLt:    mat('浅木',       [176,132, 84], .70, 5),
-  louver:    mat('仿木格栅',   [162,114, 70], .66, 5),
-  glass:     mat('玻璃',       [130,166,178], .06, 6, {alpha:.30}),
-  metalDk:   mat('深色金属',   [ 74, 76, 78], .42, 15),
-  steel:     mat('不锈钢',     [178,182,186], .28, 15),
-  concrete:  mat('混凝土铺装', [152,148,139], .88, 7),
-  brick:     mat('清水砖墙',   [166,116, 92], .90, 8),
-  grass:     mat('草坪',       [ 74,104, 46], .96, 3),
-  hedge:     mat('绿篱',       [ 46, 78, 38], .95,17),
-  foliage:   mat('树冠',       [ 54, 88, 42], .94,13),
-  foliage2:  mat('树冠浅',     [ 72,108, 50], .94,13),
-  banana:    mat('芭蕉叶',     [ 68,116, 50], .92,13),
-  bark:      mat('树皮',       [ 92, 70, 50], .95, 5),
-  soil:      mat('营养土',     [ 96, 74, 52], .97, 9),
-  veg:       mat('菜苗',       [ 78,124, 50], .93,13),
-  water:     mat('水面',       [ 26,124,156], .05, 4, {alpha:.90}),
-  pondWater: mat('鱼池水',     [ 26, 88,108], .06, 4, {alpha:.90}),
-  rock:      mat('置石',       [126,124,118], .92,16),
-  asphalt:   mat('沥青路',     [ 54, 54, 55], .93,14),
-  ceramic:   mat('洁具陶瓷',   [248,248,246], .18,11),
-  fabric:    mat('布艺',       [148,142,132], .95,12),
-  fabricW:   mat('床品',       [238,236,230], .94,12),
-  cloth:     mat('晾晒衣物',   [206,214,222], .95,18),
-  carBody:   mat('车身',       [ 82, 96,112], .22,15),
-  carGlass:  mat('车窗',       [ 44, 52, 60], .10, 6, {alpha:.55}),
-  tyre:      mat('轮胎',       [ 34, 34, 36], .95,15),
-  lamp:      mat('灯具',       [255,236,196], .40,19, {emi:1}),
-  mesh:      mat('镀锌网',     [140,146,138], .70,15),
-  screen:    mat('纱窗',       [ 96,104,100], .80,15, {alpha:.55}),
-  mirror:    mat('镜面',       [196,206,210], .04, 6, {alpha:.55}),
-  panel:     mat('太阳能板',   [ 38, 44, 58], .20,15),
-  tank:      mat('水箱',       [186,192,198], .35,15),
-  tomato:    mat('番茄果',     [186, 52, 40], .55,11),
-  eggplant:  mat('茄子果',     [ 84, 50,104], .45,11),
-  onionB:    mat('洋葱鳞茎',   [190,152, 98], .80, 9),
-  radishR:   mat('萝卜',       [204, 78, 86], .70,11),
-  lotusPad:  mat('荷叶',       [ 72,118, 58], .88,13),
-  lotusFl:   mat('荷花',       [234,172,198], .78,12),
-  frond:     mat('椰叶',       [ 74,120, 56], .92,13),
-  ringFloat: mat('泳圈',       [232,148, 52], .38,11),
-  gravel:    mat('碎石',       [150,144,134], .95, 7),
-  sandy:     mat('砂垫',       [196,184,158], .95, 9),
-  rattan:    mat('藤编',       [178,142, 94], .82, 5),
-  duckW:     mat('鸭',         [238,238,232], .90,12),
-  hen:       mat('鸡',         [152, 98, 58], .90,12),
-  wire:      mat('镀锌笼网',   [186,190,184], .55,15, {alpha:.34})
-};
-
-/* ───────────────────────── 3. 网格构建 ───────────────────────── */
-const GROUPS = {};
-let G = null;
-function group(name){ G = GROUPS[name] || (GROUPS[name] = {v:[], i:[], name}); return G; }
-function vert(p,n,m){ const g=G; g.v.push(p[0],p[1],p[2], n[0],n[1],n[2], m); return g.v.length/7-1; }
-function tri(a,b,c){ G.i.push(a,b,c); }
-function face(p0,p1,p2,p3,m,flip){
-  let n = V.n(V.c(V.s(p1,p0), V.s(p2,p0)));
-  if(flip) n = V.m(n,-1);
-  const a=vert(p0,n,m), b=vert(p1,n,m), c=vert(p2,n,m), d=vert(p3,n,m);
-  if(flip){ tri(a,c,b); tri(a,d,c); } else { tri(a,b,c); tri(a,c,d); }
-}
-function tri3(p0,p1,p2,m,flip){
-  let n = V.n(V.c(V.s(p1,p0), V.s(p2,p0)));
-  if(flip) n = V.m(n,-1);
-  const a=vert(p0,n,m), b=vert(p1,n,m), c=vert(p2,n,m);
-  if(flip) tri(a,c,b); else tri(a,b,c);
-}
-/* 轴对齐盒体。skip: 'top','bot','n','s','e','w' 的组合，用于省略看不见的面 */
-function box(x0,y0,z0,x1,y1,z1,m,skip){
-  if(x1<x0){const t=x0;x0=x1;x1=t;} if(y1<y0){const t=y0;y0=y1;y1=t;} if(z1<z0){const t=z0;z0=z1;z1=t;}
-  skip = skip||'';
-  const A=[x0,y0,z0],B=[x1,y0,z0],C=[x1,y1,z0],D=[x0,y1,z0];
-  const E=[x0,y0,z1],F=[x1,y0,z1],H=[x1,y1,z1],I=[x0,y1,z1];
-  if(skip.indexOf('top')<0) face(E,F,H,I,m);
-  if(skip.indexOf('bot')<0) face(A,D,C,B,m);
-  if(skip.indexOf('s')<0)   face(A,B,F,E,m);
-  if(skip.indexOf('n')<0)   face(C,D,I,H,m);
-  if(skip.indexOf('w')<0)   face(D,A,E,I,m);
-  if(skip.indexOf('e')<0)   face(B,C,H,F,m);
-}
-/* 竖直棱柱／圆柱／圆台 */
-function cyl(cx,cy,z0,z1,r0,r1,seg,m,cap){
-  const lo=[],hi=[];
-  for(let i=0;i<seg;i++){ const a=i/seg*Math.PI*2;
-    lo.push([cx+Math.cos(a)*r0, cy+Math.sin(a)*r0, z0]);
-    hi.push([cx+Math.cos(a)*r1, cy+Math.sin(a)*r1, z1]); }
-  for(let i=0;i<seg;i++){ const j=(i+1)%seg; face(lo[i],lo[j],hi[j],hi[i],m); }
-  if(cap!==false){
-    const ct=[cx,cy,z1]; for(let i=0;i<seg;i++){ const j=(i+1)%seg; tri3(hi[i],hi[j],ct,m); }
-    const cb=[cx,cy,z0]; for(let i=0;i<seg;i++){ const j=(i+1)%seg; tri3(lo[j],lo[i],cb,m); }
-  }
-}
-/* 球／椭球（树冠、软垫） */
-function ball(cx,cy,cz,rx,ry,rz,seg,m){
-  const ring=seg, stack=Math.max(3,seg>>1), pts=[];
-  for(let s=0;s<=stack;s++){ const ph=s/stack*Math.PI, row=[];
-    for(let i=0;i<=ring;i++){ const th=i/ring*Math.PI*2;
-      row.push([cx+Math.sin(ph)*Math.cos(th)*rx, cy+Math.sin(ph)*Math.sin(th)*ry, cz+Math.cos(ph)*rz]); }
-    pts.push(row); }
-  for(let s=0;s<stack;s++) for(let i=0;i<ring;i++){
-    const a=pts[s][i],b=pts[s][i+1],c=pts[s+1][i+1],d=pts[s+1][i];
-    const na=V.n(V.s(a,[cx,cy,cz])), nb=V.n(V.s(b,[cx,cy,cz])),
-          nc=V.n(V.s(c,[cx,cy,cz])), nd=V.n(V.s(d,[cx,cy,cz]));
-    const ia=vert(a,na,m), ib=vert(b,nb,m), ic=vert(c,nc,m), id=vert(d,nd,m);
-    tri(ia,ib,ic); tri(ia,ic,id);
-  }
-}
-/* 带洞口的墙：沿 X 或 Y 展开，openings=[{a,b,z0,z1}] a/b 为沿墙长度方向坐标 */
-function wallOpen(dir, u0,u1, v0,v1, z0,z1, m, ops){
-  ops = (ops||[]).slice().sort((p,q)=>p.a-q.a);
-  const seg = (a,b,c,d)=>{ if(b-a<0.001||d-c<0.001) return;
-    if(dir==='x') box(a,v0,c,b,v1,d,m); else box(v0,a,c,v1,b,d,m); };
-  let cur = u0;
-  for(const o of ops){
-    seg(cur, o.a, z0, z1);              // 洞口之间的墙垛
-    seg(o.a, o.b, z0, o.z0);            // 窗下墙
-    seg(o.a, o.b, o.z1, z1);            // 窗上过梁
-    cur = o.b;
-  }
-  seg(cur, u1, z0, z1);
-}
-
 /* ───────────────────────── 4. 尺寸定义 ─────────────────────────
-   第三版布局（房子北移，庭院全部在前院）
-   site x∈[0,10]，y∈[0,32]，镇道在 y=0 一侧（南）。局部 lx/ly 以主楼左前外角为原点。
-
-   南 → 北 五段：
-     y  0.00 – 14.30   前院 14.30 m   停车 → 菜园果树 → 草坪 → 泳池凉亭
-     y 14.30 – 15.50   门廊挑檐 1.20 m
-     y 15.50 – 25.10   主楼两层 9.60 m
-     y 25.10 – 29.00   后附房单层 3.90 m（厨房 · 洗衣 · 工具房）
-     y 29.00 – 32.00   后端服务带 3.00 m（禽舍 · 晾衣 · 堆肥 · 化粪池 · 空调外机）
-
-   气候依据（西宁 11.31°N）：地块逼得 13.5 m 长立面朝正东正西，是热带最差朝向，
-   因此把四个卫生间 + 衣帽间全部排在西侧 lx 0.15–1.75 当西晒热缓冲，
-   楼梯与走廊排在东侧当东晒热缓冲，卧室夹在中间。 */
+   房屋加宽至 8.80 m（两侧通道 0.65 / 0.55），腾出 1.05 m 专用走廊。
+   site x∈[0,10]，y∈[0,32]，路在 y=0 一侧（南）。局部 lx/ly 以主楼左前外角为原点。 */
 const D = {
   plotW:10, plotL:32,
-  hx0:0.65, hx1:9.45,        // 主楼左右（宽 8.80，西通道 0.65 / 东通道 0.55）
-  hy0:15.50, hy1:25.10,      // 主楼前后（深 9.60）
-  ay0:25.10, ay1:29.00,      // 后附房（深 3.90）
-  svc0:29.00, svc1:32.00,    // 后端服务带（深 3.00）
+  hx0:0.65, hx1:9.45,        // 主楼左右（宽 8.80）
+  hy0:5.60, hy1:15.20,       // 主楼前后（深 9.60）
+  ay0:15.20, ay1:19.10,      // 后附房（深 3.90）
   W:0.15, P:0.10,
   FF:0.45, F1:3.75, F2:7.05, RG:8.10,
   ceil1:3.55, ceil2:6.85, annexTop:3.55,
-  porch:1.20,                // 门廊进深
-  /* Ø2.0 m 中柱式旋转楼梯：净直径 2.00，中柱 Ø0.14，
-     16 级 × 每级 22.5° = 360°，踏面外沿宽 0.55，级高 (3.75-0.45)/16 = 0.206 */
-  spCx:7.55, spCy:17.75, spR:1.00, spN:16, spCol:0.07
+  porch:1.20                 // 门廊进深
 };
 const S = (lx,ly)=>[D.hx0+lx, D.hy0+ly];
 
@@ -574,71 +370,45 @@ doorway('y', Y0+7.20,Y0+8.00, D.F1,D.F1+2.10, X0+1.75,X0+1.85, -1, {ajar:0.72});
 doorway('y', Y0+6.25,Y0+7.05, D.F1,D.F1+2.10, X0+6.40,X0+6.50, -1, {ajar:0.85}); // 起居·书房
 doorway('y', Y0+8.20,Y0+9.00, D.F1,D.F1+2.10, X0+6.40,X0+6.50, -1, {open:1});    // 后阳台
 
-/* ───────────────────────── 10. 旋转楼梯（Ø2.0 m 中柱式钢结构） ─────────────────────────
-   为什么用旋转梯：U 型梯占 7.7 m²，Ø2.0 旋转梯只占 3.1 m²，省下 4.6 m² 全部还给卧室。
-   代价（已如实告知业主）：踏面外沿 0.55 m、内沿 0.11 m，搬大件家具困难，老人上下不便，
-   所以一楼保留一间带无障碍卫生间的适老卧室，老人日常完全不用碰这部楼梯。
-
-   几何：16 级 × 22.5° = 360°（一整圈），级高 (3.75−0.45)/16 = 0.206 m，
-   净直径 2.00 m，中柱 Ø0.14 m 钢管，踏板 40 mm 硬木，外沿栏杆高 0.95 m。
-   走 2×0.206+0.55×2π×(2/3)/16… 直接按外沿走步 0.26 m 校核：舒适。 */
+/* ───────────────────────── 10. 楼梯（U 型，落在走廊东侧） ───────────────────────── */
 group('part1');
 (function(){
-  const cx=D.spCx, cy=D.spCy, R=D.spR, n=D.spN, rc=D.spCol;
-  const rise=(D.F1-D.FF)/n, a0=-Math.PI/2;      // 起步朝南（对着玄关）
-  const dA=2*Math.PI/n;
-  // 中柱
-  cyl(cx,cy,0, D.F1+1.05, rc,rc, 16, M.steel);
-  for(let i=0;i<n;i++){
-    const z=D.FF+i*rise, a1=a0+i*dA, a2=a1+dA*0.92;
-    // 扇形踏板：内沿贴中柱，外沿到 R
-    const seg=6;
-    for(let k=0;k<seg;k++){
-      const b1=a1+(a2-a1)*k/seg, b2=a1+(a2-a1)*(k+1)/seg;
-      const p=(r,a)=>[cx+r*Math.cos(a), cy+r*Math.sin(a)];
-      const i1=p(rc,b1), i2=p(rc,b2), o1=p(R,b1), o2=p(R,b2);
-      const zt=z+0.04;
-      face([i1[0],i1[1],zt],[o1[0],o1[1],zt],[o2[0],o2[1],zt],[i2[0],i2[1],zt], M.woodDk);      // 面
-      face([i2[0],i2[1],z],[o2[0],o2[1],z],[o1[0],o1[1],z],[i1[0],i1[1],z], M.metalDk);         // 底
-      face([o1[0],o1[1],z],[o1[0],o1[1],zt],[o2[0],o2[1],zt],[o2[0],o2[1],z], M.woodDk);        // 外沿
-      if(k===0)     face([i1[0],i1[1],z],[o1[0],o1[1],z],[o1[0],o1[1],zt],[i1[0],i1[1],zt], M.woodDk);
-      if(k===seg-1) face([o2[0],o2[1],z],[i2[0],i2[1],z],[i2[0],i2[1],zt],[o2[0],o2[1],zt], M.woodDk);
-    }
-    // 外沿栏杆立柱 + 扶手段
-    const am=(a1+a2)/2, px=cx+(R-0.045)*Math.cos(am), py=cy+(R-0.045)*Math.sin(am);
-    cyl(px,py, z+0.04, z+0.95, 0.014,0.014, 6, M.metalDk, false);
-    const h1=[cx+(R-0.045)*Math.cos(a1), cy+(R-0.045)*Math.sin(a1), z+0.95],
-          h2=[cx+(R-0.045)*Math.cos(a1+dA), cy+(R-0.045)*Math.sin(a1+dA), z+rise+0.95];
-    // 螺旋扶手：斜置薄带，两面都发一次，避免从内侧看穿
-    const w=0.028;
-    const q0=[h1[0]-w,h1[1]-w,h1[2]], q1=[h2[0]-w,h2[1]-w,h2[2]],
-          q2=[h2[0]+w,h2[1]+w,h2[2]+0.05], q3=[h1[0]+w,h1[1]+w,h1[2]+0.05];
-    face(q0,q1,q2,q3, M.woodLt);
-    face(q0,q1,q2,q3, M.woodLt, true);
-  }
-  // 二层到达平台（补齐最后一级到楼板）
+  const n=18, rise=(D.F1-D.FF)/n, go=0.26;
+  const ax0=X0+7.60, ax1=X0+8.60, bx0=X0+6.55, bx1=X0+7.50;
+  const yA=Y0+1.90, yB=Y0+5.30, land=D.FF+9*rise;
+  for(let i=0;i<9;i++){ const z=D.FF+i*rise, y=yA+i*go;
+    box(ax0,y,z, ax1,y+go+0.03,z+0.045, M.floorTile);
+    box(ax0,y,z-rise+0.045, ax1,y+0.035,z, M.wallIn); }
+  box(bx0,yA+9*go,land-0.14, ax1,yB,land, M.slab);
+  box(bx0,yA+9*go,land, ax1,yB,land+0.02, M.floorTile);
+  for(let i=0;i<9;i++){ const z=land+i*rise, y=yB-i*go;
+    box(bx0,y-go-0.03,z, bx1,y,z+0.045, M.floorTile);
+    box(bx0,y-0.035,z-rise+0.045, bx1,y,z, M.wallIn); }
+  const rail=(x,y0,y1,z0,z1)=>{
+    box(x-0.025,y0,z0+0.90, x+0.025,y1,z1+0.98, M.woodLt);
+    const n2=Math.max(2,Math.round((y1-y0)/0.16));
+    for(let i=0;i<=n2;i++){ const t=i/n2, y=y0+(y1-y0)*t, z=z0+(z1-z0)*t;
+      box(x-0.014,y,z, x+0.014,y+0.028,z+0.92, M.metalDk); } };
+  rail(ax0-0.03, yA, yA+9*go, D.FF, land);
+  /* B 梯段栏杆：只沿梯井那一段（y 8.56–9.84），且高度随梯段上升——
+     原来写成 land→D.F1 是反的，而且一路铺到 yB，把折返平台横着切成两半，走不过去 */
+  const yBs = yA+9*go;
+  rail(bx1+0.03, yB-9*go, yBs, D.F1, land+((yB-yBs)/go)*rise);
+  box(bx0-0.02,yA+9*go+0.03,land+0.90, ax0+0.02,yA+9*go+0.09,land+0.98, M.woodLt);
+  for(let x=bx0;x<ax0;x+=0.16) box(x,yA+9*go+0.04,land, x+0.028,yA+9*go+0.08,land+0.90, M.metalDk);
+  // 靠墙扶手（适老化）
+  box(X0+8.58,yA,D.FF+0.92, X0+8.63,yA+9*go,land+0.92, M.woodLt);
   group('part2');
-  // 梯井护栏：沿开洞边一圈，只在到达口留缺（到达口朝南，即 a0 方向）
-  const RG2=R+0.12;
-  for(let i=0;i<26;i++){
-    const a=a0+0.55 + (2*Math.PI-1.10)*i/25;
-    const px=cx+RG2*Math.cos(a), py=cy+RG2*Math.sin(a);
-    cyl(px,py, D.F1, D.F1+0.92, 0.014,0.014, 6, M.metalDk, false);
-    if(i<25){ const a2=a0+0.55 + (2*Math.PI-1.10)*(i+1)/25;
-      const q=[cx+RG2*Math.cos(a2), cy+RG2*Math.sin(a2)];
-      box(Math.min(px,q[0])-0.028, Math.min(py,q[1])-0.028, D.F1+0.92,
-          Math.max(px,q[0])+0.028, Math.max(py,q[1])+0.028, D.F1+1.00, M.woodLt); }
-  }
+  // 南侧护栏只围 A 梯段上方（x 8.20–9.30），B 梯段到达口敞开
+  box(X0+7.55,Y0+1.80,D.F1+0.90, X0+8.65,Y0+1.86,D.F1+0.98, M.woodLt);
+  for(let x=X0+7.58;x<X0+8.6;x+=0.16) box(x,Y0+1.81,D.F1, x+0.028,Y0+1.85,D.F1+0.90, M.metalDk);
+  // 两梯段之间的护栏（x≈8.20），从楼梯厅一直到折返平台
+  box(X0+7.53,Y0+1.80,D.F1+0.90, X0+7.58,Y0+5.30,D.F1+0.98, M.woodLt);
+  for(let y=Y0+1.88;y<Y0+5.26;y+=0.16) box(X0+7.54,y,D.F1, X0+7.57,y+0.028,D.F1+0.90, M.metalDk);
   group('part1');
 })();
 
 /* ───────────────────────── 11. 家具与设备 ───────────────────────── */
-/* 供第 11 节末尾的坐标包装使用的原始别名（函数声明已提升，可在此处取引用） */
-const _box=box, _cyl=cyl, _bed=bed, _nightstand=nightstand, _wardrobe=wardrobe,
-      _sofa=sofa, _table=table, _chair=chair, _wc=wc, _basin=basin, _shower=shower,
-      _bathtub=bathtub, _bathCabinet=bathCabinet, _kitchenRun=kitchenRun, _fridge=fridge,
-      _washer=washer, _tvUnit=tvUnit, _rug=rug, _ceilLamp=ceilLamp, _ceilFan=ceilFan,
-      _acUnit=acUnit, _plantPot=plantPot;
 function bed(cx,cy,w,l,z,dir,m1,m2){
   const h=0.30, x0=cx-w/2, x1=cx+w/2, y0=cy-l/2, y1=cy+l/2;
   box(x0+0.04,y0+0.04,z, x1-0.04,y1-0.04,z+h, M.woodDk);
@@ -836,35 +606,7 @@ function ceilFan(cx,cy,z){
   ball(cx,cy,z-0.46, 0.10,0.10,0.08, 10, M.lamp);
 }
 
-/* —— 室内布置 ——
-   下面这一整块家具坐标是按「主楼前墙 y = 5.60」那一版世界坐标写的。
-   第三版把房子整体北移到 y = 15.50，与其把几百个数字逐个改（极易改错），
-   不如在这里套一层坐标包装：把每个摆放函数的 y 参数统一 +FY。
-   房子将来再挪，只需要改 D.hy0，家具会跟着走。 */
-(function(){
-const FY = D.hy0 - 5.60;
-const box=(x0,y0,z0,x1,y1,z1,m,sk)=>_box(x0,y0+FY,z0,x1,y1+FY,z1,m,sk);
-const cyl=(cx,cy,z0,z1,r0,r1,sg,m,cap)=>_cyl(cx,cy+FY,z0,z1,r0,r1,sg,m,cap);
-const bed=(cx,cy,w,l,z,d,m1,m2)=>_bed(cx,cy+FY,w,l,z,d,m1,m2);
-const nightstand=(cx,cy,z)=>_nightstand(cx,cy+FY,z);
-const wardrobe=(x0,y0,x1,y1,z,h,d)=>_wardrobe(x0,y0+FY,x1,y1+FY,z,h,d);
-const sofa=(cx,cy,w,d,z,f)=>_sofa(cx,cy+FY,w,d,z,f);
-const table=(cx,cy,w,d,z,h,m)=>_table(cx,cy+FY,w,d,z,h,m);
-const chair=(cx,cy,z,d,m)=>_chair(cx,cy+FY,z,d,m);
-const wc=(cx,cy,z,d)=>_wc(cx,cy+FY,z,d);
-const basin=(cx,cy,z,d,w,t)=>_basin(cx,cy+FY,z,d,w,t);
-const shower=(x0,y0,x1,y1,z,o)=>_shower(x0,y0+FY,x1,y1+FY,z,o);
-const bathtub=(x0,y0,x1,y1,z)=>_bathtub(x0,y0+FY,x1,y1+FY,z);
-const bathCabinet=(x0,y0,x1,y1,z,h)=>_bathCabinet(x0,y0+FY,x1,y1+FY,z,h);
-const kitchenRun=(x0,y0,x1,y1,z,o)=>_kitchenRun(x0,y0+FY,x1,y1+FY,z,o);
-const fridge=(x0,y0,x1,y1,z)=>_fridge(x0,y0+FY,x1,y1+FY,z);
-const washer=(cx,cy,z)=>_washer(cx,cy+FY,z);
-const tvUnit=(cx,cy,z,d,w)=>_tvUnit(cx,cy+FY,z,d,w);
-const rug=(cx,cy,w,l,z)=>_rug(cx,cy+FY,w,l,z);
-const ceilLamp=(cx,cy,z,r)=>_ceilLamp(cx,cy+FY,z,r);
-const ceilFan=(cx,cy,z)=>_ceilFan(cx,cy+FY,z);
-const acUnit=(cx,cy,z,d)=>_acUnit(cx,cy+FY,z,d);
-const plantPot=(cx,cy,z,h)=>_plantPot(cx,cy+FY,z,h);
+/* —— 一层布置 —— */
 group('furn1');
 const Z1=D.FF+0.02;
 // 客厅 x 0.80–5.90, y 5.75–10.20
@@ -1004,7 +746,6 @@ acUnit(8.20,11.15,Z2+2.25,'n');
 for(let i=0;i<2;i++) box(7.85,13.75+i*0.45,Z2+1.55, 9.20,13.77+i*0.45,Z2+1.57, M.steel);
 for(let i=0;i<4;i++) box(7.95+i*0.30,13.70,Z2+0.85, 8.15+i*0.30,13.84,Z2+1.54, M.cloth);
 box(8.65,14.55,Z2, 9.25,14.98,Z2+0.55, M.steel);
-})();
 
 /* ───────────────────────── 12. 场地 · 地形 · 分区铺装 ───────────────────────── */
 group('site');
@@ -1019,64 +760,43 @@ box(-1.2,-8.0,FIELD, 11.2,0,ROAD, M.asphalt);
 box(-1.2,-0.35,ROAD, 11.2,0,ROAD+0.02, M.concrete);
 box(0,0,FIELD, 10,32,0, M.plinth, 'top');
 /* 场地面：绕开泳池与鱼池开口 */
-const POOL=[0.85,7.70,4.35,14.20], POND=[6.10,12.10,8.40,14.00];
-[[0,0,10,7.70],[0,7.70,0.85,14.20],[4.35,7.70,6.10,14.20],[8.40,7.70,10,14.20],
- [6.10,7.70,8.40,12.10],[6.10,14.00,8.40,14.20],[0,14.20,10,32]]
+const POOL=[1.10,21.60,4.60,28.10], POND=[6.35,25.60,8.65,27.50];
+[[0,0,10,21.60],[0,21.60,1.10,28.10],[4.60,21.60,6.35,28.10],[8.65,21.60,10,28.10],
+ [6.35,21.60,8.65,25.60],[6.35,27.50,8.65,28.10],[0,28.10,10,32]]
  .forEach(r=>face([r[0],r[1],0],[r[2],r[1],0],[r[2],r[3],0],[r[0],r[3],0], M.grass));
 const pave=(x0,y0,x1,y1,m)=>box(x0,y0,0.005, x1,y1,0.038, m||M.concrete);
-
-/* ═══ 前院：南 → 北 = 停车 → 菜园果树 → 草坪 → 泳池凉亭 → 入户 ═══
-   排序理由：泳池贴着房子，从客厅落地窗直接看到水面，孩子游泳大人在厅里看得见；
-   离路 7.7 m，是院子里最私密的一段；泵房与管线紧贴主楼，比放到路边省约 $260。
-   菜园放最外侧，日照最好（南向无遮挡），也方便从大门直接搬肥料进出。 */
-
-/* ① 停车带 y 0.20–3.30 */
-pave(0.35,0.20,9.65,3.30);
-for(let x=1.9;x<9.6;x+=1.9) box(x,0.20,0.005, x+0.05,3.30,0.040, M.slab);   // 分格缝
-box(0.60,0.60,0.038, 5.30,2.55,0.045, M.slab);                              // 车位画线底
-box(5.70,0.60,0.038, 7.10,2.10,0.045, M.slab);                              // 摩托车位
-
-/* ② 菜园带 y 3.50–6.30：四条砌边高畦 + 堆肥 + 爬藤棚架 */
-box(0.36,3.44,0, 6.24,6.45,0.32, M.soil);              // 菜园客土（畦由第 18 节砌）
-pave(6.60,3.50,9.65,6.30, M.gravel);                    // 菜园东侧碎石工作面
-box(8.90,3.70,0, 9.55,4.50,0.72, M.woodDk);             // 堆肥箱（禽粪 + 菜叶）
-box(8.86,4.66,0, 9.59,4.72,1.85, M.metalDk);            // 工具挂架立杆
-box(8.86,4.66,1.75, 9.59,5.50,1.85, M.metalDk);
-
-/* ③ 草坪过渡带 y 6.30–7.40：汀步穿过 */
-for(let y=6.40;y<7.35;y+=0.46) box(6.95,y,0.005, 7.95,y+0.32,0.042, M.slab);
-for(let y=6.40;y<7.35;y+=0.46) box(2.10,y,0.005, 3.10,y+0.32,0.042, M.slab);
-
-/* ④ 泳池 · 凉亭 · 锦鲤池带 y 7.40–14.30 */
-pave(0.35,7.20,0.85,14.30, M.floorTile);                // 池边（西）
-pave(4.35,7.20,5.45,14.30, M.floorTile);                // 池边（东，1.10 m 走边）
-pave(0.85,7.20,4.35,7.70, M.floorTile);                 // 池边（南）
-pave(0.85,14.20,4.35,14.30, M.floorTile);               // 池边（北，接门廊）
-pave(5.45,7.40,9.65,12.00, M.floorTile);                // 凉亭区
-pave(5.45,12.00,6.10,14.30, M.floorTile);
-pave(8.40,12.00,9.65,14.30, M.floorTile);
-pave(6.10,14.00,8.40,14.30, M.floorTile);
-
-/* ⑤ 两侧通道（沿房子，兼排水与果树带） */
-pave(0.06,14.30,0.62,29.00, M.gravel);
-pave(9.50,14.30,9.94,29.00, M.gravel);
-
-/* ⑥ 后端服务带 y 29.00–32.00：禽舍 · 晾衣 · 堆肥 · 化粪池 · 空调外机
-   放在这里的理由：紧贴厨房后门，喂鸡倒垃圾不用绕房子；从前院完全看不见；
-   雨季西南风由前院吹向后端，气味顺风带走，不会回到泳池那一侧。 */
-pave(0.35,29.00,9.65,32.00);
-box(6.40,29.05,0, 9.65,31.87,0.05, M.sandy);            // 禽舍垫沙
-box(4.70,29.30,0, 6.10,30.30,0.02, M.concrete);         // 化粪池盖板
-box(0.40,30.60,0, 0.46,31.90,2.30, M.metalDk);          // 晾衣杆立柱
-box(4.20,30.60,0, 4.26,31.90,2.30, M.metalDk);
-for(let i=0;i<3;i++) box(0.40,30.75+i*0.42,2.05, 4.26,30.79+i*0.42,2.09, M.steel);
-box(0.40,29.20,0, 1.90,29.95,0.85, M.woodDk);           // 农具/饲料柜
-
-/* 排水明沟：全场地环通，坡向路边市政沟 */
-box(0.06,3.4,0.005, 0.30,31.4,0.045, M.concrete);
-box(0.10,3.4,0.02, 0.26,31.4,0.05, M.metalDk);
-box(9.70,3.4,0.005, 9.94,31.4,0.045, M.concrete);
-box(9.74,3.4,0.02, 9.90,31.4,0.05, M.metalDk);
+/* —— 前院功能分区 —— */
+pave(1.10,0.30,6.30,3.10);                          // ① 混凝土停车与车道（分格缝）
+box(1.10,3.10,0.005,6.30,3.16,0.040, M.slab);
+pave(8.20,0.30,9.80,4.30, M.gravel);                // ② 碎石带（排水兼防杂草）
+box(0.18,0.30,0.005, 1.02,4.30,0.30, M.brick);      // ③ 西墙花池
+box(0.24,0.36,0.30, 0.96,4.24,0.36, M.soil);
+for(let y=0.55;y<4.15;y+=0.42) ball(0.60,y,0.42, 0.26,0.20,0.20, 8, M.hedge);
+// ④ 入户汀步（碎石垫层 + 混凝土板）
+pave(6.55,0.30,8.10,4.40, M.gravel);
+for(let y=0.45;y<4.30;y+=0.62) box(6.75,y,0.038, 7.90,y+0.44,0.075, M.slab);
+// ⑤ 前院草坪（车位与门廊之间）
+box(1.10,3.24,0.005, 6.30,4.30,0.028, M.grass);
+// ⑥ 通往后院的侧道（人行，绕房西侧）
+pave(0.06,4.30,0.62,20.6, M.gravel);
+pave(9.50,4.30,9.94,20.6, M.gravel);
+/* —— 后院铺装 —— */
+pave(0.35,19.10,9.65,20.70);                        // 后勤平台
+pave(0.35,20.80,1.10,29.00, M.floorTile);           // 泳池边（西）
+pave(4.60,20.80,5.45,29.00, M.floorTile);           // 泳池边（东）
+pave(1.10,20.80,4.60,21.60, M.floorTile);           // 泳池边（南）
+pave(1.10,28.10,4.60,29.00, M.floorTile);           // 泳池边（北）
+pave(5.90,20.80,9.65,25.40, M.floorTile);           // 凉亭区
+pave(5.90,27.60,9.65,28.60, M.floorTile);
+pave(5.90,25.40,6.35,27.50, M.floorTile);
+pave(8.65,25.40,9.65,27.50, M.floorTile);
+box(0.35,28.60,0, 6.25,31.50,0.32, M.soil);         // 菜园客土
+box(6.40,28.80,0, 9.65,31.65,0.05, M.sandy);        // 禽舍垫沙
+// 排水明沟
+box(0.06,5.0,0.005, 0.30,30.5,0.045, M.concrete);
+box(0.10,5.0,0.02, 0.26,30.5,0.05, M.metalDk);
+box(9.70,5.0,0.005, 9.94,30.5,0.045, M.concrete);
+box(9.74,5.0,0.02, 9.90,30.5,0.05, M.metalDk);
 
 /* ───────────────────────── 13. 围墙 · 大门 · 门口细部 ───────────────────────── */
 function pillar(cx,cy,h,lamp){
@@ -1184,29 +904,26 @@ function swimRing(cx,cy,z,R,r,m){
   group('water');
   face([px0,py0,-0.10],[px1,py0,-0.10],[px1,py1,-0.10],[px0,py1,-0.10], M.water);
   group('yard');
-  swimRing(1.85,9.50,-0.05, 0.36,0.09, M.ringFloat);
-  swimRing(3.30,12.40,-0.05, 0.30,0.08, M.lotusFl);
-  box(1.10,13.20,-0.06, 2.30,13.32,0.02, M.ringFloat);                 // 浮条
-  /* 水泵与砂缸放池子北端、紧贴门廊：到机房管长 <2 m，比放路边省约 $260；
-     离一层卧室 8 m 以上，做吸音箱后夜间泳池过滤不影响睡眠 */
-  box(4.95,13.35,0.038, 5.38,14.15,0.78, M.metalDk);
-  for(let i=0;i<5;i++) box(4.93,13.45+i*0.14,0.20, 4.97,13.55+i*0.14,0.66, M.steel);  // 吸音百叶
-  cyl(4.80,12.55,0.038, 2.30, 0.035,0.035, 8, M.steel, false);         // 户外冲脚淋浴
-  box(4.66,12.47,2.22, 4.94,12.67,2.28, M.steel);
-  for(const yy of [9.10,10.60]){                                        // 躺椅
-    box(4.47,yy,0.30, 5.15,yy+0.62,0.36, M.fabricW);
-    box(4.99,yy,0.36, 5.15,yy+0.62,0.74, M.fabricW);
-    for(const q of [[4.53,yy+0.05],[5.09,yy+0.05],[4.53,yy+0.55],[5.09,yy+0.55]])
+  swimRing(2.10,23.40,-0.05, 0.36,0.09, M.ringFloat);
+  swimRing(3.55,26.30,-0.05, 0.30,0.08, M.lotusFl);
+  box(1.35,27.10,-0.06, 2.55,27.22,0.02, M.ringFloat);                // 浮条
+  box(5.05,20.95,0.038, 5.42,21.70,0.75, M.metalDk);                  // 过滤设备箱
+  cyl(5.24,21.90,0.038, 2.30, 0.035,0.035, 8, M.steel, false);        // 户外淋浴
+  box(5.10,21.82,2.22, 5.38,22.02,2.28, M.steel);
+  for(const yy of [23.0,24.5]){                                        // 躺椅
+    box(4.72,yy,0.30, 5.40,yy+0.62,0.36, M.fabricW);
+    box(5.24,yy,0.36, 5.40,yy+0.62,0.74, M.fabricW);
+    for(const q of [[4.78,yy+0.05],[5.34,yy+0.05],[4.78,yy+0.55],[5.34,yy+0.55]])
       cyl(q[0],q[1],0.038, 0.30, 0.022,0.022, 6, M.steel, false); }
-  box(4.53,11.45,0.038, 5.11,11.95,0.46, M.rattan);                    // 边几
-  cyl(4.80,8.40,0.038, 2.25, 0.035,0.035, 8, M.steel, false);          // 遮阳伞
-  cyl(4.80,8.40,2.05, 2.30, 1.20,0.06, 12, M.cloth);
-  box(4.45,7.30,0.038, 5.17,7.90,1.55, M.rattan);                      // 毛巾架/储物
+  box(4.78,25.35,0.038, 5.36,25.85,0.46, M.rattan);                    // 边几
+  cyl(5.05,26.70,0.038, 2.25, 0.035,0.035, 8, M.steel, false);         // 遮阳伞
+  cyl(5.05,26.70,2.05, 2.30, 1.20,0.06, 12, M.cloth);
+  box(4.70,27.60,0.038, 5.42,28.20,1.55, M.rattan);                    // 毛巾架/储物
 })();
 
 /* ───────────────────────── 16. 凉亭（配桌椅长凳灯扇） ───────────────────────── */
 (function(){
-  const x0=5.85,x1=9.15,y0=8.10,y1=11.40, ph=2.55, rz=3.42;
+  const x0=6.05,x1=9.35,y0=21.20,y1=24.50, ph=2.55, rz=3.42;
   box(x0,y0,0.03, x1,y1,0.17, M.floorTile);
   for(const p of [[x0+0.20,y0+0.20],[x1-0.20,y0+0.20],[x0+0.20,y1-0.20],[x1-0.20,y1-0.20]]){
     box(p[0]-0.10,p[1]-0.10,0.17, p[0]+0.10,p[1]+0.10,ph, M.woodDk);
@@ -1325,7 +1042,7 @@ function crop(kind,x,y,s){
   }
 }
 (function(){
-  const bx0=0.42, bx1=6.18, rows=[[3.62,4.32],[4.50,5.20],[5.38,6.08]];
+  const bx0=0.42, bx1=6.18, rows=[[28.72,29.42],[29.60,30.30],[30.48,31.18]];
   const plan=[['tomato','eggplant'],['bokchoy','radish'],['scallion','onion']];
   rows.forEach((r,ri)=>{
     box(bx0,r[0]-0.06,0.32, bx1,r[0],0.46, M.brick);
@@ -1339,27 +1056,27 @@ function crop(kind,x,y,s){
       crop(x < 3.2 ? plan[ri][0] : plan[ri][1], x, mid+0.16, 0.9); }
   });
   // 第四畦：大蒜 + 辣椒（靠禽舍一侧）
-  box(bx0,6.20,0.32, bx1,6.36,0.40, M.soil);
-  for(let i=0;i<12;i++) crop(i<6?'garlic':'chili', bx0+0.40+i*0.46, 6.28, 0.9);
+  box(bx0,31.30,0.32, bx1,31.46,0.40, M.soil);
+  for(let i=0;i<12;i++) crop(i<6?'garlic':'chili', bx0+0.40+i*0.46, 31.38, 0.9);
   // 爬藤棚架（苦瓜/丝瓜）
   for(let i=0;i<5;i++){ const x=0.55+i*1.42;
-    cyl(x,3.58,0.46, 2.20, 0.035,0.030, 6, M.bark, false);
-    cyl(x,6.32,0.46, 2.20, 0.035,0.030, 6, M.bark, false); }
-  box(0.50,3.55,2.15, 6.15,3.61,2.20, M.bark);
-  box(0.50,6.29,2.15, 6.15,6.35,2.20, M.bark);
-  for(let i=0;i<5;i++){ const x=0.55+i*1.42; box(x-0.02,3.58,2.17, x+0.02,6.32,2.20, M.bark); }
-  for(let i=0;i<24;i++){ const x=0.6+(i%12)*0.48, y=i<12?3.60:6.30;
+    cyl(x,28.68,0.46, 2.20, 0.035,0.030, 6, M.bark, false);
+    cyl(x,31.42,0.46, 2.20, 0.035,0.030, 6, M.bark, false); }
+  box(0.50,28.65,2.15, 6.15,28.71,2.20, M.bark);
+  box(0.50,31.39,2.15, 6.15,31.45,2.20, M.bark);
+  for(let i=0;i<5;i++){ const x=0.55+i*1.42; box(x-0.02,28.68,2.17, x+0.02,31.42,2.20, M.bark); }
+  for(let i=0;i<24;i++){ const x=0.6+(i%12)*0.48, y=i<12?28.70:31.40;
     ball(x,y,1.80+((i*7)%5)*0.09, 0.17,0.11,0.15, 6, M.veg); }
   // 工具与堆肥
-  box(0.40,27.70,0.005, 1.30,3.35,0.78, M.woodDk);
-  cyl(1.70,2.95,0.005, 0.44, 0.20,0.20, 10, M.metalDk);
+  box(0.40,27.70,0.005, 1.30,28.45,0.78, M.woodDk);
+  cyl(1.70,28.05,0.005, 0.44, 0.20,0.20, 10, M.metalDk);
   box(2.10,27.75,0.005, 2.20,27.85,1.45, M.bark);
   box(2.35,27.75,0.005, 2.45,27.85,1.42, M.bark);
 })();
 
 /* ───────────────────────── 19. 禽舍（真实笼舍 + 活动场） ───────────────────────── */
 (function(){
-  const rx0=6.40, ry0=29.05, rx1=9.65, ry1=31.87;
+  const rx0=6.40, ry0=28.80, rx1=9.65, ry1=31.62;
   // 活动场围网
   for(let x=rx0;x<=rx1;x+=0.72) box(x,ry0,0.05, x+0.07,ry0+0.07,1.55, M.metalDk);
   for(let y=ry0;y<=ry1;y+=0.72){ box(rx0,y,0.05, rx0+0.07,y+0.07,1.55, M.metalDk); }
@@ -1374,7 +1091,7 @@ function crop(kind,x,y,s){
   face([rx0-0.05,ry0-0.05,1.72],[rx1+0.05,ry0-0.05,1.72],[rx1+0.05,ry0+1.45,1.60],[rx0-0.05,ry0+1.45,1.60], M.roofMetal);
   // 架空鸡笼 ×2（镀锌网 + 支腿 + 产蛋箱 + 栖架）
   for(let k=0;k<2;k++){
-    const cx0=6.62+k*1.48, cy0=30.35, cx1=cx0+1.24, cy1=cy0+1.30, cz=0.55;
+    const cx0=6.62+k*1.48, cy0=30.10, cx1=cx0+1.24, cy1=cy0+1.30, cz=0.55;
     for(const p of [[cx0+0.06,cy0+0.06],[cx1-0.06,cy0+0.06],[cx0+0.06,cy1-0.06],[cx1-0.06,cy1-0.06]])
       box(p[0]-0.045,p[1]-0.045,0.05, p[0]+0.045,p[1]+0.045,cz, M.metalDk);
     box(cx0,cy0,cz, cx1,cy1,cz+0.05, M.steel);        // 网底托盘
@@ -1393,17 +1110,17 @@ function crop(kind,x,y,s){
     box(cx1-0.55,cy0-0.03,cz+0.10, cx1-0.12,cy0+0.02,cz+0.55, M.metalDk);   // 笼门
   }
   // 鸭舍（低棚 + 饮水池）
-  box(8.55,29.20,0.05, 9.60,30.20,0.95, M.woodDk);
-  face([8.48,29.13,1.18],[9.66,29.13,1.18],[9.66,30.27,1.02],[8.48,30.27,1.02], M.roofMetal);
-  box(8.70,29.17,0.05, 9.10,29.23,0.62, M.metalDk);
-  cyl(7.05,29.40,0.05, 0.20, 0.42,0.44, 14, M.concrete);
+  box(8.55,28.95,0.05, 9.60,29.95,0.95, M.woodDk);
+  face([8.48,28.88,1.18],[9.66,28.88,1.18],[9.66,30.02,1.02],[8.48,30.02,1.02], M.roofMetal);
+  box(8.70,28.92,0.05, 9.10,28.98,0.62, M.metalDk);
+  cyl(7.05,29.15,0.05, 0.20, 0.42,0.44, 14, M.concrete);
   group('water');
-  cyl(7.05,29.40,0.17, 0.185, 0.36,0.36, 14, M.pondWater);
+  cyl(7.05,29.15,0.17, 0.185, 0.36,0.36, 14, M.pondWater);
   group('yard');
   // 料槽与饮水器
-  box(6.60,29.80,0.05, 7.55,30.00,0.22, M.metalDk);
-  cyl(7.90,29.70,0.05, 0.32, 0.15,0.13, 10, M.steel);
-  cyl(7.90,29.70,0.32, 0.46, 0.10,0.06, 10, M.steel);
+  box(6.60,29.55,0.05, 7.55,29.75,0.22, M.metalDk);
+  cyl(7.90,29.45,0.05, 0.32, 0.15,0.13, 10, M.steel);
+  cyl(7.90,29.45,0.32, 0.46, 0.10,0.06, 10, M.steel);
   // 家禽
   const bird=(x,y,m,big)=>{ const s=big?1.15:1;
     ball(x,y,0.24*s, 0.13*s,0.18*s,0.145*s, 8, m);
@@ -1483,636 +1200,25 @@ function tree(x,y,h,r,kind){
     ball(x+f[0]*r,y+f[1]*r,th+h*f[2], 0.06,0.06,0.085, 7, M.onionB);
 }
 group('yard');
-/* 果树全部沿两侧边界种，只占 0.5 m 边条，树冠向院内挑出遮荫——
-   这样「果树区」不额外吃掉一整块地，草坪和果树共用同一片地面，是真实庭院的做法。
-   树种按西宁气候筛过：椰子、芒果、波罗蜜、香蕉、木瓜、番石榴、西印度樱桃都能结果；
-   温带甜樱桃与柿子需要 400–1000 小时 7°C 以下低温春化，西宁全年无此条件，已剔除。 */
-// 西边界果树带（自南向北）
-tree(0.42,4.60,3.10,0.58,'papaya');
-tree(0.42,6.90,3.00,0.56,'papaya');
-tree(0.38,9.60,4.40,1.05,'jackfruit');              // 矮化波罗蜜
-tree(0.40,12.60,3.90,1.15,'mango');
-tree(0.44,17.90,3.10,0.58,'papaya');                // 西通道
-tree(0.44,21.40,3.00,0.56,'papaya');
-tree(0.38,26.00,4.20,1.00,'jackfruit');
-// 东边界果树带
-tree(9.58,4.40,2.60,0.85,'acerola');                // 西印度樱桃（替代无法结果的甜樱桃）
-tree(9.62,6.60,3.20,0.90,'banana');
-tree(9.60,12.90,2.55,0.95,'pomegranate');
-tree(9.56,17.60,3.30,0.95,'banana');                // 东通道
-tree(9.56,20.80,3.10,0.90,'banana');
-tree(9.56,24.20,2.70,0.60,'papaya');
-// 院内两株遮荫大树
-tree(7.10,13.30,2.45,0.85,'acerola');               // 锦鲤池东北，给凉亭下午遮荫
-tree(2.10,3.10,4.30,1.45,'mango');                  // 停车位北侧，给车遮荫
-// 后端服务带：椰子放最北角，离泳池 22 m，落果砸不到人
-tree(0.55,31.20,9.20,2.20,'coconut');
-tree(9.55,30.90,2.70,0.60,'papaya');
-// 远景农田树（地块外）
+tree(9.05,2.00,4.30,1.45,'mango');                  // 前院 芒果
+tree(8.95,4.50,2.60,0.85,'acerola');                // 前院 西印度樱桃
+tree(0.36,17.60,3.10,0.58,'papaya');                // 左通道 木瓜
+tree(0.36,19.80,3.00,0.56,'papaya');
+tree(9.72,17.30,3.20,0.90,'banana');                // 右通道 香蕉
+tree(9.72,19.90,3.30,0.95,'banana');
+tree(9.72,22.60,3.10,0.90,'banana');
+tree(0.34,23.50,4.60,1.05,'jackfruit');             // 左通道 波罗蜜
+tree(0.40,31.30,9.20,2.20,'coconut');               // 后墙角 椰子
+tree(8.95,27.95,2.55,0.95,'pomegranate');           // 草坪 石榴
+tree(9.05,24.95,2.45,0.85,'acerola');               // 凉亭北侧树池 西印度樱桃
+tree(2.60,27.30,3.20,1.05,'mango');                 // 菜园前 芒果
+tree(9.70,30.40,2.70,0.60,'papaya');
 [[-4.6,4.0,5.4,1.7],[-3.4,26.0,4.6,1.4],[13.8,5.0,5.0,1.6],[12.6,29.5,4.2,1.3],
  [-6.4,35.6,4.8,1.5],[15.5,19.0,4.4,1.4],[-8.6,11.0,4.0,1.25],[14.2,-6.0,4.6,1.5],
  [-5.2,-5.0,4.2,1.35]].forEach(t=>tree(t[0],t[1],t[2],t[3],'mango'));
 // 草坪灌木与庭院灯
-for(const p of [[5.70,7.90],[9.30,7.60],[5.60,13.60],[9.35,13.90]])
+for(const p of [[6.20,25.10],[9.30,24.90],[5.80,28.35],[9.35,28.35]])
   ball(p[0],p[1],0.30, 0.40,0.40,0.30, 10, M.hedge);
-for(const p of [[5.60,9.20],[5.60,12.30],[9.45,8.30],[9.45,13.60],[5.60,3.40],[9.45,3.40]]){
+for(const p of [[5.65,22.60],[5.65,26.40],[6.20,20.95],[9.45,20.95],[6.20,29.60]]){
   cyl(p[0],p[1],0.04, 0.58, 0.033,0.033, 8, M.metalDk, false);
   box(p[0]-0.07,p[1]-0.07,0.58, p[0]+0.07,p[1]+0.07,0.66, M.lamp); }
-
-/* ───────────────────────── 20. 上传缓冲 ───────────────────────── */
-const ORDER = ['site','yard','shell1','shell2','slab2','ceil1','ceilA','ceil2','part1','part2','furn1','furn2','roof','roofA','water','glass'];
-const RANGES = {};
-(function(){
-  let vc=0, ic=0;
-  for(const n of ORDER){ const g=GROUPS[n]; if(!g) continue; vc+=g.v.length; ic+=g.i.length; }
-  const VB=new Float32Array(vc), IB=new Uint32Array(ic);
-  let vo=0, io=0, base=0;
-  for(const n of ORDER){ const g=GROUPS[n]; if(!g){ RANGES[n]={o:0,n:0}; continue; }
-    VB.set(g.v, vo);
-    for(let k=0;k<g.i.length;k++) IB[io+k] = g.i[k] + base;
-    RANGES[n] = {o:io, n:g.i.length};
-    base += g.v.length/7; vo += g.v.length; io += g.i.length; }
-  const vbo=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vbo); gl.bufferData(gl.ARRAY_BUFFER,VB,gl.STATIC_DRAW);
-  const ibo=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,IB,gl.STATIC_DRAW);
-  RANGES.__vbo=vbo; RANGES.__ibo=ibo; RANGES.__tris=ic/3; RANGES.__verts=vc/7;
-})();
-
-/* ───────────────────────── 21. 着色器 ───────────────────────── */
-function sh(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
-  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)+'\n'+src.split('\n').map((l,i)=>(i+1)+': '+l).join('\n').slice(0,1800));
-  return s; }
-function prog(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));
-  gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p);
-  if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-  return p; }
-const H='#version 300 es\n';
-
-const VS_MAIN = H+`
-in vec3 aPos; in vec3 aNrm; in float aMat;
-uniform mat4 uVP, uLVP;
-out vec3 vP; out vec3 vN; flat out int vM; out vec4 vL;
-void main(){ vP=aPos; vN=aNrm; vM=int(aMat+0.5);
-  vL=uLVP*vec4(aPos+aNrm*0.045,1.0);
-  gl_Position=uVP*vec4(aPos,1.0); }`;
-
-const FS_MAIN = H+`precision highp float; precision highp sampler2DShadow;
-in vec3 vP; in vec3 vN; flat in int vM; in vec4 vL;
-uniform vec3 uCam,uSun,uSunC,uSkyC,uGndC; uniform float uAmb,uT,uFog,uNight;
-uniform vec4 uMc[80]; uniform vec4 uMk[80];
-uniform sampler2DShadow uSh;
-uniform vec3 uPLp[8]; uniform vec4 uPLc[8]; uniform int uPLn;
-out vec4 O;
-float h21(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
-float vn(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
-  return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y); }
-float fbm(vec2 p){ float s=0.0,a=0.5; for(int i=0;i<4;i++){ s+=a*vn(p); p*=2.03; a*=0.5; } return s; }
-float lm(float v,float w){ float d=abs(fract(v)-0.5); return smoothstep(0.5-w,0.5-w*0.35,d); }
-vec2 planar(vec3 p, vec3 n){ vec3 a=abs(n);
-  if(a.z>a.x&&a.z>a.y) return p.xy; if(a.x>a.y) return p.yz; return p.xz; }
-float shade(vec4 l,float ndl){
-  vec3 p=l.xyz/l.w*0.5+0.5;
-  if(p.z>1.0||p.x<0.0||p.x>1.0||p.y<0.0||p.y>1.0) return 1.0;
-  float b=max(0.0022*(1.0-ndl),0.0004);
-  float s=0.0; vec2 tx=vec2(1.0/2048.0);
-  for(int i=-1;i<=1;i++) for(int j=-1;j<=1;j++)
-    s+=texture(uSh,vec3(p.xy+vec2(float(i),float(j))*tx*1.25,p.z-b));
-  return s/9.0; }
-void main(){
-  int k=int(uMk[vM].x+0.5);
-  vec3 alb=uMc[vM].rgb; float rough=uMc[vM].a;
-  vec3 N=normalize(vN); vec2 uv=planar(vP,N);
-  if(k==0)      alb*=0.95+0.10*fbm(uv*7.0);
-  else if(k==1){ float rib=sin(uv.x*24.0)*0.5+0.5; alb*=0.84+0.28*rib; }
-  else if(k==2){ float g=min(lm(uv.x/0.60,0.030),lm(uv.y/0.60,0.030));
-                 alb*=mix(0.74,1.0,g)*(0.97+0.06*fbm(uv*9.0)); }
-  else if(k==3){ float n=fbm(uv*2.4); alb*=0.74+0.52*n;
-                 alb=mix(alb,vec3(0.30,0.40,0.19),0.32*fbm(uv*0.5)); }
-  else if(k==5){ alb*=0.80+0.36*fbm(vec2(uv.x*3.0,uv.y*32.0)); }
-  else if(k==7){ float g=min(lm(uv.x,0.012),lm(uv.y,0.012));
-                 alb*=mix(0.85,1.0,g)*(0.93+0.14*fbm(uv*22.0)); }
-  else if(k==8){ float row=floor(uv.y/0.075); float off=mod(row,2.0)*0.5;
-                 float g=min(lm(uv.x/0.24+off,0.05),lm(uv.y/0.075,0.11));
-                 alb*=mix(0.66,1.0,g)*(0.88+0.24*h21(vec2(floor(uv.x/0.24+off),row))); }
-  else if(k==9)  alb*=0.78+0.44*fbm(uv*8.0);
-  else if(k==10){ float g=min(lm(uv.x/0.30,0.04),lm(uv.y/0.30,0.04)); alb*=mix(0.80,1.0,g); }
-  else if(k==11) alb*=0.99+0.02*fbm(uv*12.0);
-  else if(k==12) alb*=0.90+0.18*fbm(uv*24.0);
-  else if(k==13){ float n=fbm(uv*5.5); alb*=0.68+0.66*n; }
-  else if(k==14) alb*=0.86+0.26*fbm(uv*30.0);
-  else if(k==16) alb*=0.76+0.44*fbm(uv*4.5);
-  else if(k==17){ float n=fbm(uv*6.5); alb*=0.64+0.70*n; }
-  else if(k==18) alb*=0.92+0.14*fbm(uv*18.0);
-  else if(k==4){
-    float t=uT;
-    N=normalize(N+vec3(0.075*cos(vP.x*3.2+t*1.15)+0.05*cos((vP.x+vP.y)*4.9+t*1.8),
-                       0.075*cos(vP.y*2.8-t*0.95)+0.05*cos((vP.x+vP.y)*4.9+t*1.8),0.0));
-    rough=0.04; }
-  vec3 Vd=normalize(uCam-vP);
-  float ndl=max(dot(N,uSun),0.0);
-  float sh1=shade(vL,ndl);
-  vec3 Hh=normalize(uSun+Vd);
-  float spec=pow(max(dot(N,Hh),0.0), mix(240.0,10.0,rough))*(1.0-rough*0.92)*1.25;
-  vec3 hemi=mix(uGndC,uSkyC,N.z*0.5+0.5);
-  vec3 col=alb*hemi*uAmb + alb*uSunC*ndl*sh1 + uSunC*spec*sh1;
-  if(k==4){ float fr=pow(1.0-max(dot(N,Vd),0.0),5.0);
-    col=mix(col,uSkyC*1.10,fr*0.42); col*=1.15; }
-  else if(k==6){ float fr=pow(1.0-max(dot(N,Vd),0.0),4.0);
-    col=mix(col,uSkyC*1.15,fr*0.85); }
-  for(int i=0;i<8;i++){ if(i>=uPLn) break;
-    vec3 d=uPLp[i]-vP; float ds=length(d); d/=max(ds,0.001);
-    float wrap=0.42+0.58*max(dot(N,d),0.0);
-    col += alb*uPLc[i].rgb*wrap*(uPLc[i].a/(1.0+ds*ds*(0.16+0.26*uNight))); }
-  col += alb*uMk[vM].y*(1.0+3.6*uNight);
-  float dd=length(uCam-vP);
-  col=mix(col,uSkyC*1.05,clamp(1.0-exp(-dd*uFog),0.0,0.55));
-  float lum=dot(col,vec3(0.2126,0.7152,0.0722));
-  col=mix(vec3(lum),col,1.18);
-  col*=1.05;
-  col=(col*(2.51*col+0.03))/(col*(2.43*col+0.59)+0.14);
-  O=vec4(pow(max(col,0.0),vec3(1.0/2.2)), uMk[vM].z);
-}`;
-
-const VS_DEPTH = H+`in vec3 aPos; uniform mat4 uLVP; void main(){ gl_Position=uLVP*vec4(aPos,1.0); }`;
-const FS_DEPTH = H+`precision highp float; void main(){}`;
-
-const VS_SKY = H+`out vec2 vUV;
-void main(){ vec2 p=vec2((gl_VertexID<<1)&2, gl_VertexID&2); vUV=p; gl_Position=vec4(p*2.0-1.0,1.0,1.0); }`;
-const FS_SKY = H+`precision highp float;
-in vec2 vUV; uniform mat4 uInvVP; uniform vec3 uCam,uSun,uSunC,uSkyC,uGndC; uniform float uNight;
-out vec4 O;
-float h21(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
-void main(){
-  vec4 a=uInvVP*vec4(vUV*2.0-1.0,-1.0,1.0), b=uInvVP*vec4(vUV*2.0-1.0,1.0,1.0);
-  vec3 d=normalize(b.xyz/b.w-a.xyz/a.w);
-  float up=clamp(d.z,-1.0,1.0);
-  vec3 hor=mix(uSkyC*1.28, uSkyC*0.72, clamp(uNight,0.0,1.0));
-  vec3 zen=uSkyC*mix(0.52,0.16,uNight);
-  vec3 c=mix(hor,zen,pow(clamp(up,0.0,1.0),0.62));
-  c=mix(c, uGndC*0.85, smoothstep(0.0,-0.10,up));
-  float sd=max(dot(d,uSun),0.0);
-  c += uSunC*pow(sd,150.0)*3.4;
-  c += uSunC*pow(sd,7.0)*0.30;
-  c += uSunC*pow(sd,1.6)*0.09*max(0.0,1.0-abs(up)*2.2);
-  if(uNight>0.02){ vec3 sd3=d/max(abs(d.z),0.30);
-    vec2 g=floor(vec2(sd3.x,sd3.y)*95.0);
-    float st=step(0.9982,h21(g))*smoothstep(0.02,0.35,up)*uNight;
-    c += vec3(st)*0.95; }
-  c=(c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14);
-  O=vec4(pow(max(c,0.0),vec3(1.0/2.2)),1.0);
-}`;
-
-const P_MAIN=prog(VS_MAIN,FS_MAIN), P_DEP=prog(VS_DEPTH,FS_DEPTH), P_SKY=prog(VS_SKY,FS_SKY);
-const U=(p,n)=>gl.getUniformLocation(p,n);
-const uM={VP:U(P_MAIN,'uVP'),LVP:U(P_MAIN,'uLVP'),Cam:U(P_MAIN,'uCam'),Sun:U(P_MAIN,'uSun'),
-  SunC:U(P_MAIN,'uSunC'),SkyC:U(P_MAIN,'uSkyC'),GndC:U(P_MAIN,'uGndC'),Amb:U(P_MAIN,'uAmb'),
-  T:U(P_MAIN,'uT'),Fog:U(P_MAIN,'uFog'),Night:U(P_MAIN,'uNight'),Mc:U(P_MAIN,'uMc'),Mk:U(P_MAIN,'uMk'),
-  Sh:U(P_MAIN,'uSh'),PLp:U(P_MAIN,'uPLp'),PLc:U(P_MAIN,'uPLc'),PLn:U(P_MAIN,'uPLn')};
-const uD={LVP:U(P_DEP,'uLVP')};
-const uS={InvVP:U(P_SKY,'uInvVP'),Cam:U(P_SKY,'uCam'),Sun:U(P_SKY,'uSun'),SunC:U(P_SKY,'uSunC'),
-  SkyC:U(P_SKY,'uSkyC'),GndC:U(P_SKY,'uGndC'),Night:U(P_SKY,'uNight')};
-
-// 材质 uniform 数组
-const MC=new Float32Array(80*4), MK=new Float32Array(80*4);
-if(MATS.length>80) console.warn('材质数量超限', MATS.length);
-MATS.forEach((m,i)=>{ MC[i*4]=m.c[0]; MC[i*4+1]=m.c[1]; MC[i*4+2]=m.c[2]; MC[i*4+3]=m.r;
-  MK[i*4]=m.k; MK[i*4+1]=m.emi; MK[i*4+2]=m.alpha; });
-
-// VAO
-const vao=gl.createVertexArray(); gl.bindVertexArray(vao);
-gl.bindBuffer(gl.ARRAY_BUFFER,RANGES.__vbo); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,RANGES.__ibo);
-const ST=7*4;
-gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,ST,0);
-gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,ST,12);
-gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2,1,gl.FLOAT,false,ST,24);
-gl.bindAttribLocation(P_MAIN,0,'aPos');
-gl.bindVertexArray(null);
-
-// 阴影贴图
-const SM=2048;
-const shTex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,shTex);
-gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,SM,SM);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_COMPARE_MODE,gl.COMPARE_REF_TO_TEXTURE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_COMPARE_FUNC,gl.LEQUAL);
-const shFB=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,shFB);
-gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,shTex,0);
-gl.drawBuffers([gl.NONE]); gl.readBuffer(gl.NONE);
-gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-
-/* ───────────────────────── 22. 太阳位置（西宁 11.31°N, 106.10°E, UTC+7） ───────────────────────── */
-const LAT=11.31*Math.PI/180, LON=106.10, TZ=7;
-function solar(doy, hour){
-  const decl = 23.45*Math.PI/180*Math.sin(2*Math.PI*(284+doy)/365);
-  const B = 2*Math.PI*(doy-81)/364;
-  const EoT = 9.87*Math.sin(2*B) - 7.53*Math.cos(B) - 1.5*Math.sin(B);
-  const st = hour + (4*(LON-15*TZ)+EoT)/60;
-  const Hh = (st-12)*15*Math.PI/180;
-  const alt = Math.asin(Math.sin(LAT)*Math.sin(decl)+Math.cos(LAT)*Math.cos(decl)*Math.cos(Hh));
-  let ca = (Math.sin(decl)*Math.cos(LAT)-Math.cos(decl)*Math.sin(LAT)*Math.cos(Hh))/Math.max(Math.cos(alt),1e-4);
-  ca=Math.max(-1,Math.min(1,ca));
-  let az = Math.acos(ca); if(Hh>0) az = 2*Math.PI-az;
-  return {alt, az, dir:[Math.sin(az)*Math.cos(alt), Math.cos(az)*Math.cos(alt), Math.sin(alt)]};
-}
-const DATES=[{n:'春分 3/21',d:80},{n:'夏至 6/21',d:172},{n:'秋分 9/23',d:266},{n:'冬至 12/21',d:355}];
-
-M4.inv=function(m){ const o=new Float32Array(16),
- a00=m[0],a01=m[1],a02=m[2],a03=m[3],a10=m[4],a11=m[5],a12=m[6],a13=m[7],
- a20=m[8],a21=m[9],a22=m[10],a23=m[11],a30=m[12],a31=m[13],a32=m[14],a33=m[15],
- b00=a00*a11-a01*a10,b01=a00*a12-a02*a10,b02=a00*a13-a03*a10,b03=a01*a12-a02*a11,
- b04=a01*a13-a03*a11,b05=a02*a13-a03*a12,b06=a20*a31-a21*a30,b07=a20*a32-a22*a30,
- b08=a20*a33-a23*a30,b09=a21*a32-a22*a31,b10=a21*a33-a23*a31,b11=a22*a33-a23*a32;
- let d=b00*b11-b01*b10+b02*b09+b03*b08-b04*b07+b05*b06; if(!d) return o; d=1/d;
- o[0]=(a11*b11-a12*b10+a13*b09)*d; o[1]=(a02*b10-a01*b11-a03*b09)*d;
- o[2]=(a31*b05-a32*b04+a33*b03)*d; o[3]=(a22*b04-a21*b05-a23*b03)*d;
- o[4]=(a12*b08-a10*b11-a13*b07)*d; o[5]=(a00*b11-a02*b08+a03*b07)*d;
- o[6]=(a32*b02-a30*b05-a33*b01)*d; o[7]=(a20*b05-a22*b02+a23*b01)*d;
- o[8]=(a10*b10-a11*b08+a13*b06)*d; o[9]=(a01*b08-a00*b10-a03*b06)*d;
- o[10]=(a30*b04-a31*b02+a33*b00)*d; o[11]=(a21*b02-a20*b04-a23*b00)*d;
- o[12]=(a11*b07-a10*b09-a12*b06)*d; o[13]=(a00*b09-a01*b07+a02*b06)*d;
- o[14]=(a31*b01-a30*b03-a32*b00)*d; o[15]=(a20*b03-a21*b01+a22*b00)*d; return o; };
-
-/* ───────────────────────── 23. 状态与相机 ───────────────────────── */
-/* 时钟格式化：先取整到分钟再拆分，避免 9.997 h 显示成 09:60 */
-function clock(h){ let t=Math.round(h*60); t=((t%1440)+1440)%1440;
-  return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0'); }
-const VIEWS={
-  aerial:{az:54,el:32,d:40,t:[5,13.5,1.2]},
-  front :{az:4, el:12,d:24,t:[5,15.6,3.2]},
-  gate  :{az:14,el:8, d:11,t:[5.2,1.8,1.6]},
-  up    :{az:28,el:64,d:36,t:[5,14.5,0.4]},
-  entry :{pose:{p:[7.35,12.20,1.65], l:[6.55,18.30,1.45]}},
-  living:{pose:{p:[4.85,19.85,1.62], l:[2.20,16.30,1.10]}},
-  dining:{pose:{p:[5.55,20.00,1.58], l:[2.40,22.50,1.10]}},
-  kitchen:{pose:{p:[5.62,27.52,1.80], l:[1.60,28.35,1.00]}},
-  guest :{pose:{p:[5.70,23.00,1.60], l:[3.30,24.30,1.00]}},
-  master:{pose:{p:[5.65,16.25,4.92], l:[3.20,18.50,4.35]}},
-  bed1  :{pose:{p:[5.70,22.15,4.92], l:[3.20,20.50,4.35]}},
-  bath  :{pose:{p:[2.30,21.15,5.20], l:[1.10,20.80,4.30]}},
-  stair :{pose:{p:[6.20,16.60,1.68], l:[8.15,17.60,2.90]}},
-  hall  :{pose:{p:[6.52,24.50,1.58], l:[6.52,16.50,1.72]}},
-  pool  :{pose:{p:[5.05,14.05,1.82], l:[2.30,8.40,0.05]}},
-  pavilion:{pose:{p:[7.50,13.30,1.70], l:[7.50,9.60,1.10]}},
-  garden:{pose:{p:[3.20,7.30,1.74], l:[3.40,4.30,0.50]}},
-  coop  :{pose:{p:[4.60,29.90,1.95], l:[7.90,30.90,0.70]}},
-  yard  :{pose:{p:[8.30,2.40,1.80], l:[3.20,10.80,0.50]}}
-};
-let cam={...VIEWS.aerial}, curView='aerial';
-let hour=14.2, dateIdx=1, playSun=false, tour=null, tourT=0;
-let showRoof=true, onlyF1=false, showFurn=true, showLab=true;
-let W=1,Hh=1,DPR=1, t0=performance.now();
-
-const TOUR=[
- /* 漫游路线 = 真实步行动线：每一段直线都落在同一个房间／走廊内，
-    过墙必须垂直穿过实际门洞，绝不穿墙。坐标为世界坐标，眼高 1F 1.20 m / 2F 1.23 m。 */
- {p:[5.00,-3.20,1.65], l:[5.60,6.40,2.40], d:3.0, n:'从镇道看入口'},
- {p:[5.30,0.90,1.65],  l:[6.90,4.60,1.90], d:2.4, n:'进大门 · 前院停车位'},
- {p:[6.60,3.30,1.65],  l:[7.05,5.90,1.75], d:2.2, n:'汀步 → 入户台阶与无障碍缓坡'},
- {p:[7.05,4.60,1.65],  l:[7.05,7.20,1.70], d:2.2, n:'门廊 · 入户门'},
- {p:[7.05,6.30,1.65],  l:[8.30,8.60,2.40], d:2.4, n:'玄关 · 鞋柜与楼梯'},
- {p:[6.45,7.60,1.65],  l:[4.40,8.10,1.40], d:2.2, n:'玄关 → 客厅（1.35 m 宽门洞）'},
- {p:[5.10,7.75,1.65],  l:[2.90,7.20,1.35], d:2.4, n:'客厅 · 电视墙'},
- {p:[4.60,8.80,1.65],  l:[3.00,9.40,1.30], d:2.4, n:'客厅 · 沙发与茶几'},
- {p:[4.90,10.70,1.65], l:[3.40,11.60,1.25], d:2.2, n:'客厅 ↔ 餐厅（全开放）'},
- {p:[4.85,11.55,1.65], l:[3.10,11.50,1.30], d:2.4, n:'餐厅 · 六人餐桌'},
- {p:[5.30,11.60,1.65], l:[6.90,11.62,1.45], d:1.8, n:'餐厅 → 走廊'},
- {p:[6.50,11.70,1.65], l:[6.50,14.80,1.50], d:2.4, n:'走廊 · 右手公厕、储物间'},
- {p:[6.50,14.30,1.65], l:[4.30,14.20,1.30], d:2.0, n:'一层客房（适老）门口'},
- {p:[5.10,14.25,1.65], l:[3.20,13.70,1.20], d:2.4, n:'一层客房 · 床、衣柜、通卫 4'},
- {p:[6.50,14.60,1.65], l:[6.50,17.40,1.50], d:2.2, n:'走廊穿后墙洞 → 后附房'},
- {p:[6.50,16.55,1.65], l:[4.80,16.90,1.40], d:2.0, n:'后走廊 · 左厨房、右洗衣'},
- {p:[5.15,17.60,1.70], l:[2.80,18.20,1.15], d:2.4, n:'厨房 · 中岛与吧椅'},
- {p:[3.60,18.00,1.70], l:[1.30,18.40,1.10], d:2.4, n:'厨房 · L 形操作台（门口全空）'},
- {p:[5.15,17.50,1.70], l:[6.70,17.00,1.45], d:1.8, n:'厨房 → 后走廊'},
- {p:[6.50,16.40,1.65], l:[6.50,7.60,1.55], d:2.8, n:'走廊回望 · 一层一条直线到底'},
- {p:[7.35,6.60,1.65],  l:[8.60,9.00,2.60], d:2.2, n:'玄关 → 楼梯口'},
- {p:[8.72,8.30,2.20],  l:[8.72,10.60,3.05], d:2.0, n:'上行梯段（靠墙扶手）'},
- {p:[8.72,10.25,3.15], l:[7.60,10.35,3.40], d:1.8, n:'折返平台'},
- {p:[7.68,10.30,3.40], l:[7.68,8.40,4.70], d:1.8, n:'折返上行 B 梯段'},
- {p:[7.68,8.40,5.00],  l:[7.55,6.60,4.90], d:2.0, n:'到二层 · 到达口'},
- {p:[7.55,6.90,5.00],  l:[6.30,8.40,4.88], d:2.2, n:'二层楼梯厅 · 天窗光井'},
- {p:[6.50,8.50,5.00],  l:[4.80,8.60,4.80], d:2.0, n:'二层走廊 → 主卧门'},
- {p:[5.35,8.60,5.00],  l:[3.70,7.90,4.65], d:2.4, n:'主卧 · 床与床头柜'},
- {p:[4.60,9.50,5.00],  l:[2.90,7.20,4.60], d:2.4, n:'主卧 → 衣帽间、主卫、前阳台'},
- {p:[5.35,8.60,5.00],  l:[6.80,8.70,4.85], d:1.8, n:'主卧 → 走廊'},
- {p:[6.50,10.20,5.00], l:[6.50,13.40,4.85], d:2.2, n:'二层走廊 · 三间卧室门并排'},
- {p:[6.50,11.20,5.00], l:[4.80,11.20,4.75], d:1.8, n:'次卧 1 门口'},
- {p:[5.05,11.25,5.00], l:[3.40,10.90,4.65], d:2.4, n:'次卧 1 · 通卫 1（唯一浴缸）'},
- {p:[6.50,11.30,5.00], l:[6.50,13.00,4.85], d:1.8, n:'回二层走廊'},
- {p:[6.50,12.25,5.00], l:[8.50,12.40,4.85], d:2.0, n:'走廊 → 起居 · 书房'},
- {p:[7.60,12.30,5.00], l:[8.90,12.60,4.70], d:2.2, n:'起居 · 书房'},
- {p:[6.50,12.60,5.00], l:[6.50,14.40,4.85], d:1.8, n:'回走廊 → 后阳台'},
- {p:[6.50,14.20,5.00], l:[7.60,14.30,4.80], d:1.8, n:'后阳台门洞'},
- {p:[7.70,14.30,5.00], l:[8.40,17.60,3.40], d:2.6, n:'后阳台俯瞰后院'},
- {p:[6.50,14.20,5.00], l:[6.50,8.20,4.90], d:2.4, n:'二层走廊回望'},
- {p:[6.50,7.00,5.00],  l:[7.80,8.60,4.40], d:2.0, n:'回楼梯厅'},
- {p:[7.60,6.90,5.00],  l:[7.68,9.20,4.20], d:1.8, n:'准备下楼'},
- {p:[7.68,9.40,4.30],  l:[7.68,10.60,3.30], d:1.8, n:'下 B 梯段'},
- {p:[7.65,10.30,3.35], l:[8.72,10.10,3.05], d:1.6, n:'折返平台'},
- {p:[8.72,9.60,2.85],  l:[8.72,6.80,1.90], d:2.0, n:'下 A 梯段 → 玄关'},
- {p:[6.90,6.60,1.65],  l:[6.50,11.20,1.55], d:2.2, n:'回一层走廊'},
- {p:[6.50,9.00,1.65],  l:[6.50,15.60,1.50], d:2.4, n:'走廊直通后院（无需穿任何房间）'},
- {p:[6.50,16.60,1.65], l:[6.50,21.00,1.45], d:2.6, n:'穿后附房出后院'},
- {p:[6.30,20.30,1.65], l:[4.30,22.80,1.10], d:2.6, n:'后勤平台 · 晾衣区'},
- {p:[5.05,23.20,1.72], l:[2.60,24.60,0.10], d:2.8, n:'游泳池 3.5×6.5'},
- {p:[5.05,28.30,1.72], l:[2.40,23.60,0.15], d:2.8, n:'池北端回望 · 泳圈与踏步'},
- {p:[6.20,27.00,1.70], l:[7.60,26.10,0.55], d:2.6, n:'下沉锦鲤池 · 荷花'},
- {p:[7.70,26.40,1.70], l:[7.70,23.00,1.20], d:2.6, n:'锦鲤池 → 凉亭'},
- {p:[7.70,23.80,1.70], l:[8.80,21.80,1.15], d:2.6, n:'凉亭内 · 桌椅长凳吊灯风扇'},
- {p:[3.30,27.60,1.72], l:[3.70,30.60,0.55], d:2.8, n:'菜园 · 番茄茄子葱蒜白菜萝卜'},
- {p:[5.60,27.30,2.35], l:[8.40,30.60,0.60], d:2.8, n:'鸡鸭舍 · 架空笼舍与活动场'},
- {p:[5.00,34.60,3.40], l:[5.00,20.00,2.00], d:3.4, n:'从后墙回望全院'}
-];
-function tourPose(tt){
-  let acc=0, i=0;
-  for(;i<TOUR.length-1;i++){ if(acc+TOUR[i].d>tt) break; acc+=TOUR[i].d; }
-  const a=TOUR[i], b=TOUR[Math.min(i+1,TOUR.length-1)];
-  let u=(tt-acc)/a.d; u=Math.max(0,Math.min(1,u)); u=u*u*(3-2*u);
-  const L=(p,q)=>[p[0]+(q[0]-p[0])*u, p[1]+(q[1]-p[1])*u, p[2]+(q[2]-p[2])*u];
-  return {eye:L(a.p,b.p), at:L(a.l,b.l), name:a.n};
-}
-const TOUR_LEN = TOUR.reduce((s,w)=>s+w.d,0) - TOUR[TOUR.length-1].d;
-
-function camEye(){
-  if(tour!==null) return tourPose(tour).eye;
-  if(cam.pose) return cam.pose.p;
-  const e=cam.el*Math.PI/180, a=cam.az*Math.PI/180;
-  return [cam.t[0]+cam.d*Math.cos(e)*Math.sin(a),
-          cam.t[1]-cam.d*Math.cos(e)*Math.cos(a),
-          cam.t[2]+cam.d*Math.sin(e)];
-}
-function camAt(){ return tour!==null ? tourPose(tour).at : (cam.pose?cam.pose.l:cam.t); }
-
-/* ───────────────────────── 24. 光照配色 ───────────────────────── */
-const sat=(x,a,b)=>Math.max(0,Math.min(1,(x-a)/(b-a)));
-function lighting(alt){
-  const night = 1-sat(alt, -0.06, 0.14);
-  const low   = 1-sat(alt, 0.02, 0.42);
-  const inten = Math.max(0, Math.sin(Math.max(alt,0)))**0.55;
-  const mix3=(a,b,t)=>[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
-  const sunC = mix3([1.00,0.965,0.90],[1.00,0.50,0.22], low);
-  const k = 1.05*inten*(1-night*0.97);
-  const skyDay=[0.36,0.55,0.86], skyDusk=[0.70,0.42,0.32], skyNight=[0.045,0.062,0.125];
-  let skyC = mix3(skyDay, skyDusk, low*0.85);
-  skyC = mix3(skyC, skyNight, night);
-  const gndC = mix3([0.34,0.33,0.28],[0.035,0.04,0.05], night);
-  return {
-    sun:[sunC[0]*k, sunC[1]*k, sunC[2]*k],
-    sky:skyC, gnd:gndC,
-    amb: 0.30 - 0.272*night,
-    night
-  };
-}
-const PLIGHT=[
- [3.10,8.20,3.30],[3.20,11.45,3.30],[4.30,13.90,3.30],[3.30,16.90,3.30],
- [6.52,11.60,3.30],[4.05,7.90,6.60],[4.05,11.20,6.60],[7.70,22.85,2.45]
-];
-
-/* ───────────────────────── 25. 渲染 ───────────────────────── */
-function drawGroups(list){
-  for(const n of list){ const r=RANGES[n]; if(!r||!r.n) continue;
-    gl.drawElements(gl.TRIANGLES, r.n, gl.UNSIGNED_INT, r.o*4); }
-}
-function visible(){
-  const g=['site','yard','shell1','part1'];
-  if(!onlyF1){ g.push('shell2','slab2','part2','ceil1'); }
-  if(showRoof) g.push('ceilA','roofA');
-  if(showRoof && !onlyF1) g.push('ceil2','roof');
-  if(showFurn){ g.push('furn1'); if(!onlyF1) g.push('furn2'); }
-  return g;
-}
-function render(){
-  const now=performance.now(), tt=(now-t0)/1000;
-  const S=solar(DATES[dateIdx].d, hour);
-  const Lg=lighting(S.alt);
-  const eye=camEye(), at=camAt();
-  const proj=M4.persp((tour!==null||cam.pose)?60*Math.PI/180:46*Math.PI/180, W/Hh, 0.05, 320);
-  const view=M4.look(eye, at, [0,0,1]);
-  const VP=M4.mul(proj,view);
-
-  // —— 阴影
-  let sdir=S.dir;
-  if(sdir[2]<0.08) sdir=V.n([sdir[0], sdir[1], 0.08]);
-  const C=[5,16,1.5], R=25;
-  const LVP=M4.mul(M4.ortho(-R,R,-R,R,1,110), M4.look(V.a(C,V.m(sdir,52)), C, [0,0,1]));
-  gl.bindFramebuffer(gl.FRAMEBUFFER, shFB);
-  gl.viewport(0,0,SM,SM); gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
-  gl.clear(gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.CULL_FACE); gl.cullFace(gl.FRONT);
-  gl.useProgram(P_DEP); gl.uniformMatrix4fv(uD.LVP,false,LVP);
-  gl.bindVertexArray(vao); drawGroups(visible());
-  gl.cullFace(gl.BACK);
-
-  // —— 主画面
-  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-  gl.viewport(0,0,cv.width,cv.height);
-  gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  gl.disable(gl.CULL_FACE);
-
-  gl.useProgram(P_SKY); gl.depthMask(false); gl.disable(gl.DEPTH_TEST);
-  gl.uniformMatrix4fv(uS.InvVP,false,M4.inv(VP));
-  gl.uniform3fv(uS.Cam,eye); gl.uniform3fv(uS.Sun,S.dir);
-  gl.uniform3fv(uS.SunC,Lg.sun); gl.uniform3fv(uS.SkyC,Lg.sky);
-  gl.uniform3fv(uS.GndC,Lg.gnd); gl.uniform1f(uS.Night,Lg.night);
-  gl.drawArrays(gl.TRIANGLES,0,3);
-  gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
-
-  gl.useProgram(P_MAIN);
-  gl.uniformMatrix4fv(uM.VP,false,VP); gl.uniformMatrix4fv(uM.LVP,false,LVP);
-  gl.uniform3fv(uM.Cam,eye); gl.uniform3fv(uM.Sun,S.dir);
-  gl.uniform3fv(uM.SunC,Lg.sun); gl.uniform3fv(uM.SkyC,Lg.sky); gl.uniform3fv(uM.GndC,Lg.gnd);
-  gl.uniform1f(uM.Amb,Lg.amb); gl.uniform1f(uM.T,tt);
-  gl.uniform1f(uM.Fog, tour!==null?0.0009:0.0017); gl.uniform1f(uM.Night,Lg.night);
-  gl.uniform4fv(uM.Mc,MC); gl.uniform4fv(uM.Mk,MK);
-  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,shTex); gl.uniform1i(uM.Sh,0);
-  const pn = showFurn?PLIGHT.length:0;
-  const pp=new Float32Array(24), pc=new Float32Array(32);
-  const pi = 0.42 + 1.35*Lg.night;
-  for(let i=0;i<pn;i++){ pp[i*3]=PLIGHT[i][0]; pp[i*3+1]=PLIGHT[i][1]; pp[i*3+2]=PLIGHT[i][2];
-    pc[i*4]=1.0; pc[i*4+1]=0.90; pc[i*4+2]=0.72; pc[i*4+3]=pi; }
-  gl.uniform3fv(uM.PLp,pp); gl.uniform4fv(uM.PLc,pc); gl.uniform1i(uM.PLn,pn);
-
-  gl.bindVertexArray(vao);
-  drawGroups(visible());
-  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
-  drawGroups(['water','glass']);
-  gl.depthMask(true); gl.disable(gl.BLEND);
-  gl.bindVertexArray(null);
-
-  updateHUD(S, eye, VP);
-}
-/* HUD 与标注 */
-const hud=document.getElementById('hud'), labWrap=document.getElementById('labels');
-const LABELS=[
- {p:[5.05,10.4,8.7], t:'主楼 · 两层 8.8×9.6'},
- {p:[5.05,17.1,4.6], t:'后附房 · 厨房/洗衣/泳池淋浴'},
- {p:[3.85,1.7,2.1],  t:'停车位 · 车行门 4.0 m'},
- {p:[7.40,2.2,2.0],  t:'入户汀步'},
- {p:[2.85,24.9,0.6], t:'游泳池 3.5×6.5'},
- {p:[7.70,22.9,3.9], t:'凉亭 3.3×3.3'},
- {p:[7.50,26.6,0.9], t:'锦鲤池 · 荷花'},
- {p:[3.30,30.1,2.6], t:'菜园 · 番茄茄子葱蒜白菜萝卜'},
- {p:[8.10,30.2,2.2], t:'鸡鸭舍 · 架空笼舍'},
- {p:[7.20,20.0,3.1], t:'洗衣晾衣区'},
- {p:[0.40,31.3,7.2], t:'椰子树'}
-];
-function updateHUD(S,eye,VP){
-  if(hud){
-    const tm=clock(hour);
-    hud.innerHTML = '<b>'+DATES[dateIdx].n+'</b> &nbsp; '+tm
-      + ' &nbsp;·&nbsp; 太阳高度角 '+(S.alt*180/Math.PI).toFixed(1)+'°'
-      + ' &nbsp; 方位角 '+(S.az*180/Math.PI).toFixed(0)+'°'
-      + (S.alt<0 ? ' &nbsp;·&nbsp; 日落后' : '')
-      + (tour!==null ? ' &nbsp;·&nbsp; '+tourPose(tour).name : '');
-  }
-  if(!labWrap) return;
-  if(!showLab || tour!==null){ labWrap.style.display='none'; return; }
-  labWrap.style.display='block';
-  const eyeP=camEye();
-  const BK=[[X0-0.1,Y0-0.1,0, X1+0.1,Y1+0.1, showRoof&&!onlyF1?D.RG:(onlyF1?D.F1-0.2:D.F2)],
-            [X0-0.1,D.ay0-0.1,0, X1+0.1,AY1+0.1,4.15]];
-  const hit=(a,b,B)=>{ let t0=0,t1=1; const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]];
-    for(let i=0;i<3;i++){
-      if(Math.abs(d[i])<1e-9){ if(a[i]<B[i]||a[i]>B[i+3]) return false; continue; }
-      let u1=(B[i]-a[i])/d[i], u2=(B[i+3]-a[i])/d[i];
-      if(u1>u2){const q=u1;u1=u2;u2=q;}
-      t0=Math.max(t0,u1); t1=Math.min(t1,u2); if(t0>t1) return false; }
-    return t1>0.03 && t0<0.96; };
-  const used=[];
-  LABELS.forEach((l,i)=>{
-    let el=labWrap.children[i];
-    if(!el){ el=document.createElement('div'); el.className='lab3d'; labWrap.appendChild(el); }
-    el.textContent=l.t;
-    const p=l.p, cx=VP[0]*p[0]+VP[4]*p[1]+VP[8]*p[2]+VP[12],
-          cy=VP[1]*p[0]+VP[5]*p[1]+VP[9]*p[2]+VP[13],
-          cw=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];
-    if(cw<=0.2){ el.style.display='none'; return; }
-    if(BK.some(B=>hit(eyeP,l.p,B))){ el.style.display='none'; return; }
-    let sx=(cx/cw*0.5+0.5)*W, sy=(1-(cy/cw*0.5+0.5))*Hh;
-    if(sx<50||sx>W-50||sy<14||sy>Hh-14){ el.style.display='none'; return; }
-    let tries=0;
-    while(used.some(u=>Math.abs(u[0]-sx)<120&&Math.abs(u[1]-sy)<16)&&tries<3){ sy-=18; tries++; }
-    if(tries>=3||sy<14){ el.style.display='none'; return; }
-    used.push([sx,sy]);
-    el.style.display='block'; el.style.left=sx+'px'; el.style.top=sy+'px';
-  });
-}
-
-/* ───────────────────────── 26. 交互与控件 ───────────────────────── */
-function resize(){
-  DPR=Math.min(2, window.devicePixelRatio||1);
-  const r=cv.getBoundingClientRect();
-  W=Math.max(320,Math.round(r.width)); Hh=Math.max(300,Math.round(r.height));
-  cv.width=Math.round(W*DPR); cv.height=Math.round(Hh*DPR);
-}
-new ResizeObserver(resize).observe(cv); resize();
-
-let drag=null;
-cv.addEventListener('pointerdown',e=>{ if(tour!==null||cam.pose) return;
-  drag={x:e.clientX,y:e.clientY}; cv.setPointerCapture(e.pointerId); cv.classList.add('drag');
-  const h=document.getElementById('vhint'); if(h) h.style.opacity='0'; });
-cv.addEventListener('pointermove',e=>{ if(!drag) return;
-  cam.az=(cam.az+(e.clientX-drag.x)*0.4)%360;
-  cam.el=Math.max(2,Math.min(86,cam.el-(e.clientY-drag.y)*0.28));
-  drag={x:e.clientX,y:e.clientY}; });
-const stop=()=>{ drag=null; cv.classList.remove('drag'); };
-cv.addEventListener('pointerup',stop); cv.addEventListener('pointercancel',stop);
-cv.addEventListener('wheel',e=>{ if(tour!==null||cam.pose) return; e.preventDefault();
-  cam.d=Math.max(2.2,Math.min(70,cam.d*(1+Math.sign(e.deltaY)*0.09))); },{passive:false});
-let pinch=null;
-cv.addEventListener('touchstart',e=>{ if(e.touches.length===2)
-  pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); });
-cv.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinch&&tour===null){ e.preventDefault();
-  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-  cam.d=Math.max(2.2,Math.min(70,cam.d*pinch/d)); pinch=d; } },{passive:false});
-cv.addEventListener('touchend',()=>{pinch=null;});
-
-const bar=document.querySelector('.vbar');
-function btn(label,on,cb,id){ const b=document.createElement('button'); b.className='vbtn';
-  b.textContent=label; if(on!==null) b.setAttribute('aria-pressed',String(!!on));
-  if(id) b.id=id; b.addEventListener('click',()=>cb(b)); bar.appendChild(b); return b; }
-function spacer(f){ const s=document.createElement('span'); s.style.flex=f||'1 0 10px'; bar.appendChild(s); }
-if(bar){
-  bar.innerHTML='';
-  const views=[['鸟瞰','aerial'],['正立面','front'],['门口','gate'],['入户','entry'],['客厅','living'],
-               ['餐厅','dining'],['厨房','kitchen'],['走廊','hall'],['客房','guest'],['主卧','master'],
-               ['次卧','bed1'],['卫浴','bath'],['泳池','pool'],['凉亭','pavilion'],['菜园','garden'],
-               ['禽舍','coop'],['后院','yard'],['俯视','up']];
-  const vbtns=[];
-  views.forEach(v=>{ const b=btn(v[1]===curView?v[0]:v[0], v[1]===curView, ()=>{
-      tour=null; curView=v[1]; cam=JSON.parse(JSON.stringify(VIEWS[v[1]]));
-      vbtns.forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true');
-      tb.setAttribute('aria-pressed','false');
-    }); vbtns.push(b); });
-  spacer();
-  const tb=btn('▶ 漫游全屋', false, b=>{
-    if(tour===null){ tour=0; tourT=performance.now(); b.setAttribute('aria-pressed','true'); b.textContent='■ 停止漫游';
-      vbtns.forEach(x=>x.setAttribute('aria-pressed','false')); }
-    else { tour=null; b.setAttribute('aria-pressed','false'); b.textContent='▶ 漫游全屋'; }
-  });
-  btn('掀屋顶', false, b=>{ const on=b.getAttribute('aria-pressed')!=='true';
-    b.setAttribute('aria-pressed',String(on)); showRoof=!on; });
-  btn('只看一层', false, b=>{ const on=b.getAttribute('aria-pressed')!=='true';
-    b.setAttribute('aria-pressed',String(on)); onlyF1=on; if(on) showRoof=false; });
-  btn('家具', true, b=>{ const on=b.getAttribute('aria-pressed')!=='true';
-    b.setAttribute('aria-pressed',String(on)); showFurn=on; });
-  btn('标注', true, b=>{ const on=b.getAttribute('aria-pressed')!=='true';
-    b.setAttribute('aria-pressed',String(on)); showLab=on; });
-}
-const tbar=document.querySelector('.tbar');
-if(tbar){
-  tbar.innerHTML='';
-  const mk=(tag,cls)=>{ const e=document.createElement(tag); if(cls) e.className=cls; tbar.appendChild(e); return e; };
-  const lab=mk('span','tlab'); lab.textContent='日照模拟';
-  const sel=mk('select','tsel');
-  DATES.forEach((d,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=d.n;
-    if(i===dateIdx) o.selected=true; sel.appendChild(o); });
-  sel.addEventListener('change',()=>{ dateIdx=+sel.value; });
-  const pb=mk('button','vbtn'); pb.textContent='▶ 播放一天';
-  pb.addEventListener('click',()=>{ playSun=!playSun; pb.textContent=playSun?'❚❚ 暂停':'▶ 播放一天';
-    pb.setAttribute('aria-pressed',String(playSun)); });
-  const rng=mk('input','trng'); rng.type='range'; rng.min='5'; rng.max='19'; rng.step='0.05'; rng.value=String(hour);
-  rng.setAttribute('aria-label','时间');
-  rng.addEventListener('input',()=>{ hour=+rng.value; playSun=false; pb.textContent='▶ 播放一天';
-    pb.setAttribute('aria-pressed','false'); });
-  const rd=mk('span','tval');
-  tbar.__sync=()=>{ rng.value=String(hour);
-    rd.textContent=clock(hour); };
-  tbar.__sync();
-}
-
-/* ───────────────────────── 27. 主循环 ───────────────────────── */
-let last=performance.now(), paused=false;
-function loop(now){
-  const dt=Math.min(0.1,(now-last)/1000); last=now;
-  if(paused){ requestAnimationFrame(loop); return; }
-  if(playSun){ hour+=dt*1.15; if(hour>19){ hour=5; }
-    if(tbar&&tbar.__sync) tbar.__sync(); }
-  if(tour!==null){ tour+=dt; if(tour>TOUR_LEN){ tour=0; } }
-  try{ render(); }catch(err){ console.error(err); return; }
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
-window.__tn = {
-  set(o){ if(o.hour!==undefined) hour=o.hour; if(o.date!==undefined) dateIdx=o.date;
-    if(o.cam) cam=JSON.parse(JSON.stringify(VIEWS[o.cam])); if(o.roof!==undefined) showRoof=o.roof;
-    if(o.f1!==undefined) onlyF1=o.f1; if(o.furn!==undefined) showFurn=o.furn;
-    if(o.tour!==undefined) tour=o.tour; if(o.free) Object.assign(cam,o.free);
-    if(o.lab!==undefined) showLab=o.lab; },
-  stats(){ return {tris:RANGES.__tris, verts:RANGES.__verts, mats:MATS.length, tourLen:TOUR_LEN}; },
-  pause(v){ paused=!!v; },
-  frame(){ paused=true; try{ render(); return 'ok'; }catch(e){ return String(e); } },
-  /* 机位净空探针：返回相机点到各组最近顶点的距离，用于排查“机位卡在家具/树里” */
-  eye(){ return camEye(); },
-  probe(p){ const per={}; let best=1e9, bg='';
-    for(const n of ORDER){ const g=GROUPS[n]; if(!g) continue; let m=1e9;
-      for(let k=0;k<g.v.length;k+=7){ const dx=g.v[k]-p[0], dy=g.v[k+1]-p[1], dz=g.v[k+2]-p[2];
-        const d=dx*dx+dy*dy+dz*dz; if(d<m) m=d; }
-      m=Math.sqrt(m); per[n]=+m.toFixed(3); if(m<best){ best=m; bg=n; } }
-    return {min:+best.toFixed(3), group:bg, per}; }
-};
-console.log('[viewer] 三角面 '+RANGES.__tris+' · 顶点 '+RANGES.__verts+' · 材质 '+MATS.length);
-})();
-
