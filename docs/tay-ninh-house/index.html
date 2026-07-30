@@ -1,0 +1,1590 @@
+<title>西宁自建房设计方案 · 10×32m 地块 · 两层四卧 + 庭院</title>
+
+<style>
+:root{
+  --paper:#F4F6F1; --sheet:#FBFCF9; --vellum:#EDF0E8;
+  --ink:#141810; --ink-2:#3C4436; --muted:#6E7565; --hair:#CDD3C5;
+  --clay:#C0522E; --water:#0095AE; --paddy:#8E8419; --plum:#7360C8;
+  --deep:#0F6E7C; --good:#4A7A2B; --warn:#B07414; --crit:#B03A2E;
+  --s1:.72rem; --s2:.82rem; --s3:.94rem; --s4:1.06rem; --s5:1.35rem;
+  --s6:1.75rem; --s7:2.3rem; --s8:3.1rem;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --serif:"Songti SC","Source Han Serif SC","Noto Serif CJK SC","SimSun",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14160F; --sheet:#1B1E16; --vellum:#22261C;
+    --ink:#EDEFE4; --ink-2:#C3C8B6; --muted:#8D9481; --hair:#353B2C;
+    --clay:#CF6440; --water:#1BA5C0; --paddy:#A0942B; --plum:#8574D6;
+    --deep:#3FAEBE; --good:#7BA84E; --warn:#D19A2E; --crit:#D9614F;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14160F; --sheet:#1B1E16; --vellum:#22261C;
+  --ink:#EDEFE4; --ink-2:#C3C8B6; --muted:#8D9481; --hair:#353B2C;
+  --clay:#CF6440; --water:#1BA5C0; --paddy:#A0942B; --plum:#8574D6;
+  --deep:#3FAEBE; --good:#7BA84E; --warn:#D19A2E; --crit:#D9614F;
+}
+:root[data-theme="light"]{
+  --paper:#F4F6F1; --sheet:#FBFCF9; --vellum:#EDF0E8;
+  --ink:#141810; --ink-2:#3C4436; --muted:#6E7565; --hair:#CDD3C5;
+  --clay:#C0522E; --water:#0095AE; --paddy:#8E8419; --plum:#7360C8;
+  --deep:#0F6E7C; --good:#4A7A2B; --warn:#B07414; --crit:#B03A2E;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:var(--s3); line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 clamp(16px,4vw,40px) 96px}
+.col{max-width:66ch}
+p{margin:0 0 .9em}
+h1,h2,h3,h4{font-family:var(--serif); font-weight:600; text-wrap:balance; margin:0}
+a{color:var(--deep)}
+strong{color:var(--ink); font-weight:600}
+em{font-style:normal; background:color-mix(in srgb,var(--warn) 18%,transparent); padding:0 .18em; border-radius:2px}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+.vn{font-family:var(--mono); font-size:.88em; color:var(--muted)}
+
+/* ── masthead ─────────────────────────────── */
+.mast{padding:clamp(40px,7vw,86px) 0 0}
+.eyebrow{font-family:var(--mono); font-size:var(--s1); letter-spacing:.16em;
+  text-transform:uppercase; color:var(--clay); margin:0 0 18px}
+.mast h1{font-size:clamp(1.9rem,5.2vw,var(--s8)); line-height:1.14; letter-spacing:-.02em}
+.mast .sub{font-size:var(--s4); color:var(--ink-2); margin-top:16px; max-width:56ch}
+.titleblock{
+  margin-top:38px; border:1px solid var(--hair); background:var(--sheet);
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+}
+.tb{padding:14px 16px; border-right:1px solid var(--hair)}
+.tb:last-child{border-right:none}
+.tb dt{font-family:var(--mono); font-size:var(--s1); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 4px}
+.tb dd{margin:0; font-family:var(--mono); font-size:var(--s4); font-variant-numeric:tabular-nums}
+.tb dd small{font-size:var(--s2); color:var(--muted); font-family:var(--sans)}
+
+/* ── verdict banner ───────────────────────── */
+.verdict{margin:34px 0 0; border-left:3px solid var(--clay); background:var(--sheet);
+  padding:20px 22px; display:grid; gap:14px}
+.verdict .big{font-family:var(--mono); font-size:clamp(1.6rem,4vw,2.4rem);
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em; line-height:1}
+.verdict .big span{font-size:var(--s3); color:var(--muted); letter-spacing:0}
+
+/* ── sections ─────────────────────────────── */
+section{margin-top:clamp(56px,8vw,96px); scroll-margin-top:66px}
+.shead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  border-top:2px solid var(--ink); padding-top:12px; margin-bottom:24px}
+.shead .no{font-family:var(--mono); font-size:var(--s2); color:var(--clay); letter-spacing:.08em}
+.shead h2{font-size:clamp(1.3rem,3.2vw,var(--s6)); letter-spacing:-.015em}
+.shead .note{font-family:var(--mono); font-size:var(--s1); color:var(--muted);
+  margin-left:auto; letter-spacing:.06em}
+h3{font-size:var(--s4); margin:32px 0 12px; letter-spacing:-.01em}
+h3:first-child{margin-top:0}
+h4{font-size:var(--s3); font-family:var(--sans); font-weight:650; margin:22px 0 8px}
+
+/* ── drawing sheet ────────────────────────── */
+.sheet{background:var(--sheet); border:1px solid var(--hair); margin:22px 0}
+.sheet-bar{display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:9px 14px; border-bottom:1px solid var(--hair); background:var(--vellum);
+  font-family:var(--mono); font-size:var(--s1); letter-spacing:.07em; color:var(--muted)}
+.sheet-bar b{color:var(--clay); font-weight:600}
+.sheet-bar .sp{margin-left:auto}
+.sheet-body{padding:18px; overflow-x:auto}
+.sheet-body>svg{display:block; margin:0 auto; max-width:100%; height:auto}
+.dual{display:grid; gap:22px; grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+
+/* ── 3D viewer ────────────────────────────── */
+.viewer{position:relative; background:var(--vellum); border:1px solid var(--hair)}
+#c3d{display:block; width:100%; height:clamp(360px,58vh,600px); touch-action:none; cursor:grab}
+#c3d.drag{cursor:grabbing}
+.vbar{display:flex; gap:6px; flex-wrap:wrap; padding:10px 12px; border-top:1px solid var(--hair);
+  background:var(--sheet)}
+.vbtn{font-family:var(--mono); font-size:var(--s2); letter-spacing:.04em;
+  background:transparent; color:var(--ink-2); border:1px solid var(--hair);
+  padding:6px 11px; cursor:pointer; border-radius:2px}
+.vbtn:hover{border-color:var(--deep); color:var(--deep)}
+.vbtn[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.vbtn:focus-visible{outline:2px solid var(--deep); outline-offset:2px}
+.vhint{position:absolute; left:12px; bottom:12px; font-family:var(--mono);
+  font-size:var(--s1); color:var(--muted); background:color-mix(in srgb,var(--sheet) 82%,transparent);
+  padding:4px 8px; border-radius:2px; pointer-events:none}
+.vcompass{position:absolute; right:12px; top:12px; font-family:var(--mono);
+  font-size:var(--s1); color:var(--muted); text-align:center; pointer-events:none; line-height:1.3}
+
+/* ── tables ───────────────────────────────── */
+.tw{overflow-x:auto; margin:18px 0; border:1px solid var(--hair); background:var(--sheet)}
+table{border-collapse:collapse; width:100%; font-size:var(--s2)}
+caption{text-align:left; padding:11px 14px; border-bottom:1px solid var(--hair);
+  background:var(--vellum); font-family:var(--mono); font-size:var(--s1);
+  letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+th,td{padding:8px 12px; text-align:left; border-bottom:1px solid var(--hair); vertical-align:top}
+thead th{font-family:var(--mono); font-size:var(--s1); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); font-weight:500; white-space:nowrap}
+td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tr.sum td{border-top:2px solid var(--ink); font-weight:650; background:var(--vellum)}
+tr.grand td{border-top:2px solid var(--clay); background:color-mix(in srgb,var(--clay) 9%,transparent);
+  font-weight:700; font-size:var(--s3)}
+tr.sub td{background:color-mix(in srgb,var(--muted) 8%,transparent); font-weight:600}
+td small{display:block; color:var(--muted); font-size:.9em; line-height:1.5; margin-top:2px}
+.sw{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+  vertical-align:baseline; flex:none}
+
+/* ── budget bar chart ─────────────────────── */
+.bbar{display:flex; height:44px; border:1px solid var(--hair); background:var(--sheet); gap:2px; padding:2px}
+.bseg{position:relative; display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:var(--s1); color:#fff; overflow:hidden; white-space:nowrap}
+.blegend{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:12px;
+  font-family:var(--mono); font-size:var(--s2)}
+.blegend span{display:flex; align-items:center}
+.blegend em{background:none; padding:0; color:var(--muted); margin-left:7px}
+
+/* ── callouts ─────────────────────────────── */
+.call{border:1px solid var(--hair); border-left:3px solid var(--warn);
+  background:var(--sheet); padding:16px 18px; margin:20px 0}
+.call.risk{border-left-color:var(--crit)}
+.call.ok{border-left-color:var(--good)}
+.call .lab{font-family:var(--mono); font-size:var(--s1); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--warn); margin-bottom:7px}
+.call.risk .lab{color:var(--crit)}
+.call.ok .lab{color:var(--good)}
+.call p:last-child{margin-bottom:0}
+
+/* ── moves grid ───────────────────────────── */
+.moves{display:grid; gap:1px; background:var(--hair); border:1px solid var(--hair);
+  grid-template-columns:repeat(auto-fit,minmax(292px,1fr)); margin:24px 0}
+.move{background:var(--sheet); padding:18px 18px 20px}
+.move .k{font-family:var(--mono); font-size:var(--s1); color:var(--clay);
+  letter-spacing:.1em; margin-bottom:9px}
+.move h4{margin:0 0 7px; font-size:var(--s3)}
+.move p{margin:0; font-size:var(--s2); color:var(--ink-2); line-height:1.65}
+.move .save{display:block; margin-top:10px; font-family:var(--mono); font-size:var(--s1);
+  color:var(--good)}
+
+/* ── phases ───────────────────────────────── */
+.gantt{display:grid; gap:5px; margin:20px 0}
+.grow{display:grid; grid-template-columns:minmax(120px,1.5fr) 3fr auto; gap:12px; align-items:center;
+  font-size:var(--s2)}
+.gtrack{position:relative; height:20px; background:var(--vellum); border:1px solid var(--hair)}
+.gfill{position:absolute; top:0; bottom:0; background:var(--deep); opacity:.85}
+.gfill.perm{background:var(--clay)}
+.gfill.soft{background:var(--paddy)}
+.grow .d{font-family:var(--mono); font-size:var(--s1); color:var(--muted); white-space:nowrap}
+
+ul,ol{margin:0 0 1em; padding-left:1.35em}
+li{margin-bottom:.42em}
+li::marker{color:var(--clay)}
+ul.tight li{margin-bottom:.22em}
+hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
+.foot{margin-top:70px; padding-top:20px; border-top:1px solid var(--hair);
+  font-family:var(--mono); font-size:var(--s1); color:var(--muted); line-height:1.8}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Tây Ninh · 农村自建住宅 · 施工前设计方案</p>
+  <h1>10 × 32 米地块<br>两层四卧住宅 + 全院庭院</h1>
+  <p class="sub">越南西宁省乡镇地块。四卧四卫、大客厅大厨房、泳池、凉亭、锦鲤池、菜园果园鸡鸭区，含转地契与填土费用，总造价控制在 4 万美金以内。</p>
+
+  <dl class="titleblock">
+    <div class="tb"><dt>用地</dt><dd>320 <small>m²（10×32）</small></dd></div>
+    <div class="tb"><dt>建筑面积</dt><dd>182.4 <small>m²</small></dd></div>
+    <div class="tb"><dt>建筑密度</dt><dd>33 <small>%</small></dd></div>
+    <div class="tb"><dt>卧室 / 卫浴</dt><dd>4 / 5</dd></div>
+    <div class="tb"><dt>工期</dt><dd>8–9 <small>个月（含手续）</small></dd></div>
+    <div class="tb"><dt>汇率</dt><dd>26,300 <small>VND/USD</small></dd></div>
+  </dl>
+
+  <div class="verdict">
+    <div>
+      <p class="big">$39,536 <span>／ 1,039.8 百万越南盾</span></p>
+      <p style="margin:.5em 0 0;color:var(--ink-2)">含转地契 <span class="num">$4,620</span>、填土整平 <span class="num">$1,559</span>、房屋 <span class="num">$24,897</span>、庭院 <span class="num">$6,711</span>、其他手续 <span class="num">$304</span>、预备金 <span class="num">$1,445</span>。距 4 万上限还剩 <strong class="num">$464</strong> 空间，另有预备金作缓冲。</p>
+    </div>
+    <p style="margin:0;font-size:var(--s2);color:var(--muted)">这个数字成立有三个前提，缺一个就要超支：① 转地契按 2026 年新政的 30% 优惠税率；② 你自己管施工、自己买材料（不是包工包料整包给施工队）；③ 你所在那条路的住宅用地基准价不超过 <span class="num">150 万越南盾/m²</span>。三项的核实办法和超支应对方案见 <a href="#s7">第 7 节</a>。</p>
+  </div>
+</header>
+
+<!-- ══════════ 1 · 设计策略 ══════════ -->
+<section id="s1">
+  <div class="shead"><span class="no">01</span><h2>设计策略：钱花在哪、省在哪</h2><span class="note">DESIGN MOVES</span></div>
+
+  <div class="col">
+    <p>先说清楚一个矛盾。你要的功能清单（4 间卧室全带独立卫生间、大客厅、大厨房、公厕、杂物间、洗衣晾衣区）如果按常规做法排下来，需要 <span class="num">185–200 m²</span> 建筑面积；而 4 万美金里扣掉转地契、填土和整个院子之后，留给房子的只有 <span class="num">$24,897</span>。按乡镇正常造价，这笔钱只够盖 <span class="num">150 m²</span> 左右。</p>
+    <p>差的这 <span class="num">30–40 m²</span> 是靠下面五个决定补回来的。这五点是整套方案的核心，看懂它们就看懂了预算为什么能收在 4 万以内。</p>
+  </div>
+
+  <div class="moves">
+    <div class="move">
+      <p class="k">MOVE 1</p>
+      <h4>厨房洗衣做成单层后附房</h4>
+      <p>厨房、公厕淋浴、洗衣房、杂物间全部放在主楼后面一个 8.0 × 3.6 米的单层小屋里。单层轻钢屋面的造价只有两层主楼的六成（每平米 225 万 vs 380 万越南盾），却腾出了主楼一层近 30 m² 的宝贵面积给客厅和餐厅。这也是越南农村的通行做法：油烟、潮气、噪音都留在主屋之外。</p>
+      <span class="save">省下约 $1,700，并释放 28.8 m² 面积</span>
+    </div>
+    <div class="move">
+      <p class="k">MOVE 2</p>
+      <h4>公厕兼做泳池冲淋更衣间</h4>
+      <p>公厕不放在一层客厅旁，而是放在后附房里，从洗衣房进入，同时开门通向后院。这样从泳池、菜园、鸡鸭舍回来的人可以直接冲洗、换衣、上厕所，不用踩着湿脚和泥穿过客厅。一个 5.3 m² 的空间同时解决了「公厕」和「泳池更衣淋浴」两个需求。</p>
+      <span class="save">省下一间独立更衣室，约 $600</span>
+    </div>
+    <div class="move">
+      <p class="k">MOVE 3</p>
+      <h4>中间开光井解决采光通风</h4>
+      <p>8 米宽 × 9.6 米深的平面，中间部分见不到光。楼梯间上方开一个 <span class="num">1.4 × 1.1 米</span> 的光井（越南话叫 <span class="vn">giếng trời</span>），加可开启天窗和百叶通风口。热空气从光井抽走，前后窗形成对流，等于给全屋装了一台不用电的排风扇——西宁 4 月能到 38°C，这一笔比装空调划算得多。</p>
+      <span class="save">造价约 $340，长期省电费</span>
+    </div>
+    <div class="move">
+      <p class="k">MOVE 4</p>
+      <h4>基础挖穿填土层落到原状土</h4>
+      <p>你的地要填 0.6 米。新填的土会继续沉降，浅基础直接坐在填土上一定裂。做法是：先填土压实、静置 45 天，然后条形基础的基槽挖深 1.0–1.2 米，穿过填土层坐到下面的原状土上。这样不用打桩（打桩要多花 <span class="num">$1,100–1,900</span>），也不会出现不均匀沉降。</p>
+      <span class="save">避开 $1,100–1,900 的桩基费用</span>
+    </div>
+    <div class="move">
+      <p class="k">MOVE 5</p>
+      <h4>围墙分两段：前段砌砖，后段网栅绿篱</h4>
+      <p>沿街 10 米和两侧靠前的各 10 米做 1.9 米砌体围墙（这是脸面和安全的部分），后面 50 米改成混凝土柱 + 镀锌网 + 九里香绿篱。造价从每米 60 万降到 20 万越南盾。后院被绿篱围着比被水泥墙围着好看，也更通风。</p>
+      <span class="save">省下约 $1,140</span>
+    </div>
+    <div class="move">
+      <p class="k">MOVE 6</p>
+      <h4>转地契只转 300 m²，后 20 m² 留作农业地</h4>
+      <p>菜园、果树、鸡鸭舍所在的最后一条 2 米宽地块不转性质——种菜养鸡本身就是农业用途，完全合法，还省下一笔转让费。<em>注意</em>：30% 的优惠税率每户每块地只能用一次，所以该转的面积必须一次性转足，不要分两次办。</p>
+      <span class="save">省下约 $260，且不影响使用</span>
+    </div>
+  </div>
+
+  <div class="call ok">
+    <p class="lab">造价基准说明</p>
+    <p>房屋按 <strong>每平米 359 万越南盾（约 $136）</strong> 计算，这是<strong>业主自管、自购材料、按项包清工</strong>的乡镇价格。如果整包给施工队（<span class="vn">xây nhà trọn gói</span>），2026 年市场价是每平米 450–550 万越南盾，同样面积要多花 <span class="num">$5,000–7,000</span>，4 万预算必然突破。这是本方案最重要的一个前提假设。</p>
+  </div>
+</section>
+
+<!-- ══════════ 2 · 3D ══════════ -->
+<section id="s2">
+  <div class="shead"><span class="no">02</span><h2>3D 效果图</h2><span class="note">DWG-01 · 可交互模型</span></div>
+
+  <div class="col">
+    <p>下面是按本方案实际尺寸建的三维模型，不是示意图——每一面墙、每一棵树的位置都和后面的平面图一致。<strong>用鼠标拖动可以转视角，滚轮缩放</strong>；手机上单指拖动、双指缩放。</p>
+    <p>点「掀屋顶」可以把屋面拿掉从上往下看隔墙，点「只看一层 / 只看二层」可以逐层查看——这是理解平面最快的方式。</p>
+  </div>
+
+  <div class="viewer">
+    <canvas id="c3d" aria-label="住宅与庭院三维模型，可拖动旋转"></canvas>
+    <div class="vcompass"><span id="cArrow" style="display:block;font-size:1.15em">↑</span>北 · 后</div>
+    <div class="vhint" id="vhint">拖动旋转 · 滚轮缩放</div>
+  </div>
+  <div class="vbar">
+    <button class="vbtn" data-view="aerial" aria-pressed="true">鸟瞰全景</button>
+    <button class="vbtn" data-view="front">正立面</button>
+    <button class="vbtn" data-view="pool">泳池视角</button>
+    <button class="vbtn" data-view="yard">后院回望</button>
+    <button class="vbtn" data-view="pavilion">凉亭视角</button>
+    <span style="flex:1 0 12px"></span>
+    <button class="vbtn" id="tRoof">掀屋顶</button>
+    <button class="vbtn" id="tFloor">只看一层</button>
+    <button class="vbtn" id="tLabel" aria-pressed="true">标注</button>
+  </div>
+  <p style="font-family:var(--mono);font-size:var(--s1);color:var(--muted);margin-top:10px">
+    模型为体量与布局的准确表达（尺寸、层高、朝向、构件位置均按图纸），材质与植物为示意。屋面为低坡隐藏式金属瓦屋面，正面右侧竖向构件为仿木铝合金遮阳格栅。
+  </p>
+</section>
+
+<!-- ══════════ 3 · 总平面 ══════════ -->
+<section id="s3">
+  <div class="shead"><span class="no">03</span><h2>总平面图</h2><span class="note">DWG-02 · 1:150</span></div>
+
+  <div class="col">
+    <p>地块 10 米宽、32 米深，短边临路。整块地从前到后分成五段：停车前院 5.6 米、主楼 9.6 米、后附房 3.6 米、泳池凉亭区 8.2 米、菜园鸡鸭区 2.6 米。</p>
+    <p>房子左右各留通道：<strong>左侧 1.4 米</strong>走排水、放室外机、种木瓜柠檬；<strong>右侧 0.6 米</strong>只做排水沟和香蕉。房子不贴边建，是为了让一层那间卧室和餐厅有侧窗——这在 8 米宽的深平面里是采光的关键。</p>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-bar"><b>DWG-02</b> 总平面图 SITE PLAN <span class="sp">比例 1:150 · 单位 m</span></div>
+    <div class="sheet-body" id="sitePlan"></div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>用地平衡表 · 总用地 320 m²</caption>
+      <thead><tr><th>分区</th><th class="n">面积 m²</th><th class="n">占比</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>建筑占地</td><td class="n">105.6</td><td class="n">33.0%</td><td>主楼 76.8（8.0×9.6）+ 后附房 28.8（8.0×3.6）</td></tr>
+        <tr><td>硬质铺装</td><td class="n">62.4</td><td class="n">19.5%</td><td>停车位与车道 24、入户步道 6、泳池边铺装 24、晾衣区 8.4</td></tr>
+        <tr><td>泳池水面</td><td class="n">22.8</td><td class="n">7.1%</td><td>3.5 × 6.5 米</td></tr>
+        <tr><td>凉亭 + 锦鲤池</td><td class="n">13.7</td><td class="n">4.3%</td><td>凉亭 9.0（3×3）+ 鱼池 4.7（2.6×1.8）</td></tr>
+        <tr><td>草坪与灌木</td><td class="n">44.5</td><td class="n">13.9%</td><td>后院草坪 32、前院绿化 12.5</td></tr>
+        <tr><td>菜园</td><td class="n">19.4</td><td class="n">6.1%</td><td>6.7 × 2.9 米，砌边高畦 + 滴灌 + 爬藤棚架</td></tr>
+        <tr><td>鸡鸭区</td><td class="n">5.5</td><td class="n">1.7%</td><td>禽舍 3.2 + 活动围网区 2.3</td></tr>
+        <tr><td>两侧通道</td><td class="n">46.1</td><td class="n">14.4%</td><td>左 1.4 米（含果树带）、右 0.6 米（排水）</td></tr>
+        <tr class="sum"><td>合计</td><td class="n">320.0</td><td class="n">100%</td><td>绿地率（草坪+菜园+果树带）约 <span class="num">28%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>后院为什么这样排</h3>
+  <div class="col">
+    <p><strong>泳池靠左、凉亭靠右</strong>：泳池长边顺着地块深度放，这样 3.5 米宽的池子左右都还能留出 0.7–1.0 米的走边；凉亭放在右侧正对泳池，坐在亭子里能同时看到泳池和锦鲤池。</p>
+    <p><strong>锦鲤池紧贴凉亭</strong>：鱼池 2.6 × 1.8 米、深 1.2 米，蓄水约 5.6 m³，就在凉亭南侧 0.8 米——坐着伸手就能喂鱼。锦鲤建议养 <span class="num">6–8 尾</span>（15–20 cm），金鱼 <span class="num">10–15 尾</span>，超过这个密度这个水体撑不住。</p>
+    <p><strong>鸡鸭舍在最远的右后角</strong>：离主楼 13 米、离泳池 4 米以上，且在常年下风向。中间隔着菜园，气味和苍蝇到不了住人的地方。禽粪就近堆在菜园角落的堆肥箱里，正好给菜施肥。</p>
+    <p><strong>菜园在最后一条</strong>：这块地是唯一不转地契、保留农业性质的部分（19.4 m²），种菜养禽本身就是合法的农业用途。后墙边上一排种果树（番石榴、芒果、龙眼各一株），前面做高畦种菜，上方架瓜藤，一块地用三层。</p>
+  </div>
+</section>
+
+<!-- ══════════ 4 · 平面图 ══════════ -->
+<section id="s4">
+  <div class="shead"><span class="no">04</span><h2>各层平面图</h2><span class="note">DWG-03 / 04 · 1:100</span></div>
+
+  <div class="dual">
+    <div class="sheet">
+      <div class="sheet-bar"><b>DWG-03</b> 一层 + 后附房 <span class="sp">1:100</span></div>
+      <div class="sheet-body" id="plan1"></div>
+    </div>
+    <div class="sheet">
+      <div class="sheet-bar"><b>DWG-04</b> 二层 <span class="sp">1:100</span></div>
+      <div class="sheet-body" id="plan2"></div>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>房间面积明细 · 使用面积合计 162.1 m² / 建筑面积 182.4 m²</caption>
+      <thead><tr><th>层</th><th>房间</th><th class="n">尺寸 m</th><th class="n">使用面积 m²</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr class="sub"><td colspan="5">一层主楼（8.0 × 9.6 = 76.8 m² 建筑面积）</td></tr>
+        <tr><td>1F</td><td>客厅</td><td class="n">4.15 × 5.20</td><td class="n">21.6</td><td>全屋最大房间。前面整面推拉玻璃门通门廊，左侧开侧窗，与餐厅之间 2.1 米宽通口</td></tr>
+        <tr><td>1F</td><td>餐厅</td><td class="n">4.15 × 4.00</td><td class="n">16.6</td><td>直接连通后面的厨房，餐厨一体使用面积达 <span class="num">29.5 m²</span></td></tr>
+        <tr><td>1F</td><td>玄关</td><td class="n">3.45 × 1.10</td><td class="n">3.8</td><td>入户门在右侧，进门不直冲客厅</td></tr>
+        <tr><td>1F</td><td>楼梯间</td><td class="n">3.45 × 3.40</td><td class="n">11.7</td><td>U 型双跑楼梯，18 级、踏步 260 × 183 mm；梯下 2.0 m² 储物；上方光井</td></tr>
+        <tr><td>1F</td><td>次卧 3（老人房）</td><td class="n">3.45 × 3.00</td><td class="n">10.4</td><td>一层设卧室是给老人和客人用的，不用爬楼梯；右侧开窗</td></tr>
+        <tr><td>1F</td><td>└ 卫生间 3</td><td class="n">1.60 × 1.60</td><td class="n">2.6</td><td>独立卫浴：坐便 + 台盆 + 淋浴（干湿用玻璃隔断）</td></tr>
+        <tr><td>1F</td><td>设备 / 储物间</td><td class="n">1.75 × 1.60</td><td class="n">2.8</td><td>从餐厅开门进入。配电箱、增压泵、太阳能热水器水箱管路；也可改作神龛间（<span class="vn">phòng thờ</span>）</td></tr>
+        <tr class="sub"><td colspan="5">后附房 · 单层（8.0 × 3.6 = 28.8 m² 建筑面积）</td></tr>
+        <tr><td>附</td><td>厨房</td><td class="n">3.90 × 3.30</td><td class="n">12.9</td><td>L 形操作台 4.2 米 + 石材台面；油烟与潮气不进主楼；左侧大窗</td></tr>
+        <tr><td>附</td><td>公厕 + 淋浴</td><td class="n">1.60 × 3.30</td><td class="n">5.3</td><td>兼作泳池冲淋更衣间，从洗衣房进入，另有门通后院</td></tr>
+        <tr><td>附</td><td>洗衣房</td><td class="n">2.00 × 1.75</td><td class="n">3.5</td><td>洗衣机 + 水槽 + 热水器；后门直通晾衣棚</td></tr>
+        <tr><td>附</td><td>杂物间</td><td class="n">2.00 × 1.45</td><td class="n">2.9</td><td>农具、化肥、泳池药剂、行李箱</td></tr>
+        <tr class="sub"><td colspan="5">二层（8.0 × 9.6 = 76.8 m² 建筑面积）</td></tr>
+        <tr><td>2F</td><td>主卧</td><td class="n">4.15 × 4.20</td><td class="n">17.4</td><td>前向，带 4.15 × 1.20 米前阳台；1.8 米宽落地窗</td></tr>
+        <tr><td>2F</td><td>└ 衣帽间</td><td class="n">1.80 × 1.60</td><td class="n">2.9</td><td>U 形挂衣，进深 0.6 米挂衣区 + 中间 0.9 米通道</td></tr>
+        <tr><td>2F</td><td>└ 主卫</td><td class="n">2.25 × 1.60</td><td class="n">3.6</td><td>坐便 + 台盆 + 独立淋浴房</td></tr>
+        <tr><td>2F</td><td>次卧 1</td><td class="n">L 形 10.5</td><td class="n">10.5</td><td>后向，左侧与后侧双向开窗，采光最好的次卧；含 2.4 m² 衣柜凹室</td></tr>
+        <tr><td>2F</td><td>└ 卫生间 1</td><td class="n">1.60 × 1.70</td><td class="n">2.7</td><td>后墙开高窗直接排气</td></tr>
+        <tr><td>2F</td><td>次卧 2</td><td class="n">3.45 × 2.90</td><td class="n">10.0</td><td>右侧开窗，外挂仿木铝合金遮阳格栅挡西晒</td></tr>
+        <tr><td>2F</td><td>└ 卫生间 2</td><td class="n">1.75 × 1.70</td><td class="n">3.0</td><td>后墙开高窗</td></tr>
+        <tr><td>2F</td><td>楼梯厅 · 光井</td><td class="n">3.45 × 4.50</td><td class="n">15.2</td><td>兼起居小厅；光井 1.4 × 1.1 米，配可开启天窗与百叶通风口</td></tr>
+        <tr><td>2F</td><td>后阳台</td><td class="n">1.60 × 1.70</td><td class="n">2.7</td><td>二楼晾衣位，雨天备用</td></tr>
+        <tr class="sum"><td colspan="3">使用面积合计</td><td class="n">162.1</td><td>另有前阳台 5.0、门廊雨棚 9.6、后晾衣棚 7.2 m²（半室外，不计全额造价）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <p class="lab">卧室尺寸的取舍</p>
+    <p>三间次卧都是 <span class="num">10–10.5 m²</span>，摆得下 1.5 米双人床 + 衣柜 + 书桌，但不宽敞；四间卫浴都在 <span class="num">2.7–3.6 m²</span>，是「坐便 + 台盆 + 淋浴」的紧凑配置，装不下浴缸。这是 4 万预算下必须做的让舍——如果你愿意把预算提到 <span class="num">$44,000</span>，主楼进深可以从 9.6 米加到 11.2 米，三间次卧都能到 13 m²、卫浴到 4.5 m²。要不要加这 4 千，是这套方案里最值得你先想清楚的一件事。</p>
+  </div>
+</section>
+
+<!-- ══════════ 5 · 立面剖面 ══════════ -->
+<section id="s5">
+  <div class="shead"><span class="no">05</span><h2>正立面与通风采光剖面</h2><span class="note">DWG-05 / 06 · 1:100</span></div>
+
+  <div class="dual">
+    <div class="sheet">
+      <div class="sheet-bar"><b>DWG-05</b> 正立面（临路面） <span class="sp">1:100</span></div>
+      <div class="sheet-body" id="elev"></div>
+    </div>
+    <div class="sheet">
+      <div class="sheet-bar"><b>DWG-06</b> 纵剖面 · 通风采光 <span class="sp">1:100</span></div>
+      <div class="sheet-body" id="sect"></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>立面语言</h3>
+    <p>2026 年越南乡镇自建房的主流做法，也是最经济的做法：<strong>低坡金属瓦屋面藏在女儿墙后面</strong>（<span class="vn">mái lệch / mái tôn giả bằng</span>），立面靠横向线条和体块错位做层次，不做欧式线脚和罗马柱——那些石膏线脚每米要 12 万越南盾，一栋房子做下来就是 <span class="num">$400</span>，全部省掉。</p>
+    <p>三种材料就够了：<strong>白色抗碱外墙涂料</strong>为主，<strong>深灰色涂料</strong>做腰线、门套和屋檐收边，<strong>仿木纹铝合金格栅</strong>做右侧楼梯间和二层次卧的遮阳。格栅是唯一的「装饰性」花费（约 <span class="num">$300</span>），但它同时挡西晒、遮楼梯间的空调管、给正立面一个记得住的面孔，一笔钱办三件事。</p>
+
+    <h3>不用电的降温措施</h3>
+    <ul>
+      <li><strong>屋檐挑出 0.6 米</strong>：正午太阳高度角大，0.6 米挑檐能把二层窗户上半部完全遮住，成本只有几十美金的钢架和瓦。</li>
+      <li><strong>屋面隔热</strong>：三层夹芯隔热彩钢瓦 + 石膏板吊顶，中间留 30 cm 通风空腔，山墙两端开百叶让热空气自己跑掉。比单层彩钢瓦贵 <span class="num">$150</span>，但二层下午能低 3–4°C。</li>
+      <li><strong>光井烟囱效应</strong>：楼梯间光井顶部的可开启天窗和百叶是整套通风的核心。热空气从光井顶部排出，带动一层前门后门形成穿堂风。</li>
+      <li><strong>前后对穿</strong>：一层客厅（前）—餐厅—厨房（后）三个空间在一条直线上且门洞对齐，形成 13 米长的贯通风道。</li>
+      <li><strong>太阳能热水器</strong>：屋面装 1 台 180 升太阳能热水器（约 <span class="num">$230</span>），供主卫和次卧 1、2；一层和后附房用即热式电热水器。西宁的日照条件下一年能省下大部分洗澡电费。</li>
+    </ul>
+
+    <h3>结构与抗风</h3>
+    <ul>
+      <li><strong>基础</strong>：钢筋混凝土条形基础 + 地梁，基槽挖深 1.0–1.2 米穿过填土层坐到原状土。</li>
+      <li><strong>主体</strong>：钢筋混凝土框架，柱 200 × 200 mm，间距不超过 3.5 米；墙体 100 mm 空心砖，每 3.5 米设一根构造柱、每层设圈梁。</li>
+      <li><strong>层高</strong>：一层和二层均为 3.3 米（结构层高），吊顶后净高约 3.0 米。室内地坪比室外高 0.35 米，室外地坪比路面高 0.15 米——雨季倒灌的余量留在这里。</li>
+      <li><strong>屋面抗风</strong>：西宁 5–8 月雷雨大风，屋面钢架间距不超过 1.0 米，自攻钉加密到每波一钉并加压条，檩条与圈梁用预埋件焊接。这一项别省，掀顶的维修费远超加固费。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ 6 · 装修标准 ══════════ -->
+<section id="s6">
+  <div class="shead"><span class="no">06</span><h2>装修标准与材料清单</h2><span class="note">SPECIFICATION</span></div>
+
+  <div class="col">
+    <p>预算能不能守住，八成取决于材料档次。下面这张表就是本方案 <span class="num">$39,536</span> 对应的具体档次——<strong>越南本土品牌为主，够用、好修、好买</strong>。买材料时直接拿这张表去建材店比价，不要让施工队代买。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>材料与设备规格表</caption>
+      <thead><tr><th>部位</th><th>规格档次</th><th>参考品牌 / 型号</th><th class="n">单价参考</th></tr></thead>
+      <tbody>
+        <tr><td>水泥</td><td>PCB40 袋装</td><td>Hà Tiên / INSEE / Nghi Sơn</td><td class="n">85,000 <small>đ/袋 50kg</small></td></tr>
+        <tr><td>钢筋</td><td>CB300-V / CB400-V</td><td>Hòa Phát / Pomina / Việt Nhật</td><td class="n">17,500 <small>đ/kg</small></td></tr>
+        <tr><td>砌块</td><td>100 mm 四孔空心砖</td><td>本地砖窑（<span class="vn">gạch ống 4 lỗ</span>）</td><td class="n">1,450 <small>đ/块</small></td></tr>
+        <tr><td>屋面</td><td>三层夹芯隔热彩钢瓦，厚 0.42 mm</td><td>Hoa Sen / Đông Á（<span class="vn">tôn 3 lớp PU</span>）</td><td class="n">175,000 <small>đ/m²</small></td></tr>
+        <tr><td>吊顶</td><td>石膏板 + 镀锌龙骨，卧室与楼梯厅做</td><td>Vĩnh Tường 龙骨 + Gyproc 板</td><td class="n">180,000 <small>đ/m²</small></td></tr>
+        <tr><td>地砖</td><td>600 × 600 抛釉砖，二级品</td><td>Đồng Tâm / Viglacera / Prime</td><td class="n">165,000 <small>đ/m²</small></td></tr>
+        <tr><td>卫生间砖</td><td>300 × 600 墙砖贴到 1.8 m + 300 × 300 防滑地砖</td><td>Prime / Catalan</td><td class="n">145,000 <small>đ/m²</small></td></tr>
+        <tr><td>涂料</td><td>内墙 2 底 1 面，外墙抗碱抗霉 2 底 2 面</td><td>Jotun Jotashield（外）/ Mykolor（内）</td><td class="n">55,000 <small>đ/m²</small></td></tr>
+        <tr><td>门（入户）</td><td>防盗钢质门 或 复合实木门</td><td>本地定制，1.0 × 2.3 m</td><td class="n">6,000,000 <small>đ/扇</small></td></tr>
+        <tr><td>门（卧室）</td><td>MDF 防潮饰面门 + 五金</td><td>Huge / An Cường 板材</td><td class="n">2,200,000 <small>đ/扇</small></td></tr>
+        <tr><td>门（卫浴）</td><td>ABS 塑钢门（防水，不变形）</td><td>本地成品</td><td class="n">1,300,000 <small>đ/扇</small></td></tr>
+        <tr><td>窗</td><td>铝合金推拉 / 平开 + 5 mm 钢化玻璃 + 纱窗</td><td>Xingfa 系 或 越南本土型材</td><td class="n">1,350,000 <small>đ/m²</small></td></tr>
+        <tr><td>遮阳格栅</td><td>仿木纹铝合金方管 50 × 100，间距 120 mm</td><td>本地加工，约 12 m²</td><td class="n">650,000 <small>đ/m²</small></td></tr>
+        <tr><td>卫浴洁具</td><td>坐便 + 台盆 + 龙头 + 花洒 + 地漏（每套）</td><td>Viglacera / Caesar / Inax 入门线</td><td class="n">5,400,000 <small>đ/套</small></td></tr>
+        <tr><td>热水</td><td>屋面 180 L 太阳能（供二层 3 卫）+ 即热式 ×2（一层与后附房）</td><td>Sơn Hà / Đại Thành + Panasonic 即热</td><td class="n">6,000,000 / 1,800,000</td></tr>
+        <tr><td>电线</td><td>照明 2×1.5、插座 2×2.5、空调专线 2×4.0 mm²</td><td>Cadivi / Trần Phú</td><td class="n">— <small>按回路计</small></td></tr>
+        <tr><td>开关插座</td><td>面板式，每卧室 4 组插座 + 空调专用</td><td>Panasonic Wide / Schneider Zencelo</td><td class="n">85,000 <small>đ/组</small></td></tr>
+        <tr><td>给水管</td><td>PPR 热熔（冷热分设），排水 PVC D110</td><td>Bình Minh / Đệ Nhất</td><td class="n">— <small>按米计</small></td></tr>
+        <tr><td>厨房橱柜</td><td>防潮 MDF 柜体 + 天然花岗岩台面 + 不锈钢水槽 + 抽油烟机</td><td>本地木工定制 4.2 m</td><td class="n">24,000,000 <small>đ/整套</small></td></tr>
+        <tr><td>栏杆</td><td>方钢管 + 仿木扶手，阳台高 1.1 m、楼梯 0.9 m</td><td>本地铁艺</td><td class="n">850,000 <small>đ/m</small></td></tr>
+        <tr><td>防水</td><td>卫浴与阳台 2 遍聚合物水泥基 + 屋面女儿墙根部加强</td><td>Sika / Kova CT-11A</td><td class="n">95,000 <small>đ/m²</small></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <p class="lab">不要在这四项上省钱</p>
+    <p><strong>① 防水</strong>——四个卫生间加屋面，返修一次的代价是当初做好的十倍。<strong>② 钢筋</strong>——一定要正品有标记的，别用来源不明的便宜货。<strong>③ 电线截面</strong>——空调必须单独 4 mm² 专线，四个卫生间的热水器同理。<strong>④ 屋面固定件</strong>——见前面抗风那一条。其余任何项目都可以降档。</p>
+  </div>
+</section>
+
+<!-- ══════════ 7 · 预算 ══════════ -->
+<section id="s7">
+  <div class="shead"><span class="no">07</span><h2>预算总表</h2><span class="note">BUDGET · 汇率 26,300 VND/USD</span></div>
+
+  <div class="col">
+    <p>下面先看四大块的构成，再逐项拆。所有金额以<strong>越南盾百万（M₫）</strong>为记账单位，因为你实际付款、和施工队谈价都是用这个单位；美金列是按 <span class="num">26,300</span> 折算的参考值。</p>
+  </div>
+
+  <div class="bbar" role="img" aria-label="预算构成：房屋 63.0%，庭院 17.0%，土地与场地 16.4%，预备金 3.7%">
+    <div class="bseg" style="flex:0 0 63.0%;background:var(--clay)">房屋 63.0%</div>
+    <div class="bseg" style="flex:0 0 17.0%;background:var(--water)">庭院 17.0%</div>
+    <div class="bseg" style="flex:0 0 16.4%;background:var(--paddy)">土地 16.4%</div>
+    <div class="bseg" style="flex:0 0 3.7%;background:var(--plum)"></div>
+  </div>
+  <div class="blegend">
+    <span><i class="sw" style="background:var(--clay)"></i>房屋主体与装修 <em>654.8 M₫ · $24,897</em></span>
+    <span><i class="sw" style="background:var(--water)"></i>庭院工程 <em>176.5 M₫ · $6,711</em></span>
+    <span><i class="sw" style="background:var(--paddy)"></i>土地与场地 <em>170.5 M₫ · $6,483</em></span>
+    <span><i class="sw" style="background:var(--plum)"></i>预备金 <em>38.0 M₫ · $1,445</em></span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>A · 土地与场地平整</caption>
+      <thead><tr><th>编号</th><th>项目</th><th class="n">数量</th><th class="n">M₫</th><th class="n">USD</th></tr></thead>
+      <tbody>
+        <tr><td>A1</td><td>转地契土地使用费<small>农业地转住宅地，<span class="vn">tiền sử dụng đất</span>；按 300 m² × 差价 135 万 × 30%</small></td><td class="n">300 m²</td><td class="n">121.5</td><td class="n">4,620</td></tr>
+        <tr><td>A2</td><td>手续费用<small>测绘出图、申请受理、审核评估、换发新证、公证与代办服务费</small></td><td class="n">1 项</td><td class="n">8.0</td><td class="n">304</td></tr>
+        <tr><td>A3</td><td>购买填土<small>本地土场自卸车送到，含运费</small></td><td class="n">230 m³</td><td class="n">29.9</td><td class="n">1,137</td></tr>
+        <tr><td>A4</td><td>推平与分层压实<small>挖机 1 天 + 振动压路机 1 天 + 人工</small></td><td class="n">320 m²</td><td class="n">7.0</td><td class="n">266</td></tr>
+        <tr><td>A5</td><td>房屋垫层砂石屑<small>室内地坪垫层</small></td><td class="n">16 m³</td><td class="n">4.1</td><td class="n">156</td></tr>
+        <tr class="sum"><td colspan="3">A 小计</td><td class="n">170.5</td><td class="n">6,483</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>B · 房屋主体与装修 · 建筑面积 182.4 m²（约 359 万đ/m²，$136/m²）</caption>
+      <thead><tr><th>编号</th><th>项目</th><th class="n">数量</th><th class="n">M₫</th><th class="n">USD</th></tr></thead>
+      <tbody>
+        <tr class="sub"><td colspan="5">结构与围护</td></tr>
+        <tr><td>B1</td><td>基础<small>条形基础 + 地梁，基槽挖深 1.0–1.2 m 至原状土；含化粪池坑</small></td><td class="n">105.6 m²</td><td class="n">74.0</td><td class="n">2,814</td></tr>
+        <tr><td>B2</td><td>钢筋混凝土框架<small>柱、梁、二层楼板、屋面板、后附房结构</small></td><td class="n">— </td><td class="n">134.0</td><td class="n">5,095</td></tr>
+        <tr><td>B3</td><td>砌墙与双面抹灰<small>约 400 m² 墙体，100 mm 空心砖</small></td><td class="n">400 m²</td><td class="n">98.0</td><td class="n">3,726</td></tr>
+        <tr><td>B4</td><td>楼梯<small>混凝土梯段 18 级 + 花岗岩面层</small></td><td class="n">1 部</td><td class="n">18.0</td><td class="n">684</td></tr>
+        <tr><td>B5</td><td>屋面 · 吊顶 · 天窗<small>隔热彩钢瓦 + 钢架 + 石膏板吊顶 + 光井可开启天窗与百叶</small></td><td class="n">106 m²</td><td class="n">32.0</td><td class="n">1,217</td></tr>
+        <tr><td>B6</td><td>防水<small>5 处卫浴 + 屋面 + 阳台 + 女儿墙根部</small></td><td class="n">— </td><td class="n">11.0</td><td class="n">418</td></tr>
+        <tr class="sub"><td colspan="5">装修</td></tr>
+        <tr><td>B7</td><td>地面铺砖与踢脚<small>600×600 抛釉砖</small></td><td class="n">162 m²</td><td class="n">34.5</td><td class="n">1,312</td></tr>
+        <tr><td>B8</td><td>卫浴墙地砖<small>4 间独立卫浴 + 公厕淋浴间</small></td><td class="n">5 间</td><td class="n">20.0</td><td class="n">760</td></tr>
+        <tr><td>B9</td><td>内外墙涂料<small>内墙约 380 m² + 外墙约 240 m²</small></td><td class="n">620 m²</td><td class="n">28.0</td><td class="n">1,065</td></tr>
+        <tr><td>B10</td><td>门<small>入户门 1 + 卧室门 4 + 卫浴 ABS 门 5 + 厨房洗衣门 3</small></td><td class="n">13 扇</td><td class="n">25.0</td><td class="n">951</td></tr>
+        <tr><td>B11</td><td>窗与遮阳格栅<small>铝合金玻璃窗约 20 m²（含纱窗）+ 仿木铝格栅 12 m²</small></td><td class="n">32 m²</td><td class="n">28.0</td><td class="n">1,065</td></tr>
+        <tr><td>B12</td><td>卫浴洁具<small>5 套：坐便、台盆、龙头、花洒、玻璃隔断、五金</small></td><td class="n">5 套</td><td class="n">27.0</td><td class="n">1,027</td></tr>
+        <tr><td>B13</td><td>电气<small>配管配线、开关插座、灯具、配电箱、接地、网络线</small></td><td class="n">182 m²</td><td class="n">35.0</td><td class="n">1,331</td></tr>
+        <tr><td>B14</td><td>给排水与热水<small>PPR 冷热管、PVC 排水、增压泵、太阳能热水器 1 台、即热式 2 台</small></td><td class="n">— </td><td class="n">21.0</td><td class="n">798</td></tr>
+        <tr><td>B15</td><td>厨房橱柜<small>上下柜 4.2 m + 花岗岩台面 + 水槽 + 抽油烟机</small></td><td class="n">1 套</td><td class="n">24.0</td><td class="n">913</td></tr>
+        <tr><td>B16</td><td>衣帽间与衣柜<small>主卧衣帽间柜体 + 3 间次卧简易衣柜</small></td><td class="n">4 处</td><td class="n">12.0</td><td class="n">456</td></tr>
+        <tr><td>B17</td><td>栏杆<small>阳台 + 楼梯，方钢 + 仿木扶手</small></td><td class="n">14 m</td><td class="n">12.0</td><td class="n">456</td></tr>
+        <tr><td>B18</td><td>门廊雨棚 · 前阳台 · 后晾衣棚<small>轻钢 + 聚碳酸酯板 / 混凝土板</small></td><td class="n">22 m²</td><td class="n">13.0</td><td class="n">494</td></tr>
+        <tr><td>B19</td><td>建筑许可与施工图<small><span class="vn">giấy phép xây dựng</span> + 施工图纸 + 放线定位</small></td><td class="n">1 项</td><td class="n">8.3</td><td class="n">316</td></tr>
+        <tr class="sum"><td colspan="3">B 小计</td><td class="n">654.8</td><td class="n">24,897</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>C · 庭院工程</caption>
+      <thead><tr><th>编号</th><th>项目</th><th class="n">数量</th><th class="n">M₫</th><th class="n">USD</th></tr></thead>
+      <tbody>
+        <tr><td>C1</td><td>砌体围墙<small>高 1.9 m，沿街 10 m（扣门洞）+ 两侧靠前各 10 m；含压顶与涂料</small></td><td class="n">30 m</td><td class="n">32.0</td><td class="n">1,217</td></tr>
+        <tr><td>C2</td><td>网栅围栏 + 绿篱<small>混凝土柱 + 镀锌网 1.8 m + 九里香绿篱；两侧后段与后墙</small></td><td class="n">50 m</td><td class="n">10.0</td><td class="n">380</td></tr>
+        <tr><td>C3</td><td>大门<small>4.0 m 推拉车行门（方钢 + 折板）+ 0.9 m 人行门</small></td><td class="n">2 扇</td><td class="n">13.0</td><td class="n">494</td></tr>
+        <tr><td>C4</td><td>游泳池<small>3.5 × 6.5 m，浅端 0.95 / 深端 1.45 m；200 mm 钢混池壁 + 防水砂浆 + 泳池砖 + 壁挂式一体过滤（省机房）+ 直角梯 + 防滑压顶</small></td><td class="n">22.8 m²</td><td class="n">48.0</td><td class="n">1,825</td></tr>
+        <tr><td>C5</td><td>凉亭<small>3 × 3 m，混凝土基础 + 钢柱包仿木 + 仿瓦屋面 + 砖砌地坪 + 固定石桌凳</small></td><td class="n">9 m²</td><td class="n">11.0</td><td class="n">418</td></tr>
+        <tr><td>C6</td><td>锦鲤 / 金鱼池<small>2.6 × 1.8 × 深 1.2 m（约 5.6 m³）；钢混池体 + 三格重力过滤 + 3000 L/h 水泵 + 置石与跌水</small></td><td class="n">4.7 m²</td><td class="n">9.0</td><td class="n">342</td></tr>
+        <tr><td>C7</td><td>停车位与车道铺装<small>150 mm 混凝土 + 分格缝；含雨棚预埋件（雨棚二期加）</small></td><td class="n">24 m²</td><td class="n">6.0</td><td class="n">228</td></tr>
+        <tr><td>C8</td><td>园路与庭院铺装<small>入户步道、泳池边、晾衣区，透水砖 / 水磨石</small></td><td class="n">38 m²</td><td class="n">6.0</td><td class="n">228</td></tr>
+        <tr><td>C9</td><td>市政接入与排水<small>自来水与电表接入、3 格化粪池 4 m³、雨污排水沟与检查井、2000 L 屋顶水箱 + 增压泵</small></td><td class="n">1 项</td><td class="n">18.0</td><td class="n">684</td></tr>
+        <tr><td>C10</td><td>草坪 · 灌木 · 果树<small>马尼拉草 90 m²、绿篱苗 150 株、果树 10 株 + 香蕉 2 丛、观赏植物</small></td><td class="n">— </td><td class="n">8.0</td><td class="n">304</td></tr>
+        <tr><td>C11</td><td>菜园<small>砌边高畦 19.4 m²、营养土 8 m³、滴灌一套、爬藤竹架、堆肥箱</small></td><td class="n">19.4 m²</td><td class="n">7.0</td><td class="n">266</td></tr>
+        <tr><td>C12</td><td>鸡鸭舍<small>砖砌矮墙 + 镀锌网 + 彩钢瓦顶 3.2 m² + 活动围网 + 食槽饮水器</small></td><td class="n">5.5 m²</td><td class="n">6.0</td><td class="n">228</td></tr>
+        <tr><td>C13</td><td>庭院照明<small>太阳能地插灯 8 盏 + 低压 LED 泛光 4 盏 + 泳池边壁灯</small></td><td class="n">— </td><td class="n">2.5</td><td class="n">95</td></tr>
+        <tr class="sum"><td colspan="3">C 小计</td><td class="n">176.5</td><td class="n">6,711</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>总计</caption>
+      <thead><tr><th>类别</th><th class="n">M₫</th><th class="n">USD</th><th class="n">占比</th></tr></thead>
+      <tbody>
+        <tr><td><i class="sw" style="background:var(--paddy)"></i>A 土地与场地平整</td><td class="n">170.5</td><td class="n">6,483</td><td class="n">16.4%</td></tr>
+        <tr><td><i class="sw" style="background:var(--clay)"></i>B 房屋主体与装修</td><td class="n">654.8</td><td class="n">24,897</td><td class="n">63.0%</td></tr>
+        <tr><td><i class="sw" style="background:var(--water)"></i>C 庭院工程</td><td class="n">176.5</td><td class="n">6,711</td><td class="n">17.0%</td></tr>
+        <tr><td><i class="sw" style="background:var(--plum)"></i>D 预备金（约 3.8%）</td><td class="n">38.0</td><td class="n">1,445</td><td class="n">3.7%</td></tr>
+        <tr class="grand"><td>合计</td><td class="n">1,039.8</td><td class="n">39,536</td><td class="n">100%</td></tr>
+        <tr><td>距 4 万美金上限</td><td class="n">+12.2</td><td class="n">+464</td><td class="n">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:var(--s1);color:var(--muted)">各行美金数为独立四舍五入，逐行相加与合计可能有 ±$2 的差异；以越南盾列为准。本预算不含家具家电（床、沙发、餐桌、空调、冰箱、洗衣机、电视），按当地入门配置另需约 <span class="num">$3,000–4,500</span>，建议入住后分批添置。</p>
+</section>
+
+<!-- ══════════ 8 · 转地契 ══════════ -->
+<section id="s8">
+  <div class="shead"><span class="no">08</span><h2>转地契专项：最大的变量</h2><span class="note">LAND CONVERSION</span></div>
+
+  <div class="col">
+    <p>先说好消息。<strong>2026 年 1 月 1 日起，越南把农业地转住宅地的土地使用费大幅下调了</strong>：在当地住宅用地限额（<span class="vn">hạn mức giao đất ở</span>）以内的部分，只收「住宅地价 − 农业地价」差额的 <strong>30%</strong>；超出限额但不超过 1 倍限额的部分收 50%；再往上收 100%。2025 年之前这个数字是 100%。你正好赶上了。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>计算过程 · 基准情形</caption>
+      <thead><tr><th>项</th><th>取值</th><th>来源与说明</th></tr></thead>
+      <tbody>
+        <tr><td>转换面积</td><td class="mono">300 m²</td><td>320 m² 中保留最后 20 m²（菜园与鸡鸭区）为农业地。所有永久构筑物（房屋、泳池、凉亭、鱼池、铺装）都落在这 300 m² 内</td></tr>
+        <tr><td>住宅地基准价</td><td class="mono">1,500,000 đ/m²</td><td><em>需你核实</em>。取自西宁省 2026 年地价表（<span class="vn">Nghị quyết 49/2025/NQ-HĐND</span>，2025-12-29 通过，2026-01-01 生效）中乡镇道路沿线住宅地的中位水平</td></tr>
+        <tr><td>农业地基准价</td><td class="mono">150,000 đ/m²</td><td><em>需你核实</em>。同一地价表附录 I，年生作物地 / 多年生作物地</td></tr>
+        <tr><td>差额</td><td class="mono">1,350,000 đ/m²</td><td>1,500,000 − 150,000</td></tr>
+        <tr><td>收费比例</td><td class="mono">30%</td><td>假设当地住宅地划拨限额 ≥ 300 m²，全部在限额内</td></tr>
+        <tr class="sum"><td>土地使用费</td><td class="mono">121,500,000 đ<br>≈ $4,620</td><td>300 × 1,350,000 × 30%</td></tr>
+        <tr><td>另加手续费</td><td class="mono">8,000,000 đ ≈ $304</td><td>测绘出图、审核评估、换发新证、公证、代办服务</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call risk">
+    <p class="lab">这是全套预算里最不确定的一项</p>
+    <p>住宅地基准价在不同乡镇、不同道路等级之间能差三到四倍。如果你那条路的住宅地基准价是 300 万đ/m²，这一项就从 <span class="num">$4,620</span> 变成 <span class="num">$9,753</span>，直接把总预算顶到 <span class="num">$44,669</span>。<strong>动工之前先去把这个数字查准</strong>，具体查法见下面第 10 节。下表是不同地价下的总预算。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>敏感性分析 · 住宅地基准价对总预算的影响</caption>
+      <thead><tr><th>住宅地基准价</th><th class="n">土地使用费 M₫</th><th class="n">土地使用费 USD</th><th class="n">总预算 USD</th><th>结论</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">800,000 đ/m²</td><td class="n">58.5</td><td class="n">2,224</td><td class="n">37,141</td><td style="color:var(--good)">富余 $2,859，可把凉亭和泳池升级</td></tr>
+        <tr><td class="mono">1,000,000 đ/m²</td><td class="n">76.5</td><td class="n">2,909</td><td class="n">37,825</td><td style="color:var(--good)">富余 $2,175</td></tr>
+        <tr><td class="mono">1,500,000 đ/m² ← 基准</td><td class="n">121.5</td><td class="n">4,620</td><td class="n">39,536</td><td style="color:var(--good)">富余 $464 + 预备金 $1,445</td></tr>
+        <tr><td class="mono">2,000,000 đ/m²</td><td class="n">166.5</td><td class="n">6,331</td><td class="n">41,247</td><td style="color:var(--warn)">超 $1,247，动用预备金即可</td></tr>
+        <tr><td class="mono">2,500,000 đ/m²</td><td class="n">211.5</td><td class="n">8,042</td><td class="n">42,958</td><td style="color:var(--warn)">超 $2,958，需启用减项 1–5</td></tr>
+        <tr><td class="mono">3,000,000 đ/m²</td><td class="n">256.5</td><td class="n">9,753</td><td class="n">44,669</td><td style="color:var(--crit)">超 $4,669，需启用全部减项</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>如果超支，按这个顺序砍</h3>
+  <div class="col">
+    <p>这份清单是<strong>按「先砍最不影响生活」排序</strong>的，全部砍完能腾出 <span class="num">$3,422</span>，加上预备金 <span class="num">$1,445</span>，总缓冲 <span class="num">$4,867</span>——足以覆盖住宅地价高到 300 万đ/m² 的最坏情况。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>减项清单 · 按启用顺序</caption>
+      <thead><tr><th class="n">序</th><th>减项内容</th><th class="n">省 M₫</th><th class="n">省 USD</th><th class="n">累计 USD</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td>凉亭延后到二期（先做好基础预埋件）</td><td class="n">11.0</td><td class="n">418</td><td class="n">418</td></tr>
+        <tr><td class="n">2</td><td>锦鲤池延后（先预留池位与循环管线）</td><td class="n">9.0</td><td class="n">342</td><td class="n">760</td></tr>
+        <tr><td class="n">3</td><td>卧室衣柜自行后配，不含在施工内</td><td class="n">12.0</td><td class="n">456</td><td class="n">1,216</td></tr>
+        <tr><td class="n">4</td><td>泳池降标：均深降到 1.1 m、普通池砖、简易过滤</td><td class="n">8.0</td><td class="n">304</td><td class="n">1,520</td></tr>
+        <tr><td class="n">5</td><td>两侧砌体围墙再减 14 m，改网栅 + 绿篱</td><td class="n">7.0</td><td class="n">266</td><td class="n">1,786</td></tr>
+        <tr><td class="n">6</td><td>园路铺装减半，草坪改自播（第二年长满）</td><td class="n">8.0</td><td class="n">304</td><td class="n">2,090</td></tr>
+        <tr><td class="n">7</td><td>次卧 2 卫生间只做防水与管线预留，暂不铺贴装洁具</td><td class="n">8.0</td><td class="n">304</td><td class="n">2,394</td></tr>
+        <tr><td class="n">8</td><td>客厅不做吊顶（仅卧室与楼梯厅做）</td><td class="n">7.0</td><td class="n">266</td><td class="n">2,660</td></tr>
+        <tr><td class="n">9</td><td>二楼后阳台取消，后晾衣棚改竹木简易款</td><td class="n">6.0</td><td class="n">228</td><td class="n">2,888</td></tr>
+        <tr><td class="n">10</td><td>太阳能热水器改为即热式电热水器</td><td class="n">5.0</td><td class="n">190</td><td class="n">3,078</td></tr>
+        <tr><td class="n">11</td><td>仿木铝格栅改简易钢制百叶</td><td class="n">5.0</td><td class="n">190</td><td class="n">3,268</td></tr>
+        <tr><td class="n">12</td><td>菜园砌边取消，直接地栽 + 竹架</td><td class="n">4.0</td><td class="n">152</td><td class="n">3,420</td></tr>
+        <tr class="sum"><td colspan="2">可减总额</td><td class="n">90.0</td><td class="n">3,422</td><td class="n">—</td></tr>
+        <tr class="sum"><td colspan="2">加预备金后总缓冲</td><td class="n">128.0</td><td class="n">4,867</td><td class="n">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <p class="lab">三条容易踩坑的规则</p>
+    <p><strong>① 30% 优惠每户每块地只能用一次。</strong>所以该转的面积一次转足，不要今年转 150 m²、明年再转 150 m²——第二次就享受不到优惠了。<br>
+    <strong>② 必须在年度用地计划内。</strong>你这块地要落在乡镇当年批准的 <span class="vn">kế hoạch sử dụng đất</span> 里才能转，不在计划内今年办不下来，只能等下一年度。这个要先问。<br>
+    <strong>③ 先转地契，再报建。</strong>建筑许可（<span class="vn">giấy phép xây dựng</span>）必须凭住宅性质的土地证才能申请。顺序反了会卡住整个工期。</p>
+  </div>
+</section>
+
+<!-- ══════════ 9 · 填土 ══════════ -->
+<section id="s9">
+  <div class="shead"><span class="no">09</span><h2>填土专项：算量与做法</h2><span class="note">EARTHWORKS</span></div>
+
+  <div class="col">
+    <p>你说地势比较低。方案按<strong>现状地面低于路面 0.45 米</strong>来算——这个数字你要实测确认，它直接决定土方量。目标标高是：室外地坪高于路面 0.15 米，室内地坪再高 0.35 米。这样雨季路面积水不会倒灌进院子，院子的水也不会倒灌进屋。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>土方量计算</caption>
+      <thead><tr><th>步骤</th><th>计算</th><th class="n">结果</th></tr></thead>
+      <tbody>
+        <tr><td>建筑与硬化区需填高</td><td>0.45（补齐路面）+ 0.15（高出路面）= 0.60 m，面积约 270 m²</td><td class="n">162.0 m³</td></tr>
+        <tr><td>后部菜园区需填高</td><td>0.30 m（菜地不需垫太高，排水即可），面积约 50 m²</td><td class="n">15.0 m³</td></tr>
+        <tr><td>压实后所需净体积</td><td>162.0 + 15.0</td><td class="n">177.0 m³</td></tr>
+        <tr><td>松散系数</td><td>× 1.30（自然土装车运输后的松方体积）</td><td class="n">230.1 m³</td></tr>
+        <tr class="sum"><td>需购买土方</td><td>取整</td><td class="n">230 m³</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>填土费用明细</caption>
+      <thead><tr><th>项目</th><th class="n">数量</th><th class="n">单价</th><th class="n">M₫</th><th class="n">USD</th></tr></thead>
+      <tbody>
+        <tr><td>填土（含运费，自卸车送到）<small>2026 年参考价 10–18 万đ/m³，西宁临近平阳与古芝，取中位 13 万</small></td><td class="n">230 m³</td><td class="n">130,000 đ/m³</td><td class="n">29.9</td><td class="n">1,137</td></tr>
+        <tr><td>挖机摊平 + 振动压路机分层压实<small>每台每天约 250–300 万đ，共 2 天 + 人工</small></td><td class="n">2 台班</td><td class="n">—</td><td class="n">7.0</td><td class="n">266</td></tr>
+        <tr><td>室内地坪垫层砂与石屑</td><td class="n">16 m³</td><td class="n">255,000 đ/m³</td><td class="n">4.1</td><td class="n">156</td></tr>
+        <tr class="sum"><td colspan="3">填土整平合计</td><td class="n">41.0</td><td class="n">1,559</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call risk">
+    <p class="lab">填土的三条硬要求 · 不遵守房子会裂</p>
+    <p><strong>① 分层压实。</strong>每层松铺不超过 30 cm 就压一遍，压实度不低于 90%。一次倒 60 cm 再压，下面永远是松的。<br>
+    <strong>② 静置沉降 45 天。</strong>填完不要马上做基础。最好赶在雨季（5–10 月）填土，让雨水帮着自然沉降，雨季结束再开工。<br>
+    <strong>③ 基础穿过填土层。</strong>条形基础基槽挖深 1.0–1.2 米，一定要挖穿新填的 0.6 米、坐到下面原状土上。这是本方案不打桩还能保证不沉降的唯一办法，施工时你要亲自到场确认挖到位了。</p>
+    <p style="margin-top:.8em">另外：填土前先<strong>确认邻地排水方向</strong>，你把地填高了，雨水不能排到邻居家去，否则后患无穷。沿两侧通道做 200 mm 明沟接到路边市政沟，这笔已含在 C9 里。</p>
+  </div>
+</section>
+
+<!-- ══════════ 10 · 进度与待核实 ══════════ -->
+<section id="s10">
+  <div class="shead"><span class="no">10</span><h2>施工计划与开工前必办事项</h2><span class="note">SCHEDULE &amp; CHECKLIST</span></div>
+
+  <h3>工期计划 · 约 9 个月</h3>
+  <div class="gantt" id="gantt"></div>
+  <p style="font-family:var(--mono);font-size:var(--s1);color:var(--muted);margin-top:4px">
+    <i class="sw" style="background:var(--clay)"></i>手续 &nbsp;
+    <i class="sw" style="background:var(--deep)"></i>主体施工 &nbsp;
+    <i class="sw" style="background:var(--paddy)"></i>庭院工程（可与装修并行）
+  </p>
+  <div class="col">
+    <p>关键路径是<strong>手续 → 填土沉降 → 基础</strong>。转地契和建筑许可要 2.5 个月，正好和填土沉降的 45 天重叠，所以这两件事一定要<strong>同时启动</strong>：土可以先填（填土不需要建筑许可），手续在后台跑。这样能把总工期压掉将近两个月。</p>
+    <p>纯施工期约 6 个月。庭院的围墙、铺装、泳池、鱼池可以和室内装修并行，交给不同的班组做，互不影响。</p>
+  </div>
+
+  <h3>开工前你必须核实的六件事</h3>
+  <div class="col">
+    <p>这六项全部会影响预算或可行性，都要在花第一笔钱之前落实。前三项去乡镇的<strong>土地登记事务所</strong>（<span class="vn">Văn phòng đăng ký đất đai</span>）或乡人民委员会就能问到。</p>
+    <ol>
+      <li><strong>你那条路的住宅地与农业地基准价。</strong>要求看 2026 年地价表（<span class="vn">Nghị quyết 49/2025/NQ-HĐND</span>）里你所在乡（<span class="vn">xã</span>）那一页，记下「<span class="vn">đất ở nông thôn</span>」你这条路的单价和「<span class="vn">đất trồng cây hàng năm/lâu năm</span>」的单价。<em>这一项决定 $4,620 是变成 $2,224 还是 $9,753。</em></li>
+      <li><strong>当地住宅用地划拨限额是多少 m²。</strong>如果限额只有 200 m²，超出的 100 m² 要按 50% 收，土地使用费会多约 <span class="num">$1,027</span>。</li>
+      <li><strong>这块地是否在本年度用地计划内。</strong>不在计划内，今年就转不了，整个项目要推到明年。</li>
+      <li><strong>实测现状地面比路面低多少。</strong>拿水平仪在地块四角各测一次。如果实际低了 0.7 米而不是 0.45 米，土方量会从 230 m³ 涨到约 350 m³，多花约 <span class="num">$600</span>。</li>
+      <li><strong>自来水和电的接入点距离。</strong>如果没有市政自来水要打井（<span class="vn">khoan giếng</span>），加约 <span class="num">$400–570</span>；如果电杆距离超过 40 米，接户线也要另加钱。C9 那 <span class="num">$684</span> 是按「有自来水、电杆在门口」算的。</li>
+      <li><strong>邻地的排水方向和雨季最高水位。</strong>问一下住得久的邻居往年积水到哪个高度，必要时把室外地坪再抬高 10 cm——现在多填 30 m³ 土只要 <span class="num">$150</span>，将来泡水一次就不止这个数。</li>
+    </ol>
+  </div>
+
+  <h3>植物与养殖配置</h3>
+  <div class="tw">
+    <table>
+      <caption>苗木与养殖清单</caption>
+      <thead><tr><th>类别</th><th>品种</th><th class="n">数量</th><th>位置</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4">果树</td><td>芒果（<span class="vn">xoài</span>）</td><td class="n">2 株</td><td>前院右侧 1 株、后墙边 1 株</td></tr>
+        <tr><td>番石榴（<span class="vn">ổi</span>）、龙眼（<span class="vn">nhãn</span>）</td><td class="n">各 1 株</td><td>菜园后墙一排</td></tr>
+        <tr><td>木瓜（<span class="vn">đu đủ</span>）、柠檬 / 四季橘（<span class="vn">chanh, tắc</span>）</td><td class="n">3 + 2 株</td><td>左侧通道、前院、右侧通道</td></tr>
+        <tr><td>香蕉（<span class="vn">chuối</span>）</td><td class="n">2 丛</td><td>右侧通道（窄地也长得好，还挡西晒）</td></tr>
+        <tr><td>爬藤</td><td>苦瓜、丝瓜、南瓜、百香果</td><td class="n">4 种</td><td>菜园竹架与后墙</td></tr>
+        <tr><td>菜园</td><td>空心菜、生菜、小白菜、辣椒、番茄、黄瓜、豆角、薄荷罗勒香菜</td><td class="n">6 畦</td><td>后部 19.4 m²，砌边高畦 + 滴灌</td></tr>
+        <tr><td>绿篱</td><td>九里香（<span class="vn">nguyệt quế</span>）</td><td class="n">约 150 株</td><td>网栅围栏内侧，50 m</td></tr>
+        <tr><td>观赏</td><td>鸡蛋花 1 株、三角梅 2 株、散尾葵 3 丛、旅人蕉 1 丛</td><td class="n">7 处</td><td>凉亭旁、泳池边、砌体围墙内侧</td></tr>
+        <tr><td>草坪</td><td>马尼拉草 / 台湾草</td><td class="n">90 m²</td><td>后院泳池与凉亭之间、前院</td></tr>
+        <tr><td>鱼</td><td>锦鲤 15–20 cm、金鱼</td><td class="n">6–8 + 10–15 尾</td><td>鱼池 5.6 m³；锦鲤不要超过 8 尾</td></tr>
+        <tr><td>家禽</td><td>鸡、鸭</td><td class="n">合计 12–15 只</td><td>5.5 m² 舍 + 围网；这是这个面积的上限</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>建成后的日常开销</h3>
+  <div class="tw">
+    <table>
+      <caption>月度运行成本估算</caption>
+      <thead><tr><th>项目</th><th class="n">月度 đ</th><th class="n">月度 USD</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>泳池药剂（氯片、pH 调节、除藻）</td><td class="n">250,000</td><td class="n">9.5</td><td>26 m³ 水体，每周检测一次</td></tr>
+        <tr><td>泳池循环电费</td><td class="n">150,000</td><td class="n">5.7</td><td>0.75 kW 泵每天 6 小时</td></tr>
+        <tr><td>泳池补水（蒸发）</td><td class="n">60,000</td><td class="n">2.3</td><td>每月 2–3 m³</td></tr>
+        <tr><td>鱼池过滤电费 + 鱼食</td><td class="n">110,000</td><td class="n">4.2</td><td>循环泵常开 + 饲料</td></tr>
+        <tr><td>菜园与草坪灌溉</td><td class="n">80,000</td><td class="n">3.0</td><td>滴灌，旱季用量更大</td></tr>
+        <tr class="sum"><td>合计</td><td class="n">650,000</td><td class="n">24.7</td><td>约每年 <span class="num">$296</span>；不含生活用水电</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <p class="lab">泳池是这套院子里唯一的长期负担</p>
+    <p>建造费 <span class="num">$1,825</span>，但每月还要 <span class="num">$17.5</span> 的药剂和电费，加上每周一次的检测与清捞。如果你一年只用两三个月，可以考虑<strong>先只做池体和管线预留（约 $900），过滤设备和面层等确定要用了再装</strong>——省下的 <span class="num">$900</span> 刚好够把三间次卧的卫浴从紧凑型升级成带独立淋浴房的标准型。这个选择我建议你自己权衡，方案里默认是做完整泳池。</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <p>方案编号 TN-2026-01 · 制图日期 2026-07-30 · 地块 10.0 × 32.0 m · 西宁省（<span class="vn">Tây Ninh</span>）乡镇</p>
+  <p>造价数据来源：2026 年越南建房整包报价（<span class="vn">xây nhà trọn gói</span>）市场行情、土方与围墙分项报价、泳池与锦鲤池施工报价，按乡镇自管施工下调 15–20%；土地使用费依据 2026-01-01 起施行的新收费标准与西宁省 2026 年地价表（<span class="vn">Nghị quyết 49/2025/NQ-HĐND</span>）；汇率 26,300 VND/USD（2026 年 7 月）。</p>
+  <p>本方案为施工前设计与造价方案，不能替代当地有资质单位出具的结构施工图与报建图纸。开工前请委托本地设计单位完成正式施工图并办理建筑许可；转地契费用的准确数字必须以土地登记事务所的核定通知书为准。</p>
+</footer>
+
+<script>
+/* ═══════════ 图纸生成器 · 平面 / 总平面 / 立面 / 剖面 ═══════════ */
+const NS = 'http://www.w3.org/2000/svg';
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ── 通用 SVG 片段 ── */
+function svgOpen(w,h,cls){ return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="${cls||''}" xmlns="${NS}" role="img">`; }
+function rect(x,y,w,h,fill,stroke,sw,extra){
+  return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(0,w).toFixed(1)}" height="${Math.max(0,h).toFixed(1)}"`
+   + (fill?` fill="${fill}"`:' fill="none"') + (stroke?` stroke="${stroke}" stroke-width="${sw||1}"`:'')
+   + (extra||'') + '/>';
+}
+function txt(x,y,s,o){
+  o=o||{};
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${o.size||8}"`
+   + ` fill="${o.fill||'var(--ink)'}" text-anchor="${o.anchor||'middle'}"`
+   + ` font-family="${o.mono===false?'var(--sans)':'var(--mono)'}"`
+   + (o.weight?` font-weight="${o.weight}"`:'')
+   + (o.rot?` transform="rotate(${o.rot} ${x.toFixed(1)} ${y.toFixed(1)})"`:'')
+   + `>${esc(s)}</text>`;
+}
+function line(x1,y1,x2,y2,stroke,sw,dash){
+  return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"`
+   + ` stroke="${stroke}" stroke-width="${sw||1}"` + (dash?` stroke-dasharray="${dash}"`:'') + '/>';
+}
+/* 双向尺寸标注 */
+function dim(x1,y1,x2,y2,label,side){
+  const c='var(--clay)', o=[];
+  o.push(line(x1,y1,x2,y2,c,.7));
+  const t=6;
+  if(side==='h'){ o.push(line(x1,y1-t/2,x1,y1+t/2,c,.7)); o.push(line(x2,y2-t/2,x2,y2+t/2,c,.7));
+    o.push(txt((x1+x2)/2,y1-4,label,{size:7.5,fill:c})); }
+  else { o.push(line(x1-t/2,y1,x1+t/2,y1,c,.7)); o.push(line(x2-t/2,y2,x2+t/2,y2,c,.7));
+    o.push(txt(side==='v2'?x1+4:x1-3.5,(y1+y2)/2+2.6,label,
+      {size:7.5,fill:c,anchor:side==='v2'?'start':'end'})); }
+  return o.join('');
+}
+/* 偶数-奇数填充法画墙体剖面（poché） */
+function poche(o,i,fill){
+  const p=`M${o[0]},${o[1]}H${o[2]}V${o[3]}H${o[0]}Z M${i[0]},${i[1]}H${i[2]}V${i[3]}H${i[0]}Z`;
+  return `<path d="${p}" fill="${fill}" fill-rule="evenodd"/>`;
+}
+
+/* ═══ 楼层平面图 ═══ */
+const RT = { live:'#0095AE', bed:'#8E8419', wet:'#7360C8', serv:'#C0522E', circ:'#6E7565' };
+const tint = (c,a) => `color-mix(in srgb, ${c} ${a}%, var(--sheet))`;
+
+const FLOORS = {
+ f1:{
+  from:-1.2, to:13.2,
+  shells:[[0,0,8,9.6],[0,9.6,8,13.2]],
+  soft:[{r:[0,-1.2,8,0],label:'门廊雨棚',area:'9.6'}],
+  rooms:[
+   {n:'客厅',a:21.6,r:[0.15,0.15,4.30,5.35],t:'live'},
+   {n:'玄关',a:3.8,r:[4.40,0.15,7.85,1.25],t:'circ'},
+   {n:'楼梯间',a:11.7,r:[4.40,1.25,7.85,4.65],t:'circ',sub:'梯下储物'},
+   {n:'次卧 3',a:10.4,r:[4.40,4.75,7.85,7.75],t:'bed',sub:'老人房'},
+   {n:'设备',a:2.8,r:[4.40,7.85,6.15,9.45],t:'serv',sub:'储物'},
+   {n:'卫 3',a:2.6,r:[6.25,7.85,7.85,9.45],t:'wet'},
+   {n:'餐厅',a:16.6,r:[0.15,5.45,4.30,9.45],t:'live'},
+   {n:'厨房',a:12.9,r:[0.15,9.75,4.05,13.05],t:'serv'},
+   {n:'公厕·淋浴',a:5.3,r:[4.15,9.75,5.75,13.05],t:'wet'},
+   {n:'洗衣房',a:3.5,r:[5.85,9.75,7.85,11.50],t:'serv'},
+   {n:'杂物间',a:2.9,r:[5.85,11.60,7.85,13.05],t:'serv'}
+  ],
+  walls:[[4.30,0.15,4.40,2.20],[4.30,3.20,4.40,4.65],[0.15,5.35,1.30,5.45],[3.40,5.35,4.30,5.45],
+   [4.30,4.75,4.40,8.20],[4.30,8.95,4.40,9.45],[4.40,4.65,6.30,4.75],[7.05,4.65,7.85,4.75],
+   [4.40,7.75,6.60,7.85],[7.40,7.75,7.85,7.85],[6.15,7.85,6.25,9.45],
+   [4.05,9.75,4.15,11.20],[4.05,12.00,4.15,13.05],
+   [5.75,9.75,5.85,10.20],[5.75,11.00,5.85,13.05],
+   [5.85,11.50,6.40,11.60],[7.20,11.50,7.85,11.60]],
+  wins:[['F',0.9,2.9,'m','d'],['F',5.6,6.6,'m','e'],['L',2.0,3.2,'m'],['L',6.4,7.6,'m'],
+   ['R',2.0,3.2,'m'],['R',5.4,6.9,'m'],['L',10.6,12.0,'a'],['B',1.0,2.0,'a','e'],['B',6.3,7.2,'a','e'],
+   ['B',1.1,2.3,'m','o'],['F',1.1,2.3,'a','o']],
+  stair:{r:[4.40,1.25,7.85,4.65],dir:'up'}
+ },
+ f2:{
+  from:-1.2, to:9.6,
+  shells:[[0,0,8,9.6]],
+  soft:[{r:[0.15,-1.2,4.30,0],label:'前阳台',area:'5.0'}],
+  rooms:[
+   {n:'主卧',a:17.4,r:[0.15,0.15,4.30,4.35],t:'bed'},
+   {n:'衣帽间',a:2.9,r:[0.15,4.45,1.95,6.05],t:'serv'},
+   {n:'主卫',a:3.6,r:[2.05,4.45,4.30,6.05],t:'wet'},
+   {n:'次卧 1',a:10.5,r:[0.15,6.15,2.60,9.45],t:'bed'},
+   {n:'',a:0,r:[2.70,6.15,4.30,7.65],t:'bed'},
+   {n:'卫 1',a:2.7,r:[2.70,7.75,4.30,9.45],t:'wet'},
+   {n:'楼梯厅·光井',a:15.2,r:[4.40,0.15,7.85,4.65],t:'circ'},
+   {n:'次卧 2',a:10.0,r:[4.40,4.75,7.85,7.65],t:'bed'},
+   {n:'卫 2',a:3.0,r:[4.40,7.75,6.15,9.45],t:'wet'},
+   {n:'后阳台',a:2.7,r:[6.25,7.75,7.85,9.45],t:'circ'}
+  ],
+  walls:[[4.30,0.15,4.40,1.50],[4.30,2.40,4.40,9.45],[0.15,4.35,1.20,4.45],[2.10,4.35,4.30,4.45],
+   [1.95,4.45,2.05,6.05],[0.15,6.05,1.10,6.15],[2.00,6.05,4.30,6.15],
+   [2.60,7.00,2.70,8.20],[2.60,8.90,2.70,9.45],[2.70,7.65,4.30,7.75],
+   [4.40,4.65,5.60,4.75],[6.30,4.65,7.85,4.75],
+   [4.40,7.65,4.90,7.75],[5.60,7.65,6.60,7.75],[7.30,7.65,7.85,7.75],[6.15,7.75,6.25,9.45]],
+  wins:[['F',1.2,2.6,'m','d'],['F',5.6,7.0,'m'],['L',1.6,2.8,'m'],['L',7.0,8.4,'m'],
+   ['R',2.2,3.2,'m'],['R',5.4,6.8,'m'],['B',3.2,4.0,'m'],['B',4.8,5.6,'m'],['B',6.4,7.6,'m','o']],
+  lightwell:[5.45,1.35,6.85,2.45]
+ }
+};
+
+function drawFloor(key){
+  const F=FLOORS[key], s=32, ox=58, oy=44-F.from*s;
+  const W=ox+8*s+62, H=oy+F.to*s+40;
+  const X=m=>ox+m*s, Y=m=>oy+m*s;
+  const o=[svgOpen(W,H)];
+
+  // 半室外（阳台/雨棚）
+  F.soft.forEach(q=>{ const[a,b,c,d]=q.r;
+    o.push(rect(X(a),Y(b),(c-a)*s,(d-b)*s,'var(--vellum)','var(--hair)',1,' stroke-dasharray="4 3"'));
+    o.push(txt((X(a)+X(c))/2,(Y(b)+Y(d))/2+1,q.label,{size:8,fill:'var(--muted)'}));
+    o.push(txt((X(a)+X(c))/2,(Y(b)+Y(d))/2+11,q.area+' m²',{size:7,fill:'var(--muted)'}));
+  });
+
+  // 房间填色
+  F.rooms.forEach(r=>{ const[a,b,c,d]=r.r;
+    o.push(rect(X(a),Y(b),(c-a)*s,(d-b)*s,tint(RT[r.t],17)));
+  });
+
+  // 楼梯踏步
+  if(F.stair){ const[a,b,c,d]=F.stair.r, n=9, tw=(d-0.15-b)/n;
+    for(let i=0;i<n;i++) o.push(line(X(a+.05),Y(b+.1+i*tw),X(a+1.6),Y(b+.1+i*tw),'var(--hair)',1));
+    for(let i=0;i<n;i++) o.push(line(X(c-1.6),Y(b+.1+i*tw),X(c-.05),Y(b+.1+i*tw),'var(--hair)',1));
+    o.push(txt(X((a+c)/2),Y(d-.35),'↑ 上 18 级',{size:7,fill:'var(--muted)'}));
+  } else {
+    const[a,b,c,d]=[4.40,1.25,7.85,4.65];
+    o.push(rect(X(a+.05),Y(b+.05),(c-a-.1)*s,(d-b-.1)*s,'none','var(--hair)',1,' stroke-dasharray="3 3"'));
+    o.push(txt(X((a+c)/2),Y(b+.75),'↓ 下 一层',{size:7,fill:'var(--muted)'}));
+  }
+  // 光井
+  if(F.lightwell){ const[a,b,c,d]=F.lightwell;
+    o.push(rect(X(a),Y(b),(c-a)*s,(d-b)*s,'color-mix(in srgb, var(--water) 22%, var(--sheet))','var(--water)',1.2));
+    o.push(txt(X((a+c)/2),Y((b+d)/2)+3,'光井',{size:7,fill:'var(--water)'}));
+  }
+
+  // 墙体
+  F.shells.forEach(sh=>{ const[a,b,c,d]=sh;
+    o.push(poche([X(a),Y(b),X(c),Y(d)],[X(a+.15),Y(b+.15),X(c-.15),Y(d-.15)],'var(--ink)'));
+  });
+  F.walls.forEach(w=>{ const[a,b,c,d]=w;
+    o.push(rect(X(a),Y(b),(c-a)*s,(d-b)*s,'var(--ink)'));
+  });
+
+  // 门窗（在墙体上开洞并标注）
+  F.wins.forEach(w=>{
+    const [side,p,q,blk,kind]=w, th=.15*s;
+    const off = blk==='a' ? {F:9.6,B:13.2,L:0,R:8} : {F:0,B:9.6,L:0,R:8};
+    let x,y,ww,hh;
+    if(side==='F'){ x=X(p); y=Y(off.F); ww=(q-p)*s; hh=th; }
+    else if(side==='B'){ x=X(p); y=Y(off.B)-th; ww=(q-p)*s; hh=th; }
+    else if(side==='L'){ x=X(0); y=Y(p); ww=th; hh=(q-p)*s; }
+    else { x=X(8)-th; y=Y(p); ww=th; hh=(q-p)*s; }
+    const col = kind==='d' ? 'var(--water)' : kind==='e' ? 'var(--clay)' : kind==='o' ? 'var(--muted)' : 'var(--sheet)';
+    o.push(rect(x,y,ww,hh,col));
+    if(!kind){ // 窗：双线
+      if(side==='F'||side==='B'){ o.push(line(x,y+hh*.35,x+ww,y+hh*.35,'var(--ink)',.8)); o.push(line(x,y+hh*.65,x+ww,y+hh*.65,'var(--ink)',.8)); }
+      else { o.push(line(x+ww*.35,y,x+ww*.35,y+hh,'var(--ink)',.8)); o.push(line(x+ww*.65,y,x+ww*.65,y+hh,'var(--ink)',.8)); }
+    }
+  });
+
+  // 房间标注
+  F.rooms.forEach(r=>{ if(!r.n) return; const[a,b,c,d]=r.r;
+    const cx=(X(a)+X(c))/2, cy=(Y(b)+Y(d))/2, wpx=(c-a)*s, hpx=(d-b)*s;
+    const small = wpx<64||hpx<44;
+    o.push(txt(cx,cy-(small?1:3),r.n,{size:small?7.5:9,weight:600,mono:false}));
+    if(!small){ o.push(txt(cx,cy+10,r.a.toFixed(1)+' m²',{size:7.5,fill:'var(--muted)'}));
+      if(r.sub) o.push(txt(cx,cy+20,r.sub,{size:6.8,fill:'var(--muted)',mono:false})); }
+    else { o.push(txt(cx,cy+8,r.a.toFixed(1),{size:6.8,fill:'var(--muted)'})); }
+  });
+
+  // 尺寸链
+  o.push(dim(X(0),Y(F.from)-16,X(8),Y(F.from)-16,'8.00','h'));
+  let segs = key==='f1' ? [[F.from,0,'1.20'],[0,9.6,'9.60'],[9.6,13.2,'3.60']] : [[F.from,0,'1.20'],[0,9.6,'9.60']];
+  segs.forEach(g=> o.push(dim(X(0)-18,Y(g[0]),X(0)-18,Y(g[1]),g[2],'v')));
+  o.push(dim(X(8)+22,Y(F.from),X(8)+22,Y(F.to),(F.to-F.from).toFixed(2),'v2'));
+
+  // 指北 + 图例
+  o.push(txt(X(8)+8,Y(F.from)-16,'↑ 临路',{size:7.5,fill:'var(--muted)',anchor:'start'}));
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* ═══ 总平面图 ═══ */
+function drawSite(){
+  const s=18, ox=52, oy=40, W=ox+10*s+74, H=oy+32*s+46;
+  const X=m=>ox+m*s, Y=m=>oy+m*s;
+  const o=[svgOpen(W,H)];
+  const box=(a,b,c,d,f,st,sw,ex)=>o.push(rect(X(a),Y(b),(c-a)*s,(d-b)*s,f,st,sw,ex));
+  const key=(a,b,n)=>{ o.push(`<circle cx="${X(a).toFixed(1)}" cy="${Y(b).toFixed(1)}" r="6.6" fill="var(--ink)"/>`);
+    o.push(txt(X(a),Y(b)+2.6,n,{size:7.5,fill:'var(--paper)',weight:600})); };
+
+  // 道路
+  box(-0.4,-2.4,10.4,0,'color-mix(in srgb, var(--muted) 26%, var(--sheet))');
+  o.push(line(X(-0.4),Y(-1.2),X(10.4),Y(-1.2),'var(--sheet)',1.4,'7 6'));
+  o.push(txt(X(5),Y(-1.2)+3,'镇 道',{size:7.5,fill:'var(--muted)'}));
+
+  // 地块底色：草
+  box(0,0,10,32,'color-mix(in srgb, var(--paddy) 15%, var(--sheet))');
+  // 菜园（保留农业地）
+  box(0,29.0,10,32,'color-mix(in srgb, var(--paddy) 30%, var(--sheet))');
+  o.push(txt(X(8.9),Y(30.6),'农业地',{size:6.4,fill:'var(--paddy)',rot:-90}));
+  // 铺装
+  const pav='color-mix(in srgb, var(--muted) 20%, var(--sheet))';
+  box(1.2,0.4,6.4,3.2,pav); box(6.8,0.4,8.0,5.6,pav);
+  box(0.5,21.2,5.7,28.9,pav); box(1.4,19.6,5.4,21.0,pav);
+  // 泳池
+  box(1.2,21.9,4.7,28.4,'color-mix(in srgb, var(--water) 62%, var(--sheet))','var(--water)',1.2);
+  // 锦鲤池
+  box(6.6,26.0,9.2,27.8,'color-mix(in srgb, var(--water) 45%, var(--sheet))','var(--deep)',1.2);
+  // 菜园畦
+  for(let i=0;i<4;i++) box(0.5+i*1.72,29.2,0.5+i*1.72+1.42,31.7,'color-mix(in srgb, var(--good) 34%, var(--sheet))','var(--good)',.7);
+  // 鸡鸭
+  box(7.4,29.1,9.6,31.6,'none','var(--clay)',1,' stroke-dasharray="3 2"');
+  box(7.6,30.0,9.4,31.4,'color-mix(in srgb, var(--clay) 30%, var(--sheet))','var(--clay)',1);
+  // 凉亭
+  box(6.4,22.2,9.4,25.2,'color-mix(in srgb, var(--clay) 20%, var(--sheet))','var(--clay)',1.2);
+  // 建筑
+  box(1.4,5.6,9.4,6.8,'var(--vellum)','var(--hair)',1,' stroke-dasharray="4 3"');
+  box(1.4,6.8,9.4,16.4,'var(--ink)');
+  box(1.55,6.95,9.25,16.25,'color-mix(in srgb, var(--clay) 16%, var(--sheet))');
+  box(1.4,16.4,9.4,20.0,'var(--ink)');
+  box(1.55,16.55,9.25,19.85,'color-mix(in srgb, var(--clay) 10%, var(--sheet))');
+  box(1.4,20.0,5.4,21.0,'none','var(--hair)',1,' stroke-dasharray="4 3"');
+  o.push(txt(X(5.4),Y(11.4),'主 楼',{size:11,weight:600,mono:false}));
+  o.push(txt(X(5.4),Y(12.8),'两层 8.0×9.6',{size:7,fill:'var(--muted)'}));
+  o.push(txt(X(5.4),Y(18.0),'后附房 单层',{size:8,weight:600,mono:false}));
+  o.push(txt(X(5.4),Y(19.2),'厨房·公厕·洗衣·杂物',{size:6.4,fill:'var(--muted)',mono:false}));
+
+  // 围墙
+  const wall=(a,b,c,d)=>box(a,b,c,d,'var(--ink)');
+  wall(0,-0.1,1.2,0.1); wall(5.2,-0.1,6.8,0.1); wall(7.7,-0.1,10,0.1);
+  wall(-0.1,0,0.1,12); wall(9.9,0,10.1,12);
+  o.push(line(X(0),Y(12),X(0),Y(32),'var(--good)',2.4,'2 3'));
+  o.push(line(X(10),Y(12),X(10),Y(32),'var(--good)',2.4,'2 3'));
+  o.push(line(X(0),Y(32),X(10),Y(32),'var(--good)',2.4,'2 3'));
+  // 大门
+  o.push(line(X(1.2),Y(0),X(5.2),Y(0),'var(--clay)',2.6));
+  o.push(line(X(6.8),Y(0),X(7.7),Y(0),'var(--clay)',2.6));
+  // 车
+  box(1.6,0.7,6.3,2.6,'none','var(--ink-2)',1,' rx="4" stroke-dasharray="3 2"');
+  o.push(txt(X(3.95),Y(1.75),'停车 4.7×1.9',{size:6.6,fill:'var(--ink-2)'}));
+
+  // 树
+  const tree=(a,b,r,c)=>{ o.push(`<circle cx="${X(a).toFixed(1)}" cy="${Y(b).toFixed(1)}" r="${(r*s).toFixed(1)}" fill="color-mix(in srgb, ${c} 34%, var(--sheet))" stroke="${c}" stroke-width="1"/>`); };
+  [[8.6,1.6,.85,'var(--good)'],[8.9,4.4,.55,'var(--good)'],[0.7,17.6,.5,'var(--good)'],
+   [0.7,19.6,.5,'var(--good)'],[9.7,17.6,.45,'var(--good)'],[9.7,20.6,.5,'var(--good)'],
+   [9.7,23.4,.5,'var(--good)'],[9.6,29.9,.4,'var(--good)'],
+   [1.5,31.2,.55,'var(--good)'],[3.6,31.2,.55,'var(--good)'],[5.7,31.2,.55,'var(--good)'],
+   [6.05,22.7,.28,'var(--clay)'],[6.05,28.0,.3,'var(--clay)']].forEach(t=>tree(...t));
+
+  // 编号
+  [[3.2,0.1,'1'],[7.25,0.1,'2'],[3.95,3.0,'3'],[7.4,5.0,'4'],[8.6,3.0,'5'],[2.4,6.2,'6'],
+   [2.4,8.4,'7'],[2.4,17.4,'8'],[0.7,14.0,'9'],[9.7,14.0,'10'],[3.4,20.5,'11'],[2.95,25.1,'12'],
+   [5.1,22.6,'13'],[7.9,23.7,'14'],[7.9,26.9,'15'],[6.05,25.5,'16'],[3.6,30.4,'17'],[8.5,30.7,'18'],
+   [2.5,31.2,'19'],[0.0,6.0,'20'],[10.0,26.0,'21']].forEach(k=>key(...k));
+
+  // 尺寸
+  o.push(dim(X(0),Y(-2.4)-14,X(10),Y(-2.4)-14,'10.00','h'));
+  [[0,5.6,'5.60'],[5.6,6.8,'1.20'],[6.8,16.4,'9.60'],[16.4,20.0,'3.60'],[20.0,29.0,'9.00'],[29.0,32,'3.00']]
+    .forEach(g=>o.push(dim(X(0)-16,Y(g[0]),X(0)-16,Y(g[1]),g[2],'v')));
+  o.push(dim(X(10)+24,Y(0),X(10)+24,Y(32),'32.00','v2'));
+  o.push(txt(X(10)+58,Y(16),'↑ 北 / 地块后端',{size:7,fill:'var(--muted)',rot:-90}));
+  o.push('</svg>');
+
+  const LEG=[['1','车行门 4.0 m 推拉'],['2','人行门 0.9 m'],['3','停车位 24 m²'],['4','入户步道'],
+   ['5','前院绿化与果树'],['6','门廊雨棚（上为前阳台）'],['7','主楼 两层 8.0×9.6'],
+   ['8','后附房 单层 8.0×3.6'],['9','左侧通道 1.4 m·果树带·排水'],['10','右侧通道 0.6 m·排水'],
+   ['11','洗衣晾衣区（带棚）'],['12','游泳池 3.5×6.5'],['13','泳池铺装'],['14','凉亭 3×3'],
+   ['15','锦鲤金鱼池 2.6×1.8'],['16','草坪 32 m²'],['17','菜园 19.4 m²（保留农业地）'],
+   ['18','鸡鸭舍 + 活动围网'],['19','果树（后墙一排）'],['20','砌体围墙 h=1.9 m'],['21','网栅围栏 + 九里香绿篱']];
+  return '<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;justify-content:center">'
+   + o.join('')
+   + '<ul style="list-style:none;padding:0;margin:0;font-family:var(--mono);font-size:.74rem;line-height:1.85;columns:1;min-width:210px">'
+   + LEG.map(l=>`<li style="margin:0"><b style="display:inline-block;width:1.6em;color:var(--clay)">${l[0]}</b>${esc(l[1])}</li>`).join('')
+   + '</ul></div>';
+}
+
+/* ═══ 正立面 ═══ */
+function drawElev(){
+  const s=34, ox=42, oy=34, GH=8.05;
+  const W=ox+8*s+82, H=oy+GH*s+50;
+  const X=m=>ox+m*s, Y=z=>oy+(GH-z)*s;
+  const o=[svgOpen(W,H)];
+  const bx=(a,b,z0,z1,f,st,sw)=>o.push(rect(X(a),Y(z1),(b-a)*s,(z1-z0)*s,f,st,sw||1));
+  // 天空/地面
+  o.push(rect(0,0,W,H,'var(--sheet)'));
+  o.push(rect(0,Y(0),W,H-Y(0),'color-mix(in srgb, var(--paddy) 18%, var(--sheet))'));
+  o.push(line(0,Y(0),W,Y(0),'var(--ink)',1.6));
+  // 屋面（挑檐 0.6）
+  o.push(`<path d="M${X(-0.6)},${Y(7.05)} L${X(8.6)},${Y(7.05)} L${X(7.4)},${Y(8.05)} L${X(0.6)},${Y(8.05)} Z" fill="color-mix(in srgb, var(--ink) 72%, var(--sheet))" stroke="var(--ink)" stroke-width="1.2"/>`);
+  // 墙身
+  bx(0,8,0.45,7.05,'color-mix(in srgb, var(--sheet) 96%, var(--ink))','var(--ink)',1.4);
+  // 勒脚
+  bx(-0.1,8.1,0,0.45,'color-mix(in srgb, var(--ink) 34%, var(--sheet))','var(--ink)',1);
+  // 深灰腰线
+  bx(0,8,3.58,3.76,'color-mix(in srgb, var(--ink) 58%, var(--sheet))');
+  // 洞口
+  const glass='color-mix(in srgb, var(--water) 34%, var(--ink))';
+  bx(0.9,2.9,0.65,2.85,glass,'var(--ink)',1.2);
+  bx(5.6,6.6,0.45,2.75,'color-mix(in srgb, var(--clay) 46%, var(--ink))','var(--ink)',1.2);
+  bx(1.2,2.6,4.00,6.60,glass,'var(--ink)',1.2);
+  bx(3.3,4.1,4.40,6.20,glass,'var(--ink)',1.2);
+  // 仿木遮阳格栅
+  bx(5.35,7.9,3.90,7.05,'color-mix(in srgb, #A9754A 26%, var(--sheet))','#8A5F3C',1);
+  for(let i=0;i<=20;i++){ const x=5.35+i*0.1275; if(x<=7.9) o.push(line(X(x),Y(3.90),X(x),Y(7.05),'#8A5F3C',1.3)); }
+  // 门廊雨棚（挑出，画在最前）
+  bx(-0.35,8.35,3.40,3.56,'color-mix(in srgb, var(--ink) 44%, var(--sheet))','var(--ink)',1);
+  // 前阳台栏杆
+  for(let i=0;i<=13;i++) o.push(line(X(i*0.32),Y(3.76),X(i*0.32),Y(4.86),'var(--ink-2)',1));
+  bx(0,4.15,3.76,4.86,'none','var(--ink-2)',1.3);
+  bx(0,4.15,4.78,4.86,'color-mix(in srgb, var(--ink) 40%, var(--sheet))','var(--ink-2)',1);
+  // 标注
+  o.push(dim(X(8)+26,Y(0),X(8)+26,Y(0.45),'0.45','v2'));
+  o.push(dim(X(8)+26,Y(0.45),X(8)+26,Y(3.75),'3.30','v2'));
+  o.push(dim(X(8)+26,Y(3.75),X(8)+26,Y(7.05),'3.30','v2'));
+  o.push(dim(X(8)+26,Y(7.05),X(8)+26,Y(8.05),'1.00','v2'));
+  o.push(dim(X(0),Y(0)+26,X(8),Y(0)+26,'8.00','h'));
+  o.push(txt(X(6.62),Y(4.62),'仿木铝合金遮阳格栅',{size:7,fill:'#6B4526'}));
+  o.push(txt(X(6.1),Y(-0.42),'入户门',{size:7,fill:'var(--ink-2)'}));
+  o.push(txt(X(1.9),Y(-0.42),'客厅推拉玻璃门',{size:7,fill:'var(--ink-2)'}));
+  o.push(txt(X(2.05),Y(-1.05),'前阳台栏杆 h=1.10',{size:7,fill:'var(--ink-2)'}));
+  o.push(txt(X(4),Y(8.05)-9,'低坡隔热彩钢瓦屋面 · 挑檐 0.60',{size:7,fill:'var(--muted)'}));
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* ═══ 通风采光剖面 ═══ */
+function drawSect(){
+  const s=25, ox=40, oy=26, GH=9.3, DP=14.4;
+  const W=ox+DP*s+34, H=oy+GH*s+76;
+  const X=y=>ox+(y+1.2)*s, Y=z=>oy+(GH-z)*s;
+  const o=[svgOpen(W,H)];
+  const bx=(a,b,z0,z1,f,st,sw,ex)=>o.push(rect(X(a),Y(z1),(b-a)*s,(z1-z0)*s,f,st,sw||1,ex));
+  o.push(rect(0,0,W,H,'var(--sheet)'));
+  o.push(rect(0,Y(0),W,H-Y(0),'color-mix(in srgb, var(--paddy) 18%, var(--sheet))'));
+  o.push(line(0,Y(0),W,Y(0),'var(--ink)',1.6));
+  // 填土示意
+  o.push(rect(0,Y(0),W,0.6*s,'color-mix(in srgb, var(--clay) 20%, var(--sheet))'));
+  o.push(txt(X(3.4),Y(-0.32),'填土 0.60 m（分层压实）',{size:6.6,fill:'var(--clay)'}));
+  o.push(line(0,Y(-0.6),W,Y(-0.6),'var(--ink-2)',1,'4 3'));
+  o.push(txt(X(9.4),Y(-0.92),'原状土（条形基础坐在此层）',{size:6.6,fill:'var(--muted)',anchor:'start'}));
+  // 主楼剖面
+  bx(0,9.6,0.45,7.05,'none','var(--ink)',1.6);
+  bx(0,9.6,3.60,3.78,'var(--ink)');             // 二层楼板
+  bx(0,9.6,7.05,7.20,'var(--ink)');             // 屋面板
+  o.push(`<path d="M${X(-0.6)},${Y(7.2)} L${X(10.2)},${Y(7.2)} L${X(9.4)},${Y(8.2)} L${X(0.2)},${Y(8.2)} Z" fill="color-mix(in srgb, var(--ink) 66%, var(--sheet))" stroke="var(--ink)" stroke-width="1.2"/>`);
+  // 后附房
+  bx(9.6,13.2,0.45,3.60,'none','var(--ink)',1.6);
+  o.push(`<path d="M${X(9.4)},${Y(3.6)} L${X(13.5)},${Y(3.6)} L${X(13.5)},${Y(4.1)} L${X(9.4)},${Y(4.35)} Z" fill="color-mix(in srgb, var(--ink) 55%, var(--sheet))" stroke="var(--ink)" stroke-width="1"/>`);
+  // 光井竖井
+  bx(2.0,3.4,3.78,7.05,'color-mix(in srgb, var(--water) 16%, var(--sheet))','var(--water)',1.2,' stroke-dasharray="4 3"');
+  bx(2.0,3.4,7.05,7.55,'color-mix(in srgb, var(--water) 34%, var(--sheet))','var(--water)',1.2);
+  o.push(txt(X(3.55),Y(8.62),'可开启天窗 + 百叶（热空气由此排出）',{size:6.6,fill:'var(--water)',anchor:'start'}));
+  o.push(txt(X(2.7),Y(5.3),'光井',{size:8,fill:'var(--water)',weight:600}));
+  // 房间标注
+  const rl=(a,z,t)=>o.push(txt(X(a),Y(z),t,{size:7.5,fill:'var(--ink-2)',mono:false}));
+  rl(1.1,1.15,'客厅'); rl(5.7,1.15,'餐厅'); rl(11.5,1.15,'厨房'); rl(1.1,4.75,'主卧'); rl(7.2,4.35,'次卧 1');
+  // 气流箭头
+  const arw=(pts,c)=>o.push(`<path d="${pts}" fill="none" stroke="${c}" stroke-width="1.6" marker-end="url(#ah)"/>`);
+  o.push(`<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,1 L9,5 L0,9 z" fill="var(--water)"/></marker></defs>`);
+  arw(`M${X(-1.0)},${Y(2.0)} Q${X(1.3)},${Y(2.2)} ${X(2.35)},${Y(2.9)}`,'var(--water)');
+  arw(`M${X(2.7)},${Y(3.2)} L${X(2.7)},${Y(6.95)}`,'var(--water)');
+  arw(`M${X(13.9)},${Y(2.0)} Q${X(11.2)},${Y(2.2)} ${X(9.1)},${Y(2.9)}`,'var(--water)');
+  arw(`M${X(8.4)},${Y(5.7)} L${X(4.3)},${Y(6.0)}`,'var(--water)');
+  // 太阳
+  o.push(`<circle cx="${X(-0.5)}" cy="${Y(8.75)}" r="7" fill="var(--warn)" opacity=".85"/>`);
+  [[0.5,8.2],[1.2,7.85],[1.9,7.5]].forEach(p=>o.push(line(X(p[0]-0.85),Y(p[1]+0.62),X(p[0]),Y(p[1]),'var(--warn)',1.2)));
+  o.push(txt(X(0.6),Y(9.05),'挑檐 0.60 遮正午日照',{size:6.6,fill:'var(--warn)',anchor:'start'}));
+  // 尺寸
+  o.push(dim(X(-1.2)-16,Y(0.45),X(-1.2)-16,Y(3.75),'3.30','v'));
+  o.push(dim(X(-1.2)-16,Y(3.75),X(-1.2)-16,Y(7.05),'3.30','v'));
+  o.push(dim(X(0),Y(-1.62),X(9.6),Y(-1.62),'主楼 9.60','h'));
+  o.push(dim(X(9.6),Y(-1.62),X(13.2),Y(-1.62),'后附房 3.60','h'));
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* ═══ 工期条 ═══ */
+const PH=[['转地契 + 建筑许可',0,75,'perm'],['买土填方 + 沉降静置',15,60,'perm'],
+ ['基础与地下管线',76,20,''],['两层主体结构 + 后附房',97,55,''],['屋面 · 砌墙 · 抹灰',153,30,''],
+ ['水电预埋 · 防水',175,25,''],['室内装修',200,45,''],['围墙 · 大门 · 铺装',205,25,'soft'],
+ ['泳池 · 鱼池 · 凉亭',215,35,'soft'],['绿化 · 菜园 · 鸡鸭舍',250,20,'soft']];
+function drawGantt(){
+  const T=270;
+  return PH.map(p=>{
+    const l=(p[1]/T*100).toFixed(1), w=(p[2]/T*100).toFixed(1);
+    const m0=(p[1]/30).toFixed(1), m1=((p[1]+p[2])/30).toFixed(1);
+    return `<div class="grow"><span>${esc(p[0])}</span>`
+     + `<span class="gtrack"><i class="gfill ${p[3]}" style="left:${l}%;width:${w}%"></i></span>`
+     + `<span class="d">第 ${m0}–${m1} 月</span></div>`;
+  }).join('');
+}
+
+document.getElementById('sitePlan').innerHTML = drawSite();
+document.getElementById('plan1').innerHTML = drawFloor('f1');
+document.getElementById('plan2').innerHTML = drawFloor('f2');
+document.getElementById('elev').innerHTML = drawElev();
+document.getElementById('sect').innerHTML = drawSect();
+document.getElementById('gantt').innerHTML = drawGantt();
+</script>
+
+<script>
+/* ═══════════ 3D 效果图 · 自建软件渲染器（画家算法 + 平面着色） ═══════════ */
+(function(){
+const cv=document.getElementById('c3d'), ctx=cv.getContext('2d');
+let W=800,H=500,DPR=1;
+
+const C={wall:'#EFECE2',wall2:'#E2DED2',plinth:'#8C8579',roof:'#4B4B46',fascia:'#3E3E3A',
+ slab:'#C6C2B5',glass:'#48757F',glassL:'#5D8C95',door:'#7E4630',wood:'#A9754A',
+ grass:'#7C9A4C',pave:'#B7B2A4',deck:'#C4BCA8',water:'#31A7BC',pool:'#1C7A90',
+ pond:'#1A5F70',earth:'#9C7C58',veg:'#5C8A38',trunk:'#6A4E34',leaf:'#4C7A36',leaf2:'#618E43',
+ fence:'#D2CDBE',mesh:'#93A07E',hedge:'#4F7A3C',car:'#7E8B98',glassC:'#38434C',tire:'#26262A',
+ road:'#75736C',rail:'#66665F',tile:'#8C5A45',tank:'#8E9AA4',louver:'#A9754A',white:'#F2F0E8'};
+
+const F=[], SH=[], PATCH=[], LAB=[];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const norm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return [a[0]/l,a[1]/l,a[2]/l];};
+const LIGHT=norm([-0.40,-0.46,0.79]);
+
+function quad(p,c,g){ F.push({p:p,c:c,g:g||'base'}); }
+function box(x0,y0,z0,x1,y1,z1,c,g){
+  const A=[x0,y0,z0],B=[x1,y0,z0],D=[x1,y1,z0],E=[x0,y1,z0];
+  const A2=[x0,y0,z1],B2=[x1,y0,z1],D2=[x1,y1,z1],E2=[x0,y1,z1];
+  quad([A2,B2,D2,E2],c,g);        // top
+  quad([A,E,D,B],c,g);            // bottom
+  quad([A,B,B2,A2],c,g);          // -y
+  quad([D,E,E2,D2],c,g);          // +y
+  quad([E,A,A2,E2],c,g);          // -x
+  quad([B,D,D2,B2],c,g);          // +x
+}
+function prism(cx,cy,z0,z1,r0,r1,n,c,g){
+  const p=[],q=[];
+  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2+Math.PI/n;
+    p.push([cx+Math.cos(a)*r0,cy+Math.sin(a)*r0,z0]); q.push([cx+Math.cos(a)*r1,cy+Math.sin(a)*r1,z1]); }
+  for(let i=0;i<n;i++){ const j=(i+1)%n; quad([p[i],p[j],q[j],q[i]],c,g); }
+  quad(q.slice().reverse(),c,g);
+  return;
+}
+function patch(x0,y0,x1,y1,c,z){ PATCH.push({p:[[x0,y0,z||0.012],[x1,y0,z||0.012],[x1,y1,z||0.012],[x0,y1,z||0.012]],c:c}); }
+function shadow(x0,y0,x1,y1,h){
+  const k=-h/LIGHT[2], ox=LIGHT[0]*k, oy=LIGHT[1]*k, z=0.02;
+  SH.push({p:[[x0,y0,z],[x1,y0,z],[x1+ox,y1+oy,z],[x0+ox,y1+oy,z]]});
+  SH.push({p:[[x0,y0,z],[x0+ox,y0+oy,z],[x0+ox,y1+oy,z],[x0,y1,z]]});
+  SH.push({p:[[x0+ox,y0+oy,z],[x1+ox,y0+oy,z],[x1+ox,y1+oy,z],[x0+ox,y1+oy,z]]});
+}
+function label(x,y,z,t){ LAB.push({p:[x,y,z],t:t}); }
+
+/* ── 周边环境（示意，非本地块） ── */
+patch(-30,-2,-1.6,30,'#77914B',0.004); patch(11.6,-2,36,26,'#6E8A44',0.004);
+patch(-30,33,36,60,'#7B9550',0.004); patch(-30,-30,36,-6,'#829A54',0.004);
+/* ── 场地 ── */
+patch(0,0,10,32,C.grass,0.008);
+patch(-2.2,-4.0,12.2,0,C.road,0.006);
+patch(1.2,0.4,6.4,3.2,C.pave); patch(6.8,0.4,8.0,5.6,C.pave);
+patch(0.5,21.2,5.7,28.9,C.deck); patch(1.4,19.6,5.4,21.0,C.pave);
+patch(0.5,29.2,7.2,31.7,C.earth); patch(7.4,29.1,9.6,31.6,C.earth);
+
+/* ── 围墙 · 大门 ── */
+const WH=1.9;
+[[0,1.2],[5.2,6.8],[7.7,10]].forEach(g=>box(g[0],-0.07,0,g[1],0.07,WH,C.fence));
+box(-0.07,0,0,0.07,12,WH,C.fence); box(9.93,0,0,10.07,12,WH,C.fence);
+[[1.2],[5.2],[6.8],[7.7]].forEach(p=>box(p[0]-0.13,-0.13,0,p[0]+0.13,0.13,2.1,C.plinth));
+box(1.2,-0.03,0.05,5.2,0.03,1.7,C.rail);
+for(let x=1.35;x<5.2;x+=0.22) box(x,-0.05,0.05,x+0.05,0.05,1.7,C.rail);
+box(6.8,-0.03,0.05,7.7,0.03,1.7,C.rail);
+for(let y=12;y<32;y+=2.5){ box(-0.06,y,0,0.06,y+0.12,1.8,C.plinth); box(9.94,y,0,10.06,y+0.12,1.8,C.plinth); }
+for(let x=0;x<10;x+=2.5) box(x,31.94,0,x+0.12,32.06,1.8,C.plinth);
+[0.20,0.92,1.68].forEach(z=>{ box(0.02,12,z,0.09,32,z+0.06,C.mesh); box(9.91,12,z,9.98,32,z+0.06,C.mesh);
+  box(0,31.91,z,10,31.98,z+0.06,C.mesh); });
+box(0.13,12.2,0,0.52,31.7,0.95,C.hedge); box(9.48,12.2,0,9.87,31.7,0.95,C.hedge);
+box(0.52,31.52,0,9.48,31.91,0.95,C.hedge);
+
+/* ── 主楼 ── */
+const FF=0.45, F1=3.75, F2=7.05, RG=8.05;
+box(1.35,6.75,0,9.45,16.45,FF,C.plinth);
+function shell(x0,y0,x1,y1,z0,z1,g){
+  box(x0,y0,z0,x1,y0+0.15,z1,C.wall,g); box(x0,y1-0.15,z0,x1,y1,z1,C.wall,g);
+  box(x0,y0+0.15,z0,x0+0.15,y1-0.15,z1,C.wall2,g); box(x1-0.15,y0+0.15,z0,x1,y1-0.15,z1,C.wall2,g);
+}
+shell(1.4,6.8,9.4,16.4,FF,F1-0.15,'base');
+box(1.4,6.8,F1-0.15,9.4,16.4,F1,C.slab,'slab');
+shell(1.4,6.8,9.4,16.4,F1,F2,'f2');
+box(1.4,6.8,F2,9.4,16.4,F2+0.10,C.roof,'roof');
+// 腰线
+box(1.31,6.71,F1-0.24,9.49,16.49,F1+0.05,C.fascia,'base');
+// 屋面（歇山式低坡）
+(function(){const e=F2+0.16, x0=0.8,x1=10.0,y0=6.2,y1=17.0, rx=5.4;
+ quad([[x0,y0,e],[x0,y1,e],[rx,15.8,RG],[rx,7.4,RG]],C.roof,'roof');
+ quad([[x1,y1,e],[x1,y0,e],[rx,7.4,RG],[rx,15.8,RG]],C.roof,'roof');
+ quad([[x0,y0,e],[rx,7.4,RG],[x1,y0,e]],C.roof,'roof');
+ quad([[x1,y1,e],[rx,15.8,RG],[x0,y1,e]],C.roof,'roof');
+ box(x0,y0,e-0.14,x1,y0+0.1,e,C.fascia,'roof'); box(x0,y1-0.1,e-0.14,x1,y1,e,C.fascia,'roof');
+ box(x0,y0,e-0.14,x0+0.1,y1,e,C.fascia,'roof'); box(x1-0.1,y0,e-0.14,x1,y1,e,C.fascia,'roof');
+})();
+box(6.4,14.6,RG-0.02,7.6,15.8,RG+0.55,C.tank,'roof');
+// 光井天窗
+box(6.85,8.15,F2+0.10,8.25,9.25,F2+0.55,C.glassL,'roof');
+
+/* ── 后附房 ── */
+box(1.35,16.4,0,9.45,20.05,FF,C.plinth);
+shell(1.4,16.4,9.4,20.0,FF,3.45,'base');
+quad([[1.2,16.2,4.05],[9.6,16.2,4.05],[9.6,20.2,3.62],[1.2,20.2,3.62]],C.roof,'base');
+box(1.2,16.2,3.92,9.6,16.3,4.05,C.fascia,'base');
+box(1.2,20.1,3.49,9.6,20.2,3.62,C.fascia,'base');
+
+/* ── 隔墙（复用平面图数据） ── */
+(function(){
+ const S=(lx,ly)=>[1.4+lx,6.8+ly];
+ FLOORS.f1.walls.forEach(w=>{ const a=S(w[0],w[1]), b=S(w[2],w[3]);
+   const ann = w[1]>=9.6; box(a[0],a[1],FF,b[0],b[1],ann?3.45:F1-0.15,C.wall2,'p1'); });
+ FLOORS.f2.walls.forEach(w=>{ const a=S(w[0],w[1]), b=S(w[2],w[3]);
+   box(a[0],a[1],F1,b[0],b[1],F2-0.15,C.wall2,'p2'); });
+ // 光井洞口
+ box(6.85,8.15,F2-0.16,8.25,9.25,F2,C.glassL,'p2');
+})();
+
+/* ── 门窗 ── */
+function win(side,a,b,z0,z1,c,g){
+  const t=0.03, col=c||C.glass;
+  if(side==='F') box(a,6.80-t,z0,b,6.80+t,z1,col,g);
+  else if(side==='B') box(a,16.40-t,z0,b,16.40+t,z1,col,g);
+  else if(side==='L') box(1.40-t,a,z0,1.40+t,b,z1,col,g);
+  else if(side==='R') box(9.40-t,a,z0,9.40+t,b,z1,col,g);
+  else if(side==='AL') box(1.40-t,a,z0,1.40+t,b,z1,col,g);
+  else if(side==='AB') box(a,20.00-t,z0,b,20.00+t,z1,col,g);
+}
+win('F',2.3,4.3,1.05,3.25); win('F',7.0,8.0,FF,2.75,C.door);
+win('L',8.8,10.0,1.35,2.95); win('L',13.2,14.4,1.35,2.95);
+win('R',8.8,10.0,1.35,2.95); win('R',12.2,13.7,1.35,2.95);
+win('F',2.6,4.0,4.15,6.55,C.glass,'f2'); win('F',7.0,8.4,4.55,6.35,C.glass,'f2');
+win('L',8.4,9.6,4.65,6.25,C.glass,'f2'); win('L',13.8,15.2,4.65,6.25,C.glass,'f2');
+win('R',9.0,10.0,4.65,6.25,C.glass,'f2'); win('R',12.2,13.6,4.65,6.25,C.glass,'f2');
+win('B',4.6,5.4,5.35,6.35,C.glass,'f2'); win('B',6.2,7.0,5.35,6.35,C.glass,'f2');
+win('B',7.6,8.8,4.15,6.35,C.glassL,'f2');
+win('AL',17.4,18.8,1.35,2.95); win('AB',2.4,3.4,FF,2.55,C.door); win('AB',7.7,8.6,FF,2.55,C.door);
+// 仿木遮阳格栅
+for(let x=7.15;x<9.32;x+=0.27) box(x,6.66,4.0,x+0.10,6.78,F2,C.louver,'f2');
+
+/* ── 门廊 · 阳台 · 晾衣棚 ── */
+box(1.4,5.6,3.40,9.4,6.8,3.58,C.slab);
+box(1.4,5.6,3.58,5.6,6.8,3.76,C.slab,'f2');
+box(1.4,5.56,3.76,5.6,5.64,4.86,C.rail,'f2');
+box(1.36,5.56,3.76,1.44,6.8,4.86,C.rail,'f2'); box(5.52,5.56,3.76,5.60,6.8,4.86,C.rail,'f2');
+box(2.0,5.62,0,2.2,5.82,3.40,C.plinth); box(8.6,5.62,0,8.8,5.82,3.40,C.plinth);
+box(1.4,20.0,2.55,5.4,21.2,2.68,C.slab);
+box(5.2,20.9,0,5.4,21.1,2.55,C.plinth); box(1.4,20.9,0,1.6,21.1,2.55,C.plinth);
+box(1.6,21.05,1.4,5.2,21.10,1.45,C.rail);
+// 入口台阶
+box(6.9,6.30,0,8.1,6.80,0.15,C.pave); box(6.9,6.05,0,8.1,6.30,0.30,C.pave);
+
+/* ── 泳池 ── */
+box(1.2,21.9,-1.45,4.7,28.4,-0.06,C.pool);
+quad([[1.2,21.9,-0.06],[4.7,21.9,-0.06],[4.7,28.4,-0.06],[1.2,28.4,-0.06]],C.water);
+[[0.9,21.6,4.7+0.3,21.9],[0.9,28.4,5.0,28.7],[0.9,21.9,1.2,28.4],[4.7,21.9,5.0,28.4]]
+ .forEach(r=>box(r[0],r[1],0,r[2],r[3],0.11,C.tile));
+box(1.5,22.1,-0.62,2.4,22.5,-0.50,C.tile); box(1.5,22.1,-0.32,2.4,22.6,-0.20,C.tile);
+
+/* ── 凉亭 ── */
+box(6.4,22.2,0,9.4,25.2,0.16,C.tile);
+[[6.55,22.35],[9.10,22.35],[6.55,24.90],[9.10,24.90]].forEach(p=>box(p[0],p[1],0.16,p[0]+0.16,p[1]+0.16,2.5,C.wood));
+(function(){const e=2.5,x0=6.05,x1=9.75,y0=21.85,y1=25.55,rx=7.9;
+ quad([[x0,y0,e],[x0,y1,e],[rx,24.5,3.28],[rx,22.9,3.28]],C.tile);
+ quad([[x1,y1,e],[x1,y0,e],[rx,22.9,3.28],[rx,24.5,3.28]],C.tile);
+ quad([[x0,y0,e],[rx,22.9,3.28],[x1,y0,e]],C.tile);
+ quad([[x1,y1,e],[rx,24.5,3.28],[x0,y1,e]],C.tile);
+ box(x0,y0,e-0.10,x1,y0+0.08,e,C.fascia); box(x0,y1-0.08,e-0.10,x1,y1,e,C.fascia);})();
+box(7.3,23.2,0.16,8.5,24.2,0.55,C.wood); box(6.7,23.3,0.16,7.1,24.1,0.42,C.wood);
+box(8.7,23.3,0.16,9.1,24.1,0.42,C.wood);
+
+/* ── 锦鲤池 ── */
+box(6.6,26.0,-1.15,9.2,27.8,-0.05,C.pond);
+quad([[6.6,26.0,-0.05],[9.2,26.0,-0.05],[9.2,27.8,-0.05],[6.6,27.8,-0.05]],'#2A7F92');
+[[6.35,25.75,9.45,26.0],[6.35,27.8,9.45,28.05],[6.35,26.0,6.6,27.8],[9.2,26.0,9.45,27.8]]
+ .forEach(r=>box(r[0],r[1],0,r[2],r[3],0.28,C.plinth));
+box(8.55,27.85,0.10,9.15,28.45,0.85,C.plinth); box(8.6,27.6,0.55,9.1,27.95,0.72,'#6E7A6A');
+
+/* ── 菜园 · 棚架 · 鸡鸭 ── */
+for(let i=0;i<4;i++){const x=0.5+i*1.72; box(x,29.2,0,x+1.42,31.7,0.34,C.veg);}
+for(let i=0;i<4;i++){const x=0.6+i*2.1; box(x,29.4,0.3,x+0.07,29.47,2.1,C.trunk); box(x,31.3,0.3,x+0.07,31.37,2.1,C.trunk);}
+box(0.55,29.4,2.05,7.15,31.4,2.12,C.leaf2);
+box(7.6,30.0,0,9.4,31.4,1.4,C.fence);
+quad([[7.45,29.85,1.75],[9.55,29.85,1.75],[9.55,31.55,1.45],[7.45,31.55,1.45]],C.tile);
+box(7.6,29.9,0,7.68,30.0,1.4,C.plinth);
+for(let y=29.1;y<31.6;y+=1.2) box(7.4,y,0,7.46,y+0.08,1.1,C.mesh);
+box(7.42,29.1,0,7.48,31.6,1.05,C.mesh); box(7.4,29.06,0,9.6,29.12,1.05,C.mesh);
+
+/* ── 汽车 ── */
+box(1.7,0.75,0.28,6.3,2.60,0.95,C.car); box(2.7,0.85,0.95,5.2,2.50,1.52,C.glassC);
+[[2.0,0.72],[5.5,0.72],[2.0,2.35],[5.5,2.35]].forEach(p=>box(p[0],p[1],0,p[0]+0.55,p[1]+0.28,0.34,C.tire));
+
+/* ── 树 ── */
+function tree(x,y,h,r,c){
+  prism(x,y,0,h*0.44,0.10,0.08,6,C.trunk);
+  prism(x,y,h*0.36,h*0.72,r,r*0.86,7,c||C.leaf);
+  prism(x,y,h*0.64,h*0.94,r*0.82,r*0.5,7,(c||C.leaf)===C.leaf?C.leaf2:C.leaf);
+  prism(x,y,h*0.88,h,r*0.42,0.06,6,c||C.leaf);
+  shadow(x-r*0.7,y-r*0.7,x+r*0.7,y+r*0.7,h*0.8);
+}
+[[8.95,2.1,3.5,1.02],[8.9,4.6,2.8,0.85],[0.7,17.6,3.2,0.95],[0.7,19.6,3.0,0.9],
+ [9.7,17.6,2.8,0.8],[9.7,20.6,3.4,1.0],[9.7,23.4,3.4,1.0],[9.6,29.9,2.6,0.75],
+ [1.5,31.2,2.5,0.78],[3.6,31.2,2.5,0.78],[5.7,31.2,2.5,0.78]].forEach(t=>tree(t[0],t[1],t[2],t[3]));
+tree(6.05,22.7,2.6,0.62,'#6E8A4E'); tree(6.05,28.2,2.2,0.55,'#6E8A4E');
+// 周边示意树木
+[[-4.6,4.0,5.4,1.7],[-3.4,26.0,4.6,1.4],[13.8,5.0,5.0,1.6],[12.6,29.5,4.2,1.3],
+ [-6.4,35.6,4.8,1.5],[15.5,19.0,4.4,1.4],[-8.6,11.0,4.0,1.25]].forEach(t=>tree(t[0],t[1],t[2],t[3],'#5F8340'));
+[[2.6,4.6],[4.4,4.9],[6.0,4.5]].forEach(p=>prism(p[0],p[1],0,0.85,0.42,0.30,6,C.hedge));
+
+/* ── 阴影 ── */
+shadow(1.35,6.75,9.45,16.45,RG);
+shadow(1.35,16.4,9.45,20.05,4.0);
+shadow(6.4,22.2,9.4,25.2,3.2);
+shadow(1.7,0.75,6.3,2.6,1.5);
+shadow(7.6,30.0,9.4,31.4,1.7);
+
+/* ── 面片细分：避免大多边形在画家算法下错序 ── */
+(function refine(maxLen){
+  const out=[], L=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  const dd=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]);
+  for(const q of F){
+    if(q.p.length!==4){ out.push(q); continue; }
+    const nu=Math.ceil(Math.max(dd(q.p[0],q.p[1]),dd(q.p[3],q.p[2]))/maxLen);
+    const nv=Math.ceil(Math.max(dd(q.p[0],q.p[3]),dd(q.p[1],q.p[2]))/maxLen);
+    if(nu<=1&&nv<=1){ out.push(q); continue; }
+    for(let i=0;i<nv;i++) for(let j=0;j<nu;j++){
+      const t0=i/nv,t1=(i+1)/nv,s0=j/nu,s1=(j+1)/nu;
+      const e0=L(q.p[0],q.p[3],t0), e1=L(q.p[1],q.p[2],t0),
+            f0=L(q.p[0],q.p[3],t1), f1=L(q.p[1],q.p[2],t1);
+      out.push({p:[L(e0,e1,s0),L(e0,e1,s1),L(f0,f1,s1),L(f0,f1,s0)],c:q.c,g:q.g});
+    }
+  }
+  F.length=0; for(const q of out) F.push(q);
+})(1.6);
+
+/* ── 标注 ── */
+label(5.4,11.6,RG+0.55,'主楼 · 两层 8.0×9.6');
+label(5.4,18.2,4.55,'后附房 · 厨房/公厕/洗衣/杂物');
+label(4.0,1.7,1.9,'停车位 + 车行门 4.0 m');
+label(2.95,25.1,0.7,'游泳池 3.5×6.5');
+label(7.9,23.7,3.65,'凉亭 3×3');
+label(7.9,26.9,0.9,'锦鲤金鱼池');
+label(3.6,30.4,2.4,'菜园 19.4 m²');
+label(8.5,30.7,2.0,'鸡鸭舍');
+label(3.4,20.6,3.05,'洗衣晾衣区');
+
+/* ═══ 相机 ═══ */
+const VIEWS={
+ aerial:{az:56,el:39,d:31,t:[5,16.0,0.8]},
+ front:{az:4,el:12,d:19,t:[5,9.0,3.1]},
+ pool:{az:203,el:19,d:13,t:[3.2,24.0,0.8]},
+ yard:{az:168,el:27,d:20,t:[5,23,1.5]},
+ pavilion:{az:-52,el:14,d:10.5,t:[7.2,24.6,1.5]}
+};
+let cam={...VIEWS.aerial}, showRoof=true, onlyF1=false, showLab=true;
+const rad=d=>d*Math.PI/180;
+
+function shade(hex,k){
+  const n=parseInt(hex.slice(1),16);
+  const r=Math.min(255,((n>>16)&255)*k)|0, g=Math.min(255,((n>>8)&255)*k)|0, b=Math.min(255,(n&255)*k)|0;
+  return `rgb(${r},${g},${b})`;
+}
+function draw(){
+  const e=rad(cam.el), a=rad(cam.az), T=cam.t;
+  const eye=[T[0]+cam.d*Math.cos(e)*Math.sin(a), T[1]-cam.d*Math.cos(e)*Math.cos(a), T[2]+cam.d*Math.sin(e)];
+  const f=norm(sub(T,eye)), r=norm(cross(f,[0,0,1])), u=cross(r,f);
+  const FL=H*0.92, cx=W/2, cy=H*0.54;
+  const pr=p=>{ const d=sub(p,eye), zc=dot(d,f);
+    if(zc<0.25) return null; return [cx+FL*dot(d,r)/zc, cy-FL*dot(d,u)/zc, zc]; };
+
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  const dk=getComputedStyle(document.documentElement).getPropertyValue('--paper').trim().startsWith('#1');
+  sky.addColorStop(0, dk?'#1B2430':'#C9DCE6'); sky.addColorStop(1, dk?'#26261E':'#EAEADF');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+  const paint=(pts,fill,stroke)=>{
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+    ctx.closePath(); ctx.fillStyle=fill; ctx.fill();
+    if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=0.6; ctx.stroke(); }
+  };
+  // 地面：填到地平线（避免超大平面顶点落到相机背后）
+  const d0=norm([f[0],f[1],1e-6]);
+  const syh=cy-FL*dot(d0,u)/dot(d0,f);
+  const gy=Math.max(-1,syh);
+  if(gy<H){ ctx.fillStyle=shade('#6B8845',0.94); ctx.fillRect(0,gy,W,H-gy);
+    if(syh>0&&syh<H){ ctx.fillStyle='rgba(255,255,255,0.16)'; ctx.fillRect(0,syh,W,2.5); } }
+  PATCH.forEach(q=>{ const s=q.p.map(pr); if(s.some(v=>!v)) return; paint(s,shade(q.c,0.94)); });
+  // 阴影
+  ctx.globalAlpha=0.16; SH.forEach(q=>{ const s=q.p.map(pr); if(s.some(v=>!v)) return; paint(s,'#000'); });
+  ctx.globalAlpha=1;
+
+  // 三维面
+  const vis=F.filter(q=>{
+    if(q.g==='roof') return showRoof;
+    if(q.g==='f2')   return !onlyF1;
+    if(q.g==='p2')   return !showRoof && !onlyF1;
+    if(q.g==='slab') return !showRoof && !onlyF1;
+    if(q.g==='p1')   return !showRoof;
+    return true;
+  });
+  const list=[];
+  for(const q of vis){
+    const s=q.p.map(pr); if(s.some(v=>!v)) continue;
+    let n=norm(cross(sub(q.p[1],q.p[0]),sub(q.p[2],q.p[0])));
+    if(dot(n,sub(eye,q.p[0]))<0) n=[-n[0],-n[1],-n[2]];
+    const k=0.44+0.56*Math.max(0,dot(n,LIGHT));
+    let d=0; for(const v of s) d+=v[2]; d/=s.length;
+    list.push({s:s,c:shade(q.c,k),d:d});
+  }
+  list.sort((a,b)=>b.d-a.d);
+  for(const q of list) paint(q.s,q.c);
+
+  // 标注
+  if(showLab){
+    ctx.font='500 11px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.textBaseline='middle';
+    const used=[];
+    const BK=[[1.30,6.70,0,9.50,16.50,showRoof?RG:(onlyF1?F1-0.1:F2)],[1.30,16.35,0,9.50,20.10,4.05]];
+    const segBox=(a,b,B)=>{
+      let t0=0,t1=1; const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]];
+      for(let i=0;i<3;i++){
+        if(Math.abs(d[i])<1e-9){ if(a[i]<B[i]||a[i]>B[i+3]) return false; continue; }
+        let u1=(B[i]-a[i])/d[i], u2=(B[i+3]-a[i])/d[i];
+        if(u1>u2){const s2=u1;u1=u2;u2=s2;}
+        t0=Math.max(t0,u1); t1=Math.min(t1,u2);
+        if(t0>t1) return false;
+      }
+      return t1>0.03 && t0<0.96;
+    };
+    LAB.forEach(l=>{
+      const s=pr(l.p); if(!s) return;
+      if(BK.some(B=>segBox(eye,l.p,B))) return;
+      let x=s[0], y=s[1], tries=0;
+      if(x<40||x>W-40||y<16||y>H-16) return;
+      while(used.some(v=>Math.abs(v[0]-x)<112&&Math.abs(v[1]-y)<15)&&tries<3){ y-=17; tries++; }
+      if(y<16||tries>=3) return;
+      used.push([x,y]);
+      const w=ctx.measureText(l.t).width+12;
+      ctx.fillStyle='rgba(20,24,16,0.80)';
+      ctx.beginPath(); ctx.roundRect?ctx.roundRect(x-w/2,y-9,w,18,3):ctx.rect(x-w/2,y-9,w,18); ctx.fill();
+      ctx.fillStyle='#F2F0E8'; ctx.textAlign='center'; ctx.fillText(l.t,x,y+1);
+      ctx.strokeStyle='rgba(20,24,16,0.55)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,y+9); ctx.lineTo(s[0],s[1]+2); ctx.stroke();
+    });
+  }
+  const comp=document.getElementById('cArrow');
+  if(comp) comp.style.transform=`rotate(${cam.az}deg)`;
+}
+
+let raf=null;
+const render=()=>{ if(raf) return; raf=requestAnimationFrame(()=>{raf=null;draw();}); };
+
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  const r=cv.getBoundingClientRect();
+  W=Math.max(320,r.width|0); H=Math.max(280,r.height|0);
+  cv.width=W*DPR; cv.height=H*DPR;
+  draw();
+}
+new ResizeObserver(resize).observe(cv);
+resize();
+
+/* ── 交互 ── */
+let drag=null;
+cv.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; cv.classList.add('drag');
+  cv.setPointerCapture(e.pointerId); document.getElementById('vhint').style.opacity='0'; });
+cv.addEventListener('pointermove',e=>{ if(!drag) return;
+  cam.az=(cam.az+(e.clientX-drag.x)*0.42)%360;
+  cam.el=Math.max(4,Math.min(82,cam.el-(e.clientY-drag.y)*0.30));
+  drag={x:e.clientX,y:e.clientY}; render(); });
+const stop=()=>{ drag=null; cv.classList.remove('drag'); };
+cv.addEventListener('pointerup',stop); cv.addEventListener('pointercancel',stop);
+cv.addEventListener('wheel',e=>{ e.preventDefault();
+  cam.d=Math.max(7,Math.min(62,cam.d*(1+Math.sign(e.deltaY)*0.10))); render(); },{passive:false});
+let pinch=null;
+cv.addEventListener('touchstart',e=>{ if(e.touches.length===2){
+  pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); } });
+cv.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinch){ e.preventDefault();
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  cam.d=Math.max(7,Math.min(62,cam.d*pinch/d)); pinch=d; render(); } },{passive:false});
+cv.addEventListener('touchend',()=>{pinch=null;});
+
+document.querySelectorAll('.vbtn[data-view]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.vbtn[data-view]').forEach(o=>o.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    cam={...VIEWS[b.dataset.view]}; render();
+  });
+});
+const tg=(id,fn)=>{ const b=document.getElementById(id);
+  b.addEventListener('click',()=>{ const on=b.getAttribute('aria-pressed')!=='true';
+    b.setAttribute('aria-pressed',String(on)); fn(on); render(); }); };
+tg('tRoof',on=>{ showRoof=!on; });
+tg('tFloor',on=>{ onlyF1=on; if(on){ const r=document.getElementById('tRoof');
+  r.setAttribute('aria-pressed','true'); showRoof=false; } });
+tg('tLabel',on=>{ showLab=on; });
+document.getElementById('tLabel').setAttribute('aria-pressed','true');
+window.__view=o=>{Object.assign(cam,o);render();};
+})();
+</script>
+
+</div>
