@@ -1,0 +1,2896 @@
+<title>Reborn 重生 · 系统性康复</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Reborn 重生：基于认知重塑、能量提升与冲动脱敏的系统性成瘾康复应用。">
+
+<style>
+/* ============================================================
+   Reborn — 设计令牌
+   深空墨 / 深空蓝 / 翡翠绿 / 琥珀金 / 朱砂红
+   中性色带青绿偏，非纯灰
+   ============================================================ */
+:root{
+  --ink:#0B1220;
+  --ground:#0F172A;
+  --jade:#10B981;
+  --jade-dim:#0E9F6E;
+  --amber:#F59E0B;
+  --cinnabar:#E2503F;
+
+  /* 语义色（与强调色分离） */
+  --ok:#10B981;
+  --warn:#F59E0B;
+  --crit:#E2503F;
+
+  /* 浅色主题（默认） */
+  --bg:#F2F5F3;
+  --surface:#FFFFFF;
+  --surface-2:#E9EFEC;
+  --line:#D3DEDA;
+  --text:#0B1220;
+  --text-2:#4A5C56;
+  --text-3:#6B7F78;
+  --accent:#0E8F68;
+  --accent-soft:#D6F0E6;
+  --gold:#B8760A;
+  --gold-soft:#FBEBCF;
+  --danger:#C33F2F;
+  --danger-soft:#FADFDB;
+  --shadow:0 1px 2px rgba(11,18,32,.06), 0 8px 24px -12px rgba(11,18,32,.18);
+  --shadow-lg:0 2px 4px rgba(11,18,32,.08), 0 24px 48px -20px rgba(11,18,32,.28);
+
+  --font-display:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","Source Han Serif CN",SimSun,"STSong",Georgia,serif;
+  --font-body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+
+  --r-sm:8px; --r:14px; --r-lg:20px; --r-xl:28px;
+  --shell:440px;
+}
+
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0B1220;
+    --surface:#0F172A;
+    --surface-2:#16233C;
+    --line:#22314C;
+    --text:#EAF2EF;
+    --text-2:#A8BCB5;
+    --text-3:#7B9188;
+    --accent:#10B981;
+    --accent-soft:#0F3A2C;
+    --gold:#F59E0B;
+    --gold-soft:#3D2C08;
+    --danger:#F2705C;
+    --danger-soft:#3D1712;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow-lg:0 2px 4px rgba(0,0,0,.5), 0 24px 48px -20px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --surface:#0F172A; --surface-2:#16233C; --line:#22314C;
+  --text:#EAF2EF; --text-2:#A8BCB5; --text-3:#7B9188;
+  --accent:#10B981; --accent-soft:#0F3A2C; --gold:#F59E0B; --gold-soft:#3D2C08;
+  --danger:#F2705C; --danger-soft:#3D1712;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-lg:0 2px 4px rgba(0,0,0,.5), 0 24px 48px -20px rgba(0,0,0,.7);
+}
+:root[data-theme="light"]{
+  --bg:#F2F5F3; --surface:#FFFFFF; --surface-2:#E9EFEC; --line:#D3DEDA;
+  --text:#0B1220; --text-2:#4A5C56; --text-3:#6B7F78;
+  --accent:#0E8F68; --accent-soft:#D6F0E6; --gold:#B8760A; --gold-soft:#FBEBCF;
+  --danger:#C33F2F; --danger-soft:#FADFDB;
+  --shadow:0 1px 2px rgba(11,18,32,.06), 0 8px 24px -12px rgba(11,18,32,.18);
+  --shadow-lg:0 2px 4px rgba(11,18,32,.08), 0 24px 48px -20px rgba(11,18,32,.28);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--font-body);
+  font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+
+/* ============ APP SHELL ============ */
+.shell{
+  max-width:var(--shell); margin:0 auto; min-height:100vh;
+  min-height:100dvh; position:relative;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+}
+@media (min-width:600px){
+  body{background:linear-gradient(160deg,var(--surface-2),var(--bg))}
+  .shell{
+    box-shadow:var(--shadow-lg);
+    min-height:100dvh;
+    border-left:1px solid var(--line); border-right:1px solid var(--line);
+  }
+}
+
+/* 顶栏 */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px 12px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.brand{
+  font-family:var(--font-display); font-size:19px; font-weight:600;
+  letter-spacing:.06em; margin:0; flex:1;
+}
+.brand span{color:var(--accent)}
+.chip{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 10px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--line);
+  font-size:12.5px; font-variant-numeric:tabular-nums;
+  font-weight:600;
+}
+.chip.gold{color:var(--gold); background:var(--gold-soft); border-color:transparent}
+.icon-btn{
+  display:grid; place-items:center; width:34px; height:34px;
+  border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); padding:0;
+}
+.icon-btn:hover{background:var(--surface-2)}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* 主内容 */
+.main{flex:1; padding:18px 18px 108px; display:none}
+.main.active{display:block}
+
+/* 底部导航 */
+.tabbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  max-width:var(--shell); margin:0 auto;
+  display:grid; grid-template-columns:repeat(5,1fr);
+  background:color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+}
+.tab{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:0; padding:6px 2px; border-radius:12px;
+  color:var(--text-3); font-size:10.5px; letter-spacing:.04em;
+  transition:color .18s;
+}
+.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--accent)}
+.tab[aria-selected="true"] .tab-dot{opacity:1}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:0;transition:opacity .18s}
+
+/* 急救悬浮按钮 */
+.sos{
+  position:fixed; z-index:55;
+  bottom:calc(78px + env(safe-area-inset-bottom)); right:calc(50% - var(--shell)/2 + 18px);
+  display:flex; align-items:center; gap:7px;
+  padding:11px 16px; border-radius:999px; border:0;
+  background:var(--cinnabar); color:#fff;
+  font-size:13.5px; font-weight:700; letter-spacing:.03em;
+  box-shadow:0 6px 20px -6px rgba(226,80,63,.7);
+}
+@media (max-width:479px){ .sos{right:18px} }
+.sos:hover{filter:brightness(1.08)}
+.sos svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+
+/* ============ 排版 ============ */
+.h-display{
+  font-family:var(--font-display); font-weight:600;
+  font-size:26px; line-height:1.3; margin:0 0 6px;
+  text-wrap:balance; letter-spacing:.01em;
+}
+.h-sec{
+  font-family:var(--font-display); font-size:17px; font-weight:600;
+  margin:26px 0 12px; display:flex; align-items:baseline; gap:9px;
+  letter-spacing:.02em;
+}
+.h-sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.eyebrow{
+  font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--text-3); font-weight:600; margin:0 0 8px;
+}
+.lede{color:var(--text-2); margin:0 0 14px; max-width:34em}
+.small{font-size:12.5px; color:var(--text-3); line-height:1.6}
+.num{font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+
+/* ============ 卡片 ============ */
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px;
+  box-shadow:var(--shadow);
+}
+.card + .card{margin-top:12px}
+.stack{display:flex; flex-direction:column; gap:12px}
+.row{display:flex; align-items:center; gap:12px}
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+
+/* 天数英雄卡 */
+.hero{
+  position:relative; overflow:hidden;
+  background:linear-gradient(150deg,var(--ground),#132A45 60%,#0F3A2C);
+  border:1px solid rgba(16,185,129,.22);
+  border-radius:var(--r-lg); padding:22px 20px 20px;
+  color:#EAF2EF;
+}
+.hero::before{
+  content:""; position:absolute; inset:-40% -20% auto auto;
+  width:280px; height:280px; border-radius:50%;
+  background:radial-gradient(circle,rgba(16,185,129,.28),transparent 68%);
+  pointer-events:none;
+}
+.hero-label{font-size:11.5px; letter-spacing:.15em; text-transform:uppercase; color:rgba(234,242,239,.62); margin:0 0 2px}
+.hero-days{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:58px; line-height:1; font-weight:700;
+  letter-spacing:-.03em; margin:2px 0 0;
+  background:linear-gradient(180deg,#fff,#8FE8C8);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero-unit{font-family:var(--font-body);font-size:15px;color:rgba(234,242,239,.7);margin-left:7px;font-weight:400}
+.hero-meta{display:flex; gap:18px; margin-top:14px; padding-top:14px; border-top:1px solid rgba(234,242,239,.14)}
+.hero-meta div{flex:1}
+.hero-meta dt{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:rgba(234,242,239,.55); margin:0}
+.hero-meta dd{margin:3px 0 0; font-family:var(--font-mono); font-size:16px; font-weight:600; font-variant-numeric:tabular-nums}
+
+/* 伙伴（动物） */
+.pet-stage{
+  position:relative; display:grid; place-items:center;
+  padding:18px 0 6px;
+}
+.pet-glyph{
+  font-size:76px; line-height:1;
+  filter:drop-shadow(0 8px 18px rgba(16,185,129,.32));
+  animation:breathe 4.2s ease-in-out infinite;
+}
+.pet-glyph.sad{filter:grayscale(.7) drop-shadow(0 6px 14px rgba(0,0,0,.3)); animation-duration:7s}
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7px) scale(1.035)}}
+.pet-ring{
+  position:absolute; inset:auto; width:132px; height:132px; border-radius:50%;
+  border:1px dashed color-mix(in srgb,var(--accent) 45%, transparent);
+  animation:spin 26s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 进度条 */
+.bar{height:7px; border-radius:999px; background:var(--surface-2); overflow:hidden}
+.bar > i{display:block; height:100%; border-radius:999px; background:var(--accent); transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.bar.gold > i{background:var(--gold)}
+.bar.crit > i{background:var(--danger)}
+.stat-line{display:grid; grid-template-columns:64px 1fr 42px; align-items:center; gap:10px; font-size:12.5px}
+.stat-line b{font-weight:600; color:var(--text-2)}
+.stat-line span{text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--text-3)}
+
+/* 任务项 */
+.task{
+  display:flex; align-items:flex-start; gap:12px;
+  padding:13px 14px; border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--line);
+  width:100%; text-align:left; transition:border-color .18s, background .18s;
+}
+.task:hover{border-color:color-mix(in srgb,var(--accent) 40%, var(--line))}
+.task.done{background:var(--accent-soft); border-color:transparent}
+.task.done .task-name{text-decoration:line-through; color:var(--text-3)}
+.tick{
+  flex:none; width:21px; height:21px; border-radius:6px; margin-top:1px;
+  border:1.8px solid var(--text-3); display:grid; place-items:center;
+  transition:.18s;
+}
+.task.done .tick{background:var(--accent); border-color:var(--accent)}
+.tick svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.task.done .tick svg{opacity:1}
+.task-body{flex:1; min-width:0}
+.task-name{font-weight:600; font-size:14.5px; display:block}
+.task-note{font-size:12px; color:var(--text-3); display:block; margin-top:2px}
+.task-coin{flex:none; font-size:11.5px; font-weight:700; color:var(--gold); font-family:var(--font-mono)}
+
+.time-group{margin-top:14px}
+.time-head{
+  display:flex; align-items:center; gap:8px; margin-bottom:9px;
+  font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3); font-weight:600;
+}
+.time-head::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* 按钮 */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:12px 18px; border-radius:var(--r-sm); border:1px solid transparent;
+  background:var(--accent); color:#fff; font-weight:650; font-size:14.5px;
+  transition:filter .18s, transform .1s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:var(--surface); color:var(--text); border-color:var(--line)}
+.btn.ghost:hover{background:var(--surface-2); filter:none}
+.btn.danger{background:var(--cinnabar)}
+.btn.gold{background:var(--gold); color:#1A1204}
+.btn.block{width:100%}
+.btn:disabled{opacity:.42; cursor:not-allowed}
+.btn-row{display:flex; gap:9px; flex-wrap:wrap}
+
+/* 徽章/标签 */
+.pill{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:650;
+  background:var(--surface-2); color:var(--text-2);
+}
+.pill.ok{background:var(--accent-soft); color:var(--accent)}
+.pill.warn{background:var(--gold-soft); color:var(--gold)}
+.pill.crit{background:var(--danger-soft); color:var(--danger)}
+
+/* 预警卡 */
+.alert{
+  border-radius:var(--r); padding:14px 15px;
+  background:var(--gold-soft); border:1px solid color-mix(in srgb,var(--gold) 30%, transparent);
+}
+.alert.crit{background:var(--danger-soft); border-color:color-mix(in srgb,var(--danger) 30%, transparent)}
+.alert-title{font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:7px; margin-bottom:5px}
+.alert-title svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex:none}
+.alert p{margin:0; font-size:13px; color:var(--text-2); line-height:1.6}
+
+/* ============ 模态 ============ */
+.sheet{
+  position:fixed; inset:0; z-index:100;
+  background:var(--bg);
+  display:none; flex-direction:column;
+  max-width:var(--shell); margin:0 auto;
+}
+.sheet.open{display:flex; animation:sheetUp .28s cubic-bezier(.2,.9,.25,1)}
+@keyframes sheetUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sheet-head{
+  display:flex; align-items:center; gap:12px; padding:14px 18px;
+  border-bottom:1px solid var(--line); background:var(--surface);
+}
+.sheet-head h2{font-family:var(--font-display); font-size:16.5px; margin:0; flex:1; font-weight:600}
+.sheet-body{flex:1; overflow-y:auto; padding:20px 18px 32px; -webkit-overflow-scrolling:touch}
+.sheet-foot{padding:14px 18px calc(16px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:var(--surface)}
+
+/* 测评 */
+.q-progress{height:3px; background:var(--surface-2)}
+.q-progress > i{display:block; height:100%; background:var(--accent); transition:width .35s}
+.q-num{font-family:var(--font-mono); font-size:11.5px; color:var(--text-3); letter-spacing:.08em}
+.q-title{font-family:var(--font-display); font-size:21px; font-weight:600; margin:8px 0 4px; text-wrap:balance; line-height:1.35}
+.q-hint{font-size:13px; color:var(--text-3); margin:0 0 18px}
+.opts{display:flex; flex-direction:column; gap:9px}
+.opt{
+  display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+  padding:14px 15px; border-radius:var(--r);
+  background:var(--surface); border:1.5px solid var(--line);
+  font-size:14.5px; transition:.16s;
+}
+.opt:hover{border-color:color-mix(in srgb,var(--accent) 50%, var(--line)); background:var(--surface-2)}
+.opt[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.opt-mark{
+  flex:none; width:19px; height:19px; border-radius:50%;
+  border:1.8px solid var(--text-3); display:grid; place-items:center;
+}
+.opt[aria-pressed="true"] .opt-mark{border-color:var(--accent); background:var(--accent)}
+.opt-mark i{width:7px;height:7px;border-radius:50%;background:#fff;opacity:0}
+.opt[aria-pressed="true"] .opt-mark i{opacity:1}
+.opt.multi .opt-mark{border-radius:5px}
+.opt.multi .opt-mark i{border-radius:2px; width:8px; height:8px}
+
+/* 滑块自评 */
+.slider-row{margin-bottom:20px}
+.slider-row label{display:flex; justify-content:space-between; font-size:14px; font-weight:600; margin-bottom:7px}
+.slider-row label span{font-family:var(--font-mono); color:var(--accent); font-variant-numeric:tabular-nums}
+input[type=range]{
+  width:100%; height:26px; margin:0; background:transparent;
+  -webkit-appearance:none; appearance:none;
+}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:var(--surface-2)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--accent); border:3px solid var(--surface); margin-top:-8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+input[type=range]::-moz-range-track{height:6px;border-radius:999px;background:var(--surface-2)}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;background:var(--accent);
+  border:3px solid var(--surface); box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.slider-scale{display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); margin-top:-2px}
+
+/* 报告 */
+.report-grade{
+  display:flex; align-items:baseline; gap:10px;
+  font-family:var(--font-display); font-size:24px; font-weight:600;
+}
+.stars{color:var(--gold); letter-spacing:.12em; font-size:19px}
+.dim{padding:14px 0; border-bottom:1px solid var(--line)}
+.dim:last-child{border-bottom:0; padding-bottom:0}
+.dim-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:9px}
+.dim-name{font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:7px}
+.trigger-item{display:grid; grid-template-columns:1fr 46px; gap:10px; align-items:center; padding:7px 0; font-size:13.5px}
+.trigger-item .num{color:var(--accent); font-weight:700; text-align:right; font-size:14px}
+
+/* 急救 */
+.sos-timer{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:62px; font-weight:700; letter-spacing:-.02em;
+  text-align:center; margin:6px 0 2px; color:var(--text);
+}
+.sos-quote{
+  font-family:var(--font-display); font-size:17px; line-height:1.6;
+  text-align:center; color:var(--text-2); margin:0 0 22px;
+  text-wrap:balance; padding:0 8px;
+}
+.breathe-orb{
+  width:172px; height:172px; margin:26px auto; border-radius:50%;
+  background:radial-gradient(circle at 38% 32%, color-mix(in srgb,var(--accent) 62%, transparent), color-mix(in srgb,var(--accent) 14%, transparent) 72%);
+  border:1px solid color-mix(in srgb,var(--accent) 45%, transparent);
+  display:grid; place-items:center;
+  font-family:var(--font-display); font-size:19px; color:var(--text);
+  animation:orb 8s ease-in-out infinite;
+}
+@keyframes orb{0%,100%{transform:scale(.82)}50%{transform:scale(1.14)}}
+.ground-step{
+  padding:16px; border-radius:var(--r); background:var(--surface);
+  border:1px solid var(--line); margin-bottom:11px;
+}
+.ground-step.active{border-color:var(--accent); background:var(--accent-soft)}
+.ground-step.done{opacity:.5}
+.ground-n{
+  font-family:var(--font-mono); font-size:26px; font-weight:700;
+  color:var(--accent); line-height:1;
+}
+.sense-inputs{display:flex; flex-direction:column; gap:7px; margin-top:11px}
+.sense-inputs input{
+  padding:10px 12px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--bg); color:var(--text); font-family:inherit; font-size:14px;
+}
+.sense-inputs input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+
+/* 功法计时 */
+.practice-timer{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:66px; font-weight:700; text-align:center; letter-spacing:-.02em;
+  margin:14px 0 4px;
+}
+.practice-phase{
+  text-align:center; font-family:var(--font-display); font-size:18px;
+  color:var(--accent); min-height:1.6em; margin-bottom:6px;
+}
+.practice-cue{text-align:center; color:var(--text-2); font-size:13.5px; min-height:3em; padding:0 10px}
+.ring-wrap{position:relative; width:220px; height:220px; margin:8px auto 0}
+.ring-wrap svg{transform:rotate(-90deg); width:100%; height:100%}
+.ring-bg{fill:none; stroke:var(--surface-2); stroke-width:8}
+.ring-fg{fill:none; stroke:var(--accent); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .3s linear}
+.ring-center{position:absolute; inset:0; display:grid; place-items:center; text-align:center}
+
+/* 列表项（功法/文章/商城） */
+.item{
+  display:flex; align-items:center; gap:13px; width:100%; text-align:left;
+  padding:14px 15px; border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--line);
+  transition:.16s; margin-bottom:10px;
+}
+.item:hover{border-color:color-mix(in srgb,var(--accent) 40%, var(--line)); transform:translateY(-1px)}
+.item-glyph{
+  flex:none; width:44px; height:44px; border-radius:12px;
+  display:grid; place-items:center; font-size:22px;
+  background:var(--surface-2);
+}
+.item-main{flex:1; min-width:0}
+.item-title{font-weight:650; font-size:14.5px; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.item-sub{font-size:12px; color:var(--text-3); margin-top:2px}
+.item-arrow{flex:none; color:var(--text-3)}
+.item-arrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.item.locked{opacity:.5}
+.stars-diff{color:var(--gold); font-size:11px; letter-spacing:.06em}
+
+/* 文章正文 */
+.article{max-width:34em}
+.article h3{font-family:var(--font-display); font-size:19px; margin:24px 0 8px; font-weight:600}
+.article p{margin:0 0 13px; color:var(--text-2); line-height:1.78}
+.article strong{color:var(--text); font-weight:650}
+.article ul{margin:0 0 14px; padding-left:20px; color:var(--text-2)}
+.article li{margin-bottom:6px; line-height:1.7}
+.article blockquote{
+  margin:16px 0; padding:12px 16px; border-left:3px solid var(--accent);
+  background:var(--accent-soft); border-radius:0 var(--r-sm) var(--r-sm) 0;
+  font-size:14px; color:var(--text);
+}
+.article .src{font-size:11.5px; color:var(--text-3); font-style:italic}
+
+/* 里程碑 */
+.mile{
+  display:flex; gap:14px; padding-bottom:20px; position:relative;
+}
+.mile:not(:last-child)::before{
+  content:""; position:absolute; left:15px; top:34px; bottom:0; width:1.5px;
+  background:var(--line);
+}
+.mile.reached:not(:last-child)::before{background:var(--accent)}
+.mile-dot{
+  flex:none; width:31px; height:31px; border-radius:50%;
+  display:grid; place-items:center; font-size:15px;
+  background:var(--surface-2); border:1.5px solid var(--line);
+  position:relative; z-index:1;
+}
+.mile.reached .mile-dot{background:var(--accent-soft); border-color:var(--accent)}
+.mile.next .mile-dot{border-color:var(--gold); border-style:dashed}
+.mile-main{flex:1; padding-top:3px}
+.mile-day{font-family:var(--font-mono); font-size:11.5px; color:var(--text-3); letter-spacing:.06em}
+.mile-name{font-family:var(--font-display); font-size:16px; font-weight:600; margin:1px 0 3px}
+.mile-reward{font-size:12.5px; color:var(--text-2)}
+
+/* 勋章墙 */
+.badge-wall{display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:10px}
+.badge{
+  aspect-ratio:1; border-radius:var(--r); display:grid; place-items:center;
+  background:var(--surface); border:1px solid var(--line); text-align:center;
+  padding:8px; gap:2px;
+}
+.badge.on{background:var(--gold-soft); border-color:color-mix(in srgb,var(--gold) 40%, transparent)}
+.badge.off{opacity:.4}
+.badge-glyph{font-size:26px; line-height:1}
+.badge-name{font-size:10.5px; color:var(--text-2); font-weight:600; line-height:1.3}
+
+/* 图表 */
+.spark{width:100%; height:66px; display:block; overflow:visible}
+.spark .grid-line{stroke:var(--line); stroke-width:1; stroke-dasharray:2 3}
+.spark .area{fill:color-mix(in srgb,var(--accent) 15%, transparent)}
+.spark .line{fill:none; stroke:var(--accent); stroke-width:2; stroke-linejoin:round; stroke-linecap:round}
+.spark .end-dot{fill:var(--accent)}
+.week-strip{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:10px}
+.week-cell{
+  aspect-ratio:1; border-radius:7px; background:var(--surface-2);
+  display:grid; place-items:center; font-size:10.5px; color:var(--text-3);
+  font-family:var(--font-mono);
+}
+.week-cell.hit{background:var(--accent); color:#fff; font-weight:700}
+.week-cell.miss{background:var(--danger-soft); color:var(--danger)}
+.week-cell.future{opacity:.4}
+
+/* 对话（教练） */
+.chat{display:flex; flex-direction:column; gap:11px; padding-bottom:8px}
+.msg{max-width:84%; padding:11px 14px; border-radius:16px; font-size:14px; line-height:1.62}
+.msg.bot{background:var(--surface); border:1px solid var(--line); border-bottom-left-radius:5px; align-self:flex-start}
+.msg.me{background:var(--accent); color:#fff; border-bottom-right-radius:5px; align-self:flex-end}
+.chat-opts{display:flex; flex-direction:column; gap:8px; margin-top:6px}
+.chat-opt{
+  padding:11px 14px; border-radius:14px; text-align:left;
+  background:var(--bg); border:1.5px solid var(--accent); color:var(--accent);
+  font-size:13.5px; font-weight:600;
+}
+.chat-opt:hover{background:var(--accent-soft)}
+
+/* Toast / 奖励 */
+.toast-wrap{
+  position:fixed; z-index:200; left:50%; transform:translateX(-50%);
+  bottom:calc(140px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:8px; align-items:center;
+  pointer-events:none; width:min(360px,90vw);
+}
+.toast{
+  padding:11px 17px; border-radius:999px;
+  background:var(--ink); color:#EAF2EF; font-size:13.5px; font-weight:600;
+  box-shadow:var(--shadow-lg); animation:toastIn .3s cubic-bezier(.2,.9,.25,1);
+  display:flex; align-items:center; gap:8px; text-align:center;
+}
+:root[data-theme="light"] .toast{background:var(--ink)}
+.toast.gold{background:var(--amber); color:#1A1204}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+
+/* 全屏庆祝 */
+.celebrate{
+  position:fixed; inset:0; z-index:300; display:none;
+  place-items:center; text-align:center; padding:30px;
+  background:color-mix(in srgb,var(--ink) 90%, transparent);
+  backdrop-filter:blur(8px);
+}
+.celebrate.open{display:grid; animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.celebrate-glyph{font-size:88px; animation:pop .7s cubic-bezier(.2,1.4,.3,1)}
+@keyframes pop{0%{transform:scale(0) rotate(-25deg)}60%{transform:scale(1.22) rotate(6deg)}100%{transform:scale(1) rotate(0)}}
+.celebrate h2{font-family:var(--font-display); font-size:30px; color:#fff; margin:14px 0 6px; font-weight:600}
+.celebrate p{color:rgba(234,242,239,.8); margin:0 0 24px; max-width:26em}
+#confetti{position:fixed; inset:0; z-index:299; pointer-events:none; display:none}
+#confetti.on{display:block}
+
+/* 空状态 */
+.empty{text-align:center; padding:34px 20px; color:var(--text-3)}
+.empty-glyph{font-size:38px; opacity:.5; margin-bottom:10px}
+
+/* 免责 */
+.disclaimer{
+  margin-top:24px; padding:13px 15px; border-radius:var(--r-sm);
+  background:var(--surface-2); font-size:11.5px; color:var(--text-3); line-height:1.65;
+}
+.hidden{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+
+<div class="shell">
+  <header class="topbar">
+    <h1 class="brand">Re<span>born</span></h1>
+    <span class="chip gold" id="coinChip">◈ 0</span>
+    <button class="icon-btn" id="themeBtn" aria-label="切换深浅色主题" title="切换主题">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    </button>
+  </header>
+
+  <!-- 首页 -->
+  <main class="main" id="view-home" role="tabpanel" aria-label="首页"></main>
+  <!-- 能量 -->
+  <main class="main" id="view-energy" role="tabpanel" aria-label="能量"></main>
+  <!-- 伙伴 -->
+  <main class="main" id="view-pet" role="tabpanel" aria-label="伙伴"></main>
+  <!-- 科普 -->
+  <main class="main" id="view-learn" role="tabpanel" aria-label="科普"></main>
+  <!-- 我 -->
+  <main class="main" id="view-me" role="tabpanel" aria-label="我的"></main>
+
+  <button class="sos" id="sosBtn">
+    <svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    我有冲动
+  </button>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab" data-view="home" role="tab" aria-selected="true">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6h5v6"/></svg>
+      <span>首页</span><i class="tab-dot"></i>
+    </button>
+    <button class="tab" data-view="energy" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>
+      <span>能量</span><i class="tab-dot"></i>
+    </button>
+    <button class="tab" data-view="pet" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M12 21c4.5-2.6 7.5-6 7.5-10a4.5 4.5 0 0 0-7.5-3.3A4.5 4.5 0 0 0 4.5 11c0 4 3 7.4 7.5 10z"/></svg>
+      <span>伙伴</span><i class="tab-dot"></i>
+    </button>
+    <button class="tab" data-view="learn" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M4 4.5h6a2 2 0 0 1 2 2V20a1.6 1.6 0 0 0-1.6-1.6H4z"/><path d="M20 4.5h-6a2 2 0 0 0-2 2V20a1.6 1.6 0 0 1 1.6-1.6H20z"/></svg>
+      <span>科普</span><i class="tab-dot"></i>
+    </button>
+    <button class="tab" data-view="me" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 21c0-3.9 3.4-7 7.5-7s7.5 3.1 7.5 7"/></svg>
+      <span>我</span><i class="tab-dot"></i>
+    </button>
+  </nav>
+</div>
+
+<!-- 通用全屏面板 -->
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="q-progress hidden" id="sheetProgress"><i style="width:0"></i></div>
+  <div class="sheet-head">
+    <button class="icon-btn" id="sheetBack" aria-label="返回">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h2 id="sheetTitle">—</h2>
+    <button class="icon-btn hidden" id="sheetClose" aria-label="关闭">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+  <div class="sheet-foot hidden" id="sheetFoot"></div>
+</section>
+
+<canvas id="confetti"></canvas>
+<div class="celebrate" id="celebrate">
+  <div>
+    <div class="celebrate-glyph" id="celGlyph">🎉</div>
+    <h2 id="celTitle">—</h2>
+    <p id="celText">—</p>
+    <button class="btn gold" id="celBtn">继续</button>
+  </div>
+</div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Reborn — 应用逻辑
+   纯前端，localStorage 持久化，无外部依赖
+   ============================================================ */
+
+/* ---------- 存储（带降级） ---------- */
+const KEY = "reborn.state.v1";
+let memStore = null;
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* 隐私模式或禁用存储 */ }
+  return null;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ memStore = S; }
+}
+
+/* ---------- 日期工具 ---------- */
+function today(){ return ymd(new Date()); }
+function ymd(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function parseYmd(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function daysBetween(a,b){ return Math.round((parseYmd(b)-parseYmd(a))/86400000); }
+function shiftDays(s,n){ const d=parseYmd(s); d.setDate(d.getDate()+n); return ymd(d); }
+function nowHour(){ return new Date().getHours(); }
+
+/* ---------- 初始状态 ---------- */
+function blankState(){
+  return {
+    v:1, onboarded:false,
+    profile:null, report:null,
+    startDate:today(), bestStreak:0, totalClean:0,
+    coins:0, relapses:[],
+    tasks:{}, practice:[], urges:[], read:[],
+    pet:{ name:"", hunger:70, mood:70, energy:60, lastTick:today() },
+    badges:[], skins:["default"], activeSkin:"default",
+    eggs:[], theme:null, ratings:[],
+    lockUntil:0
+  };
+}
+let S = load() || blankState();
+if(!S.pet) S.pet = blankState().pet;
+
+/* ============================================================
+   内容数据
+   ============================================================ */
+
+/* --- 功法库 --- */
+const PRACTICES = [
+  { id:"baduanjin", name:"八段锦", glyph:"🧘", min:12, diff:2, unlock:0,
+    good:"疏通经络、提升阳气", when:"morning",
+    phases:[
+      [60,"预备式","两脚平行开立，与肩同宽，膝微屈。含胸拔背，舌抵上腭，自然呼吸三次。"],
+      [80,"第一式 两手托天理三焦","两手十指交叉于腹前，缓缓上托至头顶，翻掌上撑，仰头看手背。吸气上托，呼气下落。"],
+      [80,"第二式 左右开弓似射雕","马步下蹲，左手成八字掌向左推出，右手如拉弓弦。目视左手食指尖。左右各三次。"],
+      [80,"第三式 调理脾胃须单举","左手上举翻掌上撑，右手下按，形成对拉。呼气时还原。左右交替。"],
+      [80,"第四式 五劳七伤往后瞧","两臂外旋，头缓慢向左后转，目视左后方。转头时脊柱随之微旋，不可猛转。"],
+      [90,"第五式 摇头摆尾去心火","马步，双手撑膝，上体向左前倾，臀向右摆，头向左后瞧。动作宜缓，去心火最忌急躁。"],
+      [80,"第六式 两手攀足固肾腰","两手沿背部下摩至臀，上体前俯，双手攀足。起身时以腰带动，切勿用蛮力。"],
+      [80,"第七式 攒拳怒目增气力","马步，双手握固，左拳向前冲出，怒目而视。冲拳时呼气，收拳时吸气。"],
+      [80,"第八式 背后七颠百病消","两脚并立，脚跟提起，头向上顶，随后脚跟下落轻震地面。共七次，震动脊柱。"],
+      [30,"收式","两手重叠于丹田，静养片刻。感受气血流动，缓缓睁眼。"]
+    ]},
+  { id:"jingang", name:"金刚功", glyph:"💪", min:15, diff:3, unlock:7,
+    good:"强身健体、充盈精力", when:"morning",
+    phases:[
+      [60,"预备 · 调息","自然站立，双手垂于体侧。深长呼吸六次，吸气至丹田，呼气松沉全身。"],
+      [110,"双手插顶利三焦","十指交叉翻掌上顶，脚跟随之提起，全身向上拔长。呼气落下，一起一落为一次，做九次。"],
+      [110,"手足前后固肾腰","一手前伸一手后展，掌根用力，腰部随之拧转。左右交替，各九次，专固肾气。"],
+      [110,"调理脾胃需单举","一掌上撑一掌下按，形成上下对拉之势。上撑之掌五指并紧，下按之掌指尖朝前。"],
+      [110,"左肝右肺如射雕","开弓势，前手推后手拉，胸廓充分打开。左右各九次，开胸展肺。"],
+      [110,"官行气血保肝心","两臂划圆，带动腰胯转动。上身放松，以腰为轴，气血自然流转。"],
+      [110,"叉手弯腰强腰膝","十指交叉，弯腰下探，尽量以掌触地。起身时挺膝直立，不可屈腿借力。"],
+      [110,"大鹏压嗉可通关","双掌相叠按于胸前，含胸下压，随后展臂如鹏展翅。九次为一组。"],
+      [55,"收功","双掌自上而下抚过面部、胸腹，气归丹田。静立一分钟。"]
+    ]},
+  { id:"zhanzhuang", name:"站桩", glyph:"🌲", min:10, diff:2, unlock:14,
+    good:"培养定力、收敛心神", when:"evening",
+    phases:[
+      [70,"入桩 · 调形","两脚平行开立略宽于肩，膝微屈不过脚尖。松肩坠肘，双手环抱于胸前如抱球。"],
+      [70,"调息","呼吸自然，不刻意深长。意念只在「松」字，从头顶松到脚底。"],
+      [130,"松肩坠肘","检查肩部是否上提。想象两肩挂着重物，缓缓下沉。肘部微微外撑，腋下留一拳空隙。"],
+      [130,"含胸拔背","胸口微含不挺，背部有向上拔起之意。头顶如有线轻提，下颌微收。"],
+      [130,"意守丹田","注意力轻放于下腹丹田处。不追不逐，杂念来时只观照不跟随。"],
+      [130,"体察气感","可能出现发热、微颤、酸胀。这是气血运行的正常反应，不要惊慌，也不要刻意追求。"],
+      [40,"收桩","双手缓缓下落，两脚并拢。原地慢走一分钟散气，避免气滞。"]
+    ]},
+  { id:"zuochan", name:"打坐 · 数息", glyph:"☯️", min:10, diff:3, unlock:21,
+    good:"静心凝神、提升觉察", when:"evening",
+    phases:[
+      [50,"调身","盘腿或端坐椅上，脊柱正直而不僵硬。双手结定印置于腿上，眼帘微垂。"],
+      [70,"调息","先深呼吸三次，把胸中浊气吐尽。随后转为自然呼吸，不控制长短。"],
+      [180,"数息 · 一至十","呼气时数「一」，再呼数「二」，至十复归一。中途念头跑了，就从一重新开始，不必自责。"],
+      [180,"随息","不再计数，只是知道气进、气出。呼吸变细变长是自然发生的，不要人为拉长。"],
+      [120,"观照念头","念头生起时，看着它来，看着它走。不评判、不跟随。冲动也是念头之一，它会自己散去。"],
+      [40,"出定","缓缓睁眼，双手搓热敷面。伸展四肢再起身。"]
+    ]},
+  { id:"yijinjing", name:"易筋经", glyph:"🐉", min:20, diff:4, unlock:45,
+    good:"强筋健骨、充盈气血", when:"morning",
+    phases:[
+      [70,"韦陀献杵第一势","双掌合于胸前，立掌，指尖向上。全身放松，静立数息。"],
+      [140,"韦陀献杵第二势","两臂向左右平举成一字，掌心向下，随后立掌外撑。坚持不动，感受两臂酸胀。"],
+      [140,"韦陀献杵第三势","双掌上托过顶，掌心向上，脚跟提起。上撑下顶，全身拔长。"],
+      [140,"摘星换斗势","一掌上举翻掌如托星，目视掌心；另一手背贴于腰。左右交替。"],
+      [150,"倒拽九牛尾势","前腿弓后腿撑，两手握拳一前一后，如拽牛尾。腰部发力，左右各做。"],
+      [150,"出爪亮翅势","双掌前推，五指用力张开如翅。推至极处收回，共七次。"],
+      [150,"九鬼拔马刀势","一手绕颈后，一手绕背后，两手相扣。头向侧后转，牵拉整条侧线。"],
+      [150,"三盘落地势","马步下蹲，双掌下按至膝，随后翻掌上托。下蹲要稳，膝不过脚尖。"],
+      [110,"青龙探爪势","一手成爪向侧前方探出，腰随之拧转。目随爪走，探至极处稍停。"],
+      [50,"收功","双手抚腹，静养一分钟。"]
+    ]},
+  { id:"taiji", name:"太极（简化）", glyph:"🌀", min:15, diff:3, unlock:30,
+    good:"身心合一、柔中带刚", when:"any",
+    phases:[
+      [60,"起势","并步站立，两臂缓缓前平举，随后屈膝下蹲、两掌下按。动作要匀、要慢。"],
+      [140,"野马分鬃","转腰分手，一手上分一手下按，弓步。以腰带手，不可只动手臂。左右各三次。"],
+      [140,"白鹤亮翅","虚步，一手上提至头侧，一手下按于胯旁。含胸拔背，重心稳在后腿。"],
+      [140,"搂膝拗步","一手搂过膝前，另一手向前推掌。推掌与弓步同时完成，上下相随。"],
+      [140,"手挥琵琶","虚步合手，两手一前一后如抱琵琶。合手时气沉丹田。"],
+      [140,"倒卷肱","退步，两手交替向前推、向后撤。退步要轻，脚掌先着地。"],
+      [140,"云手","以腰为轴，两掌交替划圆于胸前。侧行步随之移动，连绵不断。"],
+      [50,"收势","两掌下按，气归丹田。并步直立，静立片刻。"]
+    ]}
+];
+
+/* --- 调理项（每日可打卡） --- */
+const RITUALS = [
+  { id:"sun",    name:"晒太阳",   glyph:"☀️", coin:15, when:"morning", note:"晨间 15–30 分钟",
+    why:"促进维生素 D 合成与血清素分泌，稳定昼夜节律。", tip:"上午 9–10 点最佳。露出手臂和小腿，不要隔玻璃。" },
+  { id:"footbath",name:"泡脚",    glyph:"🦶", coin:15, when:"evening", note:"睡前 15–20 分钟",
+    why:"促进下肢血液循环，帮助入睡。", tip:"水温 40℃ 左右，没过脚踝。微微出汗即可，泡过头反而耗气。" },
+  { id:"cold",   name:"冷水挑战", glyph:"🧊", coin:20, when:"any", note:"从冷水洗脸开始",
+    why:"短时冷刺激可提升多巴胺基线，锻炼意志耐受。", tip:"Level 1 冷水洗脸 → Level 2 冷水冲手臂 → Level 3 冷水澡 30 秒。循序渐进。" },
+  { id:"breath", name:"腹式呼吸", glyph:"🌬️", coin:10, when:"any", note:"3 组 × 10 次",
+    why:"激活副交感神经，快速降低焦虑水平。", tip:"吸气 4 秒鼓腹，屏 2 秒，呼气 6 秒收腹。呼气要比吸气长。" },
+  { id:"nature", name:"接触自然", glyph:"🌳", coin:15, when:"any", note:"公园散步 20 分钟",
+    why:"降低皮质醇，恢复注意力资源。", tip:"有条件可赤足踩草地或沙地几分钟。" },
+  { id:"water",  name:"喝够水",   glyph:"💧", coin:10, when:"any", note:"目标 8 杯",
+    why:"维持代谢与排毒效率，缺水会加重疲劳感。", tip:"起床先喝一杯温水。咖啡和茶不算在内。" },
+  { id:"sleep",  name:"22:30 前入睡", glyph:"🌙", coin:25, when:"evening", note:"生长激素分泌窗口",
+    why:"深睡阶段是身体修复与激素分泌的主要窗口，熬夜是复发的头号推手。", tip:"睡前 1 小时离开屏幕。手机放在床以外的地方充电。" },
+  { id:"exercise",name:"力量训练", glyph:"🏋️", coin:20, when:"any", note:"20 分钟以上",
+    why:"提升睾酮水平，运动后的内啡肽可替代成瘾带来的多巴胺峰值。", tip:"深蹲、俯卧撑、硬拉等复合动作优先。没器械就做自重。" }
+];
+
+/* --- 膳食（按体质） --- */
+const DIET = {
+  yang:{ name:"阳虚", sign:"怕冷、易疲劳、手脚不温",
+    eat:["黑芝麻","核桃","山药","羊肉","桂圆","生姜红枣茶"],
+    avoid:["冷饮","生鱼片","苦瓜","过量西瓜"],
+    advice:"重在温补。早餐可用山药小米粥，晚上生姜红枣茶。多晒太阳、多泡脚。" },
+  yin:{ name:"阴虚", sign:"口干、失眠、手足心热",
+    eat:["桑葚","枸杞","银耳","百合","鸭肉","黑豆"],
+    avoid:["辛辣","烧烤","过量咖啡","酒"],
+    advice:"重在滋阴。银耳百合汤、桑葚枸杞泡水。静坐优于剧烈运动，忌熬夜。" },
+  qi:{ name:"气虚", sign:"气短、懒言、易出汗",
+    eat:["黄芪（泡水）","党参","小米","鸡蛋","牛肉","南瓜"],
+    avoid:["生冷","过度节食","剧烈耗力运动"],
+    advice:"重在补气。黄芪 10g 泡水代茶。八段锦比跑步更适合，切忌一开始就大运动量。" },
+  tan:{ name:"痰湿", sign:"体胖、困倦、舌苔厚",
+    eat:["薏米","赤小豆","冬瓜","陈皮","白萝卜"],
+    avoid:["甜食","油炸","奶茶","夜宵"],
+    advice:"重在化湿。薏米赤小豆水常喝。必须动起来出汗，久坐会加重痰湿。" }
+};
+const BRAIN_FOOD = {
+  title:"脑力与精力恢复",
+  groups:[
+    { k:"神经修复", items:"深海鱼（DHA）、鸡蛋（卵磷脂）、蓝莓（花青素）、核桃" },
+    { k:"睾酮支持", items:"牛肉、南瓜籽（锌）、菠菜（镁）、鸡蛋黄（胆固醇前体）" },
+    { k:"助眠", items:"温牛奶、香蕉、燕麦、酸枣仁（褪黑素前体与镁）" },
+    { k:"补肾益精（传统）", items:"黑芝麻、核桃、枸杞、山药、桑葚" }
+  ]
+};
+
+/* --- 科普文章 --- */
+const ARTICLES = [
+  { id:"dopamine", cat:"大脑", glyph:"🧠", title:"成瘾如何劫持你的奖赏回路", min:4,
+    body:`<p>大脑里有一条叫做<strong>中脑多巴胺通路</strong>的线路，它的本职工作是给"对生存有利的事"打分：吃饱了、被认可了、学会新技能了，它就释放多巴胺，让你记住"这事值得再做一次"。</p>
+    <p>问题在于，这套系统是为<strong>稀缺环境</strong>设计的。祖先一年也遇不到几次高热量食物，所以多巴胺对"新奇 + 高刺激"给出的分数极高。而现在，无限滚动的色情内容提供的是<strong>永不重复的新奇性</strong>——这是自然界中根本不存在的刺激强度。</p>
+    <h3>三个连锁反应</h3>
+    <ul>
+      <li><strong>受体下调。</strong>长期高频刺激后，多巴胺 D2 受体密度下降。同样的刺激量不再够用，这就是"越看越重口"的生理原因。</li>
+      <li><strong>基线下移。</strong>受体减少后，日常小事（一顿饭、一次聊天、完成一份工作）释放的多巴胺不足以让你感到愉悦。现实变得"灰白"、"无聊"。</li>
+      <li><strong>前额叶失守。</strong>负责刹车的前额叶皮层与奖赏中枢的连接减弱，冲动来时"理智上知道不该做，但身体已经在做了"。</li>
+    </ul>
+    <blockquote>关键认知：你感受到的不是"欲望强"，而是"基线低"。所以硬扛意志力是在错误的战场上打仗——真正要做的是把基线抬回来。</blockquote>
+    <h3>好消息：这是可逆的</h3>
+    <p>受体密度可以恢复。多数人在停止刺激后的 <strong>2 到 12 周</strong>内会感受到明显变化：现实中的小事重新变得有滋味，专注时长回升。这个过程被称为多巴胺基线重置，中间会经历一段"什么都没意思"的低谷期——那正是受体上调的过程，不是复发的理由。</p>
+    <p class="src">相关领域：神经科学中的奖赏系统与受体可塑性研究。本文为科普性概述，非诊断依据。</p>` },
+
+  { id:"deltafosb", cat:"大脑", glyph:"🧬", title:"为什么戒掉了还会突然想起来", min:3,
+    body:`<p>很多人经历过这样的事：已经很久没碰了，状态也不错，突然某一天冲动汹涌而来，仿佛前面的努力都白费。</p>
+    <p>这背后有一个叫 <strong>DeltaFosB</strong> 的蛋白。它在反复刺激中逐渐累积，把"刺激—奖赏"的关联<strong>写进长期记忆</strong>。它的半衰期很长，即使行为停止，这份记忆仍会保留相当长时间。</p>
+    <h3>这意味着什么</h3>
+    <ul>
+      <li><strong>成瘾记忆不会被删除，只会被覆盖。</strong>你要建立的是更强的新回路，而不是擦掉旧回路。</li>
+      <li><strong>突发的强烈冲动是正常现象，不是失败信号。</strong>它往往由某个线索（气味、场景、情绪状态）激活了旧记忆。</li>
+      <li><strong>越久之后的冲动，强度反而可能越大。</strong>因为你放松了警惕，而记忆本身还在。</li>
+    </ul>
+    <blockquote>实操结论：不要因为"状态很好"就撤掉防护。诱因管理要一直做下去，这不是不信任自己，而是尊重生理规律。</blockquote>
+    <p class="src">相关领域：成瘾记忆的分子机制研究。此处为简化科普。</p>` },
+
+  { id:"anxiety", cat:"心理", glyph:"🌀", title:"成瘾—内疚—抑郁的恶性循环", min:3,
+    body:`<p>成瘾行为本身造成的伤害，往往小于它引发的<strong>心理循环</strong>：</p>
+    <ul>
+      <li>行为发生 → 短暂快感</li>
+      <li>快感退去 → 强烈内疚与自我厌恶</li>
+      <li>内疚积累 → 情绪低落、回避社交</li>
+      <li>情绪低落 → 更需要一个"快速逃离痛苦的出口"</li>
+      <li>于是回到第一步，而且这次门槛更低</li>
+    </ul>
+    <h3>循环的真正燃料是羞耻，不是快感</h3>
+    <p>研究一致发现：<strong>自我羞辱越重，复发越快</strong>。因为羞耻本身是一种痛苦，而成瘾行为正是这个人已经掌握的、最熟练的止痛方式。你用羞耻惩罚自己，等于给循环加油。</p>
+    <blockquote>替换方案：把"我又完了，我真恶心"换成"这次是什么触发的？下次这个环节我可以怎么改？"——前者制造痛苦，后者产生信息。</blockquote>
+    <p>这不是给自己找台阶下。恰恰相反，自我关怀在临床上被反复证明比自我批判带来更高的行为改变率。</p>
+    <p class="src">相关领域：自我关怀与成瘾复发的相关性研究。</p>` },
+
+  { id:"social", cat:"关系", glyph:"👥", title:"它如何悄悄拿走你的社交能力", min:3,
+    body:`<p>成瘾对社交的损害很少是戏剧性的，它是<strong>缓慢的替换</strong>。</p>
+    <h3>四条隐性路径</h3>
+    <ul>
+      <li><strong>时间挤占。</strong>每天 40 分钟，一年就是 240 小时——足够学会一门乐器或建立三段深度友谊。</li>
+      <li><strong>期待扭曲。</strong>长期接触脚本化的性内容，会在无意中建立一套现实中不存在的互动预期，真实关系相比之下显得"麻烦"。</li>
+      <li><strong>回避强化。</strong>社交需要承担被拒绝的风险，而成瘾提供零风险的即时满足。每次选择后者，回避的神经通路就被加强一次。</li>
+      <li><strong>精力透支。</strong>睡眠不足与情绪低落直接降低社交意愿，形成"越不社交越不想社交"的下坠。</li>
+    </ul>
+    <blockquote>可操作的第一步：不要设"我要变得外向"这种目标。设"这周主动发起一次线下见面"这种可完成的具体动作。回避是靠一次次小的暴露拆掉的。</blockquote>` },
+
+  { id:"body", cat:"身体", glyph:"💪", title:"疲劳、腰酸、脱发：分清哪些真的相关", min:4,
+    body:`<p>这个领域最大的问题是<strong>信息两极化</strong>：一边把所有毛病都归因于此，一边说"完全无害"。两者都不准确。诚实地区分开来，反而更有帮助。</p>
+    <h3>证据较明确的关联</h3>
+    <ul>
+      <li><strong>睡眠剥夺。</strong>深夜行为直接压缩深睡时间，而深睡是生长激素分泌与身体修复的主窗口。次日的疲劳、注意力涣散主要来自这里。</li>
+      <li><strong>皮质醇升高。</strong>内疚与焦虑推高压力激素，长期偏高与腹部脂肪堆积、免疫力下降、肌肉合成受阻相关。</li>
+      <li><strong>注意力碎片化。</strong>高频切换的刺激模式会降低持续专注能力，这一点在行为层面很容易自测。</li>
+    </ul>
+    <h3>关联被夸大或存在争议的</h3>
+    <ul>
+      <li><strong>脱发。</strong>雄性脱发主要由遗传与 DHT 敏感性决定。压力和睡眠可能加速，但把它当作主因并不成立。</li>
+      <li><strong>"精气"损耗的量化说法。</strong>诸如"一次等于多少天营养"的具体数字缺乏可靠依据，不必据此恐慌。</li>
+      <li><strong>不可逆损伤。</strong>绝大多数相关症状在停止后数周到数月内改善。</li>
+    </ul>
+    <blockquote>为什么要说清楚这些：靠恐惧驱动的改变通常只能维持几周。当你发现某个恐吓性说法是假的，往往会连真实的部分一起放弃。基于事实的动机才撑得久。</blockquote>
+    <p class="src">如有持续的身体症状（长期疲劳、疼痛、脱发加速），应就诊排查其他原因，不要自行归因。</p>` },
+
+  { id:"trigger", cat:"实操", glyph:"🎯", title:"诱因管理：把力气花在冲动之前", min:4,
+    body:`<p>冲动一旦形成，你能调动的意志力资源已经很少了。真正有效的干预发生在<strong>冲动形成之前</strong>——这是本应用的核心逻辑。</p>
+    <h3>四类诱因与对应动作</h3>
+    <ul>
+      <li><strong>视觉线索。</strong>清理关注列表，取消触发性账号；开启灰度模式降低视觉刺激强度；把推荐流替换为主动订阅的内容。</li>
+      <li><strong>情绪线索。</strong>无聊、焦虑、孤独、压力是四大高发情绪。为每一种预先准备一个替代动作（无聊→出门散步；焦虑→腹式呼吸；孤独→给人打电话；压力→力量训练）。</li>
+      <li><strong>场景线索。</strong>床、浴室、深夜独处是最常见的三个高危场景。手机不进卧室，是单条收益最高的规则。</li>
+      <li><strong>生理线索。</strong>失眠与过度疲劳会显著削弱前额叶的抑制能力。把睡眠当成戒断计划的一部分，而不是附加项。</li>
+    </ul>
+    <blockquote>核心原则：改环境比改意志便宜得多。与其每晚在床上跟冲动搏斗，不如让手机根本不在卧室。</blockquote>
+    <h3>15 分钟法则</h3>
+    <p>冲动的强度曲线通常在 <strong>10 到 20 分钟</strong>内到达峰值并开始回落。你不需要"永远抵抗"，只需要撑过这一段。这就是急救倒计时的设计依据——把一个看起来不可能的任务，换成一个有明确终点的任务。</p>` },
+
+  { id:"tcm", cat:"养生", glyph:"🌿", title:"补比戒更重要：能量视角的康复", min:3,
+    body:`<p>只做"戒"这一件事的人，通常会经历一段空虚期：旧的快感来源被切断，新的没有建立起来，于是每天都在硬扛。这种状态很难维持超过几周。</p>
+    <p>传统养生对此的思路是<strong>"损有余而补不足"</strong>——不是单纯压制，而是把亏空的部分补上来。翻译成现代语言：<strong>提升多巴胺基线，冲动的相对吸引力自然下降。</strong></p>
+    <h3>三条补的路径</h3>
+    <ul>
+      <li><strong>动。</strong>八段锦、站桩这类内向型运动，除了体能收益，更重要的是训练"与不适共处"的能力——站桩时腿酸而不动，和冲动来时不动，是同一种能力。</li>
+      <li><strong>晒与泡。</strong>晨间光照校准昼夜节律，睡前泡脚帮助入睡。这两件事成本极低而回报稳定，是最值得先做的。</li>
+      <li><strong>吃与睡。</strong>锌、镁、优质蛋白、Omega-3 是激素合成的原料，长期缺乏时"精力不足"是必然结果，与意志无关。</li>
+    </ul>
+    <blockquote>判断标准：如果你每天都觉得在"忍"，说明补的部分没跟上。目标状态不是忍得住，而是不太想。</blockquote>
+    <p class="src">本文涉及的传统养生内容属经验范畴，非医疗建议；营养学部分为通识性概述。</p>` },
+
+  { id:"relapse", cat:"实操", glyph:"🔁", title:"复发之后的 24 小时最关键", min:3,
+    body:`<p>数据上看，一次复发本身对长期结果的影响很小。真正决定走向的是<strong>之后 24 小时</strong>的反应。</p>
+    <h3>两条岔路</h3>
+    <p><strong>路径 A（放弃式）：</strong>"完了，前面 40 天白费了。" → 自我惩罚 → 情绪跌到谷底 → 用同样的方式止痛 → 连续多日失控 → 真正的倒退发生在这里，不在那一次。</p>
+    <p><strong>路径 B（复盘式）：</strong>"这次是怎么发生的？" → 记录触发链条 → 调整对应环节 → 第二天照常打卡 → 天数归零，但认知增加了。</p>
+    <blockquote>天数是计分板，不是资产。它归零的时候，你从这次康复中学到的东西一样都没丢。</blockquote>
+    <h3>复盘要问的三个问题</h3>
+    <ul>
+      <li>前 2 小时我在做什么？（找场景线索）</li>
+      <li>当时的情绪是什么？（找情绪线索）</li>
+      <li>哪一个环节如果不同，结果就会不同？（找最薄弱的那一环）</li>
+    </ul>
+    <p>本应用的"重新开始"不会记录羞辱性内容，只会问这三个问题，并据此调整你的诱因防护。</p>` }
+];
+
+/* --- 里程碑 --- */
+const MILESTONES = [
+  { d:1,   name:"觉醒者",   glyph:"🥚", coin:100, reward:"新手礼包 100 金币" },
+  { d:7,   name:"初行者",   glyph:"🌱", coin:80,  reward:"解锁「金刚功」课程" },
+  { d:14,  name:"坚守者",   glyph:"🌿", coin:120, reward:"解锁「站桩」课程" },
+  { d:21,  name:"筑基者",   glyph:"🎍", coin:150, reward:"解锁「打坐 · 数息」" },
+  { d:30,  name:"蜕变者",   glyph:"🥈", coin:300, reward:"银质勋章 + 太极课程" },
+  { d:45,  name:"通关者",   glyph:"🗝️", coin:250, reward:"解锁「易筋经」" },
+  { d:66,  name:"习惯之主", glyph:"🥇", coin:400, reward:"金质勋章 + 神兽皮肤" },
+  { d:90,  name:"重生者",   glyph:"💎", coin:600, reward:"钻石勋章 + 高级课程" },
+  { d:180, name:"半载真人", glyph:"🐲", coin:900, reward:"实体奖励资格" },
+  { d:365, name:"周年宗师", glyph:"🌌", coin:2000,reward:"终身 Pro + 名人堂" }
+];
+
+/* --- 动物成长阶段 --- */
+const PET_STAGES = [
+  { from:0,   to:0,   glyph:"🥚", stage:"蛋期",   desc:"觉醒前夜。它还在壳里，等你迈出第一步。" },
+  { from:1,   to:7,   glyph:"🐣", stage:"雏鸟期", desc:"刚破壳，脆弱但充满希望。这几天最难，也最关键。" },
+  { from:8,   to:30,  glyph:"🐤", stage:"幼兽期", desc:"开始学会独立。羽毛渐丰，能短距离飞行了。" },
+  { from:31,  to:90,  glyph:"🦅", stage:"成长期", desc:"力量逐渐显现。它已能在悬崖边站稳，目光变得锐利。" },
+  { from:91,  to:180, glyph:"🦁", stage:"成熟期", desc:"王者之气初现。它不再需要你时时照看。" },
+  { from:181, to:364, glyph:"🐉", stage:"神兽期", desc:"完全蜕变。鳞爪已成，云雷随行。" },
+  { from:365, to:1e9, glyph:"🔥", stage:"涅槃期", desc:"凤凰浴火。它与你已不可分辨——你就是它。" }
+];
+
+/* --- 商城 --- */
+const SHOP = [
+  { id:"skin_wuxia",  name:"武侠皮肤",   glyph:"⚔️", price:300, kind:"skin", desc:"江湖夜雨十年灯" },
+  { id:"skin_scifi",  name:"科幻皮肤",   glyph:"🛸", price:300, kind:"skin", desc:"星海孤舟" },
+  { id:"skin_zen",    name:"禅意皮肤",   glyph:"🎐", price:400, kind:"skin", desc:"一花一世界" },
+  { id:"box",         name:"神秘宝箱",   glyph:"🎁", price:50,  kind:"box",  desc:"随机金币或皮肤碎片" },
+  { id:"donate",      name:"捐赠证书",   glyph:"📜", price:500, kind:"cert", desc:"以你的名义完成一次公益捐赠" }
+];
+
+/* --- 冲动急救：CBT 真相核查 --- */
+const TRUTH_CHECK = [
+  { q:"现在这个念头，是「我需要」还是「多巴胺在讨价还价」？",
+    a:"多巴胺的话术很固定：「就这一次」「看看不做」「今天压力太大值得放松」。它从不提之后那 30 分钟你会怎么想。" },
+  { q:"上一次结束后的 10 分钟，你的真实感受是什么？",
+    a:"绝大多数人给出的答案是：空虚、后悔、比之前更累。冲动预测的是快感，而记忆记录的是代价——现在请调用记忆，不是预测。" },
+  { q:"如果 15 分钟后再决定，会失去什么？",
+    a:"什么都不会失去。冲动的强度曲线会在 10–20 分钟内到峰并回落。你不需要永远抵抗，只需要不在峰值时做决定。" }
+];
+const GROUND_STEPS = [
+  { n:5, sense:"看见", prompt:"说出你现在看见的 5 样东西", ph:["","","","",""] },
+  { n:4, sense:"触摸", prompt:"说出你能摸到的 4 种触感", ph:["","","",""] },
+  { n:3, sense:"听见", prompt:"说出你听见的 3 种声音", ph:["","",""] },
+  { n:2, sense:"闻到", prompt:"说出你闻到的 2 种气味", ph:["",""] },
+  { n:1, sense:"尝到", prompt:"说出 1 种你能尝到的味道", ph:[""] }
+];
+
+/* --- 教练对话树（脚本化，非 LLM） --- */
+const COACH = {
+  start:{ bot:"我在。先不用急着做决定——告诉我现在最接近哪种状态？",
+    opts:[
+      {t:"冲动很强，快撑不住了", go:"urge"},
+      {t:"心情很低落", go:"low"},
+      {t:"就是无聊", go:"bored"},
+      {t:"刚刚破戒了", go:"relapsed"}
+    ]},
+  urge:{ bot:"明白。先说一件事实：你现在感受到的强度，在 10 到 20 分钟内会自己回落。你不需要战胜它，只需要不在峰值时做决定。\n\n现在身体是什么感觉？",
+    opts:[
+      {t:"心跳快、坐不住", go:"body"},
+      {t:"脑子里画面停不下来", go:"image"},
+      {t:"还好，主要是习惯性想做", go:"habit"}
+    ]},
+  body:{ bot:"这是交感神经在兴奋。最快的物理开关是冷水和呼吸——冷水洗脸能通过迷走神经在几十秒内把它压下来。\n\n去洗脸，回来告诉我。",
+    opts:[ {t:"我去了，回来了", go:"after_action"}, {t:"我想先做点运动", go:"move"} ]},
+  image:{ bot:"不要试图「不去想」——那只会加强它。改成观察：把画面当成天上飘过的云，看着它，不跟着走。\n\n同时把注意力拉回身体：说出你现在看见的 5 样东西。",
+    opts:[ {t:"开始 5-4-3-2-1 练习", go:"ground_jump"}, {t:"我试试观察", go:"after_action"} ]},
+  habit:{ bot:"习惯性冲动最好对付——它强度不高，但很会伪装成「顺手做一下」。\n\n这种时候最有效的是<strong>换场景</strong>：离开你现在待的这个空间，哪怕只是去阳台站两分钟。环境线索一断，念头往往自己就散了。",
+    opts:[ {t:"我换个地方", go:"after_action"}, {t:"给我个替代动作", go:"move"} ]},
+  move:{ bot:"20 个俯卧撑，或者 30 秒原地冲刺。目标不是锻炼，是把交感神经的兴奋导出去，让内啡肽顶上来。\n\n做完再回来。",
+    opts:[ {t:"做完了", go:"after_action"} ]},
+  low:{ bot:"低落的时候冲动特别容易得手，因为它是你最熟练的止痛方式。这不是意志薄弱，是大脑在找已知的出口。\n\n这份低落，更像哪一种？",
+    opts:[
+      {t:"孤独，没人可说", go:"lonely"},
+      {t:"对自己失望", go:"shame"},
+      {t:"累，什么都不想干", go:"tired"}
+    ]},
+  lonely:{ bot:"孤独是最强的诱因之一，而它需要的是<strong>真实的连接</strong>，不是替代品。\n\n现在给一个人发条消息——不用聊心事，说句普通的话就行。哪怕对方不回，动作本身就在拆掉回避。",
+    opts:[ {t:"我发了", go:"after_action"}, {t:"没人可发", go:"lonely2"} ]},
+  lonely2:{ bot:"那就先不勉强。孤独感在这一刻不需要被解决，只需要被承认——它在，你知道它在，这就够了。\n\n换个动作：出门走 15 分钟，不带目的。身体动起来，情绪的黏度会降。",
+    opts:[ {t:"好，我去走走", go:"after_action"} ]},
+  shame:{ bot:"这里有个反直觉的事实：<strong>自我责备会提高复发率，不是降低。</strong>因为羞耻本身是痛苦，而你正在戒的那个行为，恰好是你最擅长的止痛法。\n\n所以请把「我真没用」换成一个问题：这次是什么触发的？",
+    opts:[ {t:"我想想…", go:"reframe"}, {t:"确实，我一直在骂自己", go:"reframe"} ]},
+  reframe:{ bot:"记住这个区别：<strong>自责制造痛苦，复盘产生信息。</strong>只有后者能改变下一次的结果。\n\n你已经在用这个应用了，这本身就是行动，不是失败者会做的事。",
+    opts:[ {t:"谢谢，好点了", go:"end_ok"} ]},
+  tired:{ bot:"疲劳会直接削弱前额叶的刹车能力——这是生理层面的，不是你的错。\n\n累的时候不要跟冲动硬拼，直接去睡。睡眠是最被低估的戒断工具。",
+    opts:[ {t:"我去睡了", go:"sleep"} ]},
+  sleep:{ bot:"好。手机放在卧室以外的地方充电——这一条规则的收益，比任何意志力训练都高。\n\n明天见。", opts:[] },
+  bored:{ bot:"无聊是最常见的触发情绪，而它其实是个信号：<strong>你的时间没有被有意义的事填满。</strong>\n\n现在有多少空闲？",
+    opts:[
+      {t:"十几分钟", go:"bored_short"},
+      {t:"一整个晚上", go:"bored_long"}
+    ]},
+  bored_short:{ bot:"十几分钟刚好够一段站桩，或者八段锦的前四式。\n\n关键是不要让这段空白挂着——空白就是冲动的入口。",
+    opts:[ {t:"去练功", go:"go_practice"}, {t:"换个别的", go:"after_action"} ]},
+  bored_long:{ bot:"一整晚的独处是高危时段，需要<strong>提前安排</strong>，不能靠临时抵抗。\n\n现在就定下来：接下来两小时做什么？出门、约人、一件具体的动手活都可以。写在纸上，然后立刻开始第一步。",
+    opts:[ {t:"我定好了", go:"after_action"} ]},
+  relapsed:{ bot:"先说清楚：这不是终点，也不需要道歉。\n\n真正影响长期结果的不是这一次，而是<strong>接下来 24 小时</strong>怎么走。现在只做一件事——复盘，不自责。",
+    opts:[ {t:"开始复盘", go:"go_restart"}, {t:"我只想说说话", go:"shame"} ]},
+  after_action:{ bot:"做得好。现在再感受一下强度——是不是已经没有刚才那么满了？\n\n这就是它的本来面目：一波浪，来了会走。你刚刚证明了自己不需要它也能过去。",
+    opts:[ {t:"确实降了", go:"end_ok"}, {t:"还是很强", go:"still"} ]},
+  still:{ bot:"那就再加一层：启动 15 分钟延迟锁。你没有承诺「永远不」，只承诺「现在不」——这个承诺容易得多。\n\n15 分钟后如果还想，那时再说。绝大多数人到不了那一刻。",
+    opts:[ {t:"启动延迟锁", go:"go_lock"}, {t:"我再撑撑", go:"end_ok"} ]},
+  end_ok:{ bot:"记下这次的经验——它是你诱因图谱的一部分，下次会更容易。\n\n我一直在这儿。", opts:[] }
+};
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function el(tag, cls, html){
+  const n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(html != null) n.innerHTML = html;
+  return n;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function mmss(sec){
+  sec = Math.max(0, Math.round(sec));
+  return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
+}
+
+function toast(msg, gold){
+  const t = el("div","toast"+(gold?" gold":""), esc(msg));
+  $("#toasts").appendChild(t);
+  setTimeout(()=>{ t.style.transition="opacity .3s, transform .3s"; t.style.opacity="0"; t.style.transform="translateY(-8px)"; }, 2100);
+  setTimeout(()=> t.remove(), 2500);
+}
+function addCoins(n, why){
+  S.coins += n; save();
+  $("#coinChip").textContent = "◈ " + S.coins;
+  if(why) toast("+" + n + " 金币 · " + why, true);
+}
+
+/* 庆祝 */
+let confettiTimer = null;
+function celebrate(glyph, title, text, onClose){
+  $("#celGlyph").textContent = glyph;
+  $("#celTitle").textContent = title;
+  $("#celText").textContent = text;
+  $("#celebrate").classList.add("open");
+  $("#celBtn").onclick = ()=>{
+    $("#celebrate").classList.remove("open");
+    stopConfetti();
+    if(onClose) onClose();
+  };
+  startConfetti();
+}
+function startConfetti(){
+  const c = $("#confetti"), ctx = c.getContext("2d");
+  c.classList.add("on");
+  c.width = innerWidth; c.height = innerHeight;
+  const reduce = matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce) return;
+  const colors = ["#10B981","#F59E0B","#EAF2EF","#8FE8C8"];
+  const bits = Array.from({length:110}, ()=>({
+    x: Math.random()*c.width,
+    y: -20 - Math.random()*c.height*0.6,
+    r: 3 + Math.random()*5,
+    vy: 1.6 + Math.random()*2.8,
+    vx: -0.9 + Math.random()*1.8,
+    rot: Math.random()*Math.PI,
+    vr: -0.06 + Math.random()*0.12,
+    col: colors[(Math.random()*colors.length)|0]
+  }));
+  cancelAnimationFrame(confettiTimer);
+  (function frame(){
+    ctx.clearRect(0,0,c.width,c.height);
+    let alive = false;
+    for(const b of bits){
+      b.x += b.vx; b.y += b.vy; b.rot += b.vr;
+      if(b.y < c.height + 30) alive = true;
+      ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.rot);
+      ctx.fillStyle = b.col;
+      ctx.fillRect(-b.r/2, -b.r/2, b.r, b.r*1.6);
+      ctx.restore();
+    }
+    if(alive) confettiTimer = requestAnimationFrame(frame);
+  })();
+}
+function stopConfetti(){
+  cancelAnimationFrame(confettiTimer);
+  const c = $("#confetti");
+  c.getContext("2d").clearRect(0,0,c.width,c.height);
+  c.classList.remove("on");
+}
+
+/* ---------- 面板（sheet） ---------- */
+let sheetStack = [];
+function openSheet(title, bodyNode, opts){
+  opts = opts || {};
+  sheetStack.push({title, bodyNode, opts});
+  renderSheet();
+}
+function renderSheet(){
+  const cur = sheetStack[sheetStack.length-1];
+  if(!cur){ $("#sheet").classList.remove("open"); document.body.style.overflow=""; return; }
+  $("#sheetTitle").textContent = cur.title;
+  const body = $("#sheetBody");
+  body.innerHTML = ""; body.appendChild(cur.bodyNode);
+  body.scrollTop = 0;
+  const foot = $("#sheetFoot");
+  foot.innerHTML = "";
+  if(cur.opts.foot){ foot.appendChild(cur.opts.foot); foot.classList.remove("hidden"); }
+  else foot.classList.add("hidden");
+  $("#sheetProgress").classList.toggle("hidden", cur.opts.progress == null);
+  if(cur.opts.progress != null) $("#sheetProgress").firstElementChild.style.width = (cur.opts.progress*100)+"%";
+  $("#sheetBack").classList.toggle("hidden", !!cur.opts.noBack);
+  $("#sheetClose").classList.toggle("hidden", !cur.opts.noBack);
+  $("#sheet").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeSheet(){ sheetStack = []; renderSheet(); }
+function popSheet(){ sheetStack.pop(); renderSheet(); }
+function setSheetTitle(t){ if(sheetStack.length){ sheetStack[sheetStack.length-1].title = t; $("#sheetTitle").textContent = t; } }
+function replaceSheetBody(node, opts){
+  const cur = sheetStack[sheetStack.length-1];
+  if(!cur) return;
+  cur.bodyNode = node;
+  if(opts) cur.opts = Object.assign({}, cur.opts, opts);
+  renderSheet();
+}
+$("#sheetBack").onclick = ()=>{
+  const cur = sheetStack[sheetStack.length-1];
+  if(cur && cur.opts.onBack){ cur.opts.onBack(); return; }
+  popSheet();
+};
+$("#sheetClose").onclick = ()=>{
+  const cur = sheetStack[sheetStack.length-1];
+  if(cur && cur.opts.onClose){ cur.opts.onClose(); return; }
+  closeSheet();
+};
+
+/* ============================================================
+   派生计算
+   ============================================================ */
+function cleanDays(){ return daysBetween(S.startDate, today()) + 1; }
+function petStage(){
+  const d = S.onboarded ? cleanDays() : 0;
+  for(const s of PET_STAGES){ if(d >= s.from && d <= s.to) return s; }
+  return PET_STAGES[PET_STAGES.length-1];
+}
+function unlockedPractices(){
+  const d = cleanDays();
+  return PRACTICES.filter(p => d >= p.unlock || p.unlock === 0);
+}
+function nextMilestone(){
+  const d = cleanDays();
+  return MILESTONES.find(m => m.d > d) || null;
+}
+function reachedMilestones(){
+  const d = cleanDays();
+  return MILESTONES.filter(m => m.d <= d);
+}
+function todayTasks(){
+  const t = S.tasks[today()];
+  return t || {};
+}
+function markTask(id, coin){
+  const d = today();
+  if(!S.tasks[d]) S.tasks[d] = {};
+  if(S.tasks[d][id]) return false;
+  S.tasks[d][id] = true;
+  addCoins(coin, "完成任务");
+  petGain(id);
+  save();
+  checkPerfectDay();
+  return true;
+}
+function petGain(id){
+  const p = S.pet;
+  if(id === "sun"){ p.mood = Math.min(100, p.mood + 10); }
+  else if(id === "sleep"){ p.energy = Math.min(100, p.energy + 15); }
+  else if(id.startsWith("practice:")){ p.energy = Math.min(100, p.energy + 10); p.mood = Math.min(100, p.mood + 5); }
+  else { p.mood = Math.min(100, p.mood + 4); p.energy = Math.min(100, p.energy + 3); }
+  save();
+}
+
+/* 今日推荐任务清单（根据体质、解锁、时段动态生成） */
+function planToday(){
+  const con = (S.profile && S.profile.constitution) || "qi";
+  const list = [];
+  // 一个功法（早晚不同）
+  const unlocked = unlockedPractices();
+  const hour = nowHour();
+  const wantWhen = hour < 12 ? "morning" : "evening";
+  let pick = unlocked.filter(p => p.when === wantWhen);
+  if(!pick.length) pick = unlocked;
+  const dayIdx = daysBetween(S.startDate, today());
+  const prac = pick[dayIdx % pick.length];
+  list.push({ id:"practice:"+prac.id, name:prac.name, note:prac.min+" 分钟 · "+prac.good, coin:30,
+              slot:prac.when === "morning" ? "morning" : "evening", act:()=>openPractice(prac) });
+  // 体质对应的调理项优先
+  const priority = { yang:["sun","footbath","sleep"], yin:["footbath","sleep","breath"],
+                     qi:["sun","breath","sleep"], tan:["exercise","sun","water"] }[con];
+  const chosen = [];
+  for(const id of priority){ const r = RITUALS.find(x => x.id === id); if(r) chosen.push(r); }
+  for(const r of RITUALS){ if(chosen.length >= 5) break; if(!chosen.includes(r)) chosen.push(r); }
+  for(const r of chosen){
+    list.push({ id:r.id, name:r.name, note:r.note, coin:r.coin, slot:r.when, act:()=>openRitual(r) });
+  }
+  // 一篇科普
+  const unread = ARTICLES.filter(a => !S.read.includes(a.id));
+  const art = unread.length ? unread[0] : ARTICLES[dayIdx % ARTICLES.length];
+  list.push({ id:"read:"+art.id, name:"读一篇：" + art.title, note:art.min+" 分钟阅读", coin:20,
+              slot:"any", act:()=>openArticle(art) });
+  return list;
+}
+function checkPerfectDay(){
+  const plan = planToday(), done = todayTasks();
+  const all = plan.every(t => done[t.id]);
+  if(all && !done.__perfect){
+    S.tasks[today()].__perfect = true;
+    addCoins(50, "完美日");
+    save();
+    celebrate("✨","完美日","今天的每一项都完成了。这种日子累积起来，就是你正在变成的那个人。");
+  }
+}
+
+/* 每日结算：宠物状态衰减、里程碑、彩蛋 */
+function dailyTick(){
+  const p = S.pet;
+  const gap = daysBetween(p.lastTick, today());
+  if(gap > 0){
+    p.hunger = Math.max(0, p.hunger - gap*12);
+    p.mood   = Math.max(0, p.mood   - gap*9);
+    p.energy = Math.max(0, p.energy - gap*7);
+    p.lastTick = today();
+    save();
+  }
+  // 里程碑：补齐所有已达成但未发放的奖励，只为最高的那个庆祝
+  const d = cleanDays();
+  const pending = MILESTONES.filter(m => d >= m.d && !S.badges.includes("m"+m.d));
+  if(pending.length){
+    let coins = 0;
+    for(const m of pending){ S.badges.push("m"+m.d); coins += m.coin; }
+    S.coins += coins;
+    save();
+    const top = pending[pending.length-1];
+    const extra = pending.length > 1 ? "（含 " + pending.length + " 个里程碑的补发）" : "";
+    setTimeout(()=> celebrate(top.glyph, "Day "+top.d+" · "+top.name,
+      top.reward + "　已发放 " + coins + " 金币" + extra + "。"), 400);
+  }
+  checkEggs();
+}
+function checkEggs(){
+  const h = nowHour(), d = today();
+  const fire = (id, glyph, title, text) => {
+    if(S.eggs.includes(id+":"+d)) return;
+    S.eggs.push(id+":"+d); save();
+    setTimeout(()=> toast(glyph + " " + title), 900);
+    if(text) setTimeout(()=> toast(text), 3200);
+  };
+  if(h >= 23 || h < 2){
+    fire("night","🌌","这么晚还不睡？","试试睡前的「打坐 · 数息」，10 分钟就够。");
+  } else if(h === 5 || h === 6){
+    fire("dawn","🌅","早起的人拥有世界","日出属于你。");
+    if(!S.eggs.includes("dawnCoin:"+d)){
+      S.eggs.push("dawnCoin:"+d);
+      addCoins(20,"早起打卡");
+    }
+  }
+  if(S.relapses.length && !S.eggs.includes("comeback:"+d) && daysBetween(S.relapses[S.relapses.length-1].d, d) === 1){
+    S.eggs.push("comeback:"+d); save();
+    setTimeout(()=> toast("🌱 跌倒之后还回来的人，比没跌倒的人更强"), 1200);
+  }
+}
+
+/* ============================================================
+   入职测评
+   ============================================================ */
+const QUIZ = [
+  { k:"age", type:"one", t:"你的年龄段？", h:"用于调整内容的表达方式与强度。",
+    o:[["12-17","12–17 岁"],["18-25","18–25 岁"],["26-35","26–35 岁"],["36-45","36–45 岁"],["45+","45 岁以上"]] },
+  { k:"years", type:"one", t:"这个习惯持续了多久？", h:"时长影响康复周期的预估，不影响能不能成。",
+    o:[["<1","不到 1 年"],["1-3","1–3 年"],["3-5","3–5 年"],["5-10","5–10 年"],["10+","10 年以上"]] },
+  { k:"freq", type:"one", t:"最近一个月，大致的频率？", h:"如实回答就好——这里没有人评判你。",
+    o:[["daily","几乎每天"],["w3","每周 3–5 次"],["w1","每周 1–2 次"],["m","每月几次"],["down","已经在减少"]] },
+  { k:"firstAge", type:"one", t:"第一次接触是什么年龄？", h:"越早接触，大脑可塑期受影响越大，但也意味着可塑性更强。",
+    o:[["<12","12 岁以前"],["12-15","12–15 岁"],["16-18","16–18 岁"],["18+","18 岁以后"]] },
+  { k:"body", type:"slider", t:"身体状态自评", h:"拖动滑块，凭直觉，不用纠结。",
+    s:[["fatigue","疲劳程度","精力充沛","极度疲劳"],
+       ["memory","记忆力","很好","明显下降"],
+       ["focus","专注力","能长时间专注","几分钟就走神"],
+       ["sleepQ","睡眠质量","睡得很沉","入睡困难/多梦"]] },
+  { k:"mind", type:"slider", t:"心理状态自评", h:"这一页的结果会影响推荐方案的侧重。",
+    s:[["anxiety","焦虑程度","平静","经常焦虑"],
+       ["low","情绪低落","稳定","持续低落"],
+       ["avoid","社交回避","乐于社交","刻意回避"],
+       ["esteem","自我评价","比较认可自己","经常否定自己"]] },
+  { k:"consti", type:"multi", t:"哪些身体感受符合你？", h:"可多选。用于中医体质倾向的初步辨识。",
+    o:[["yang","怕冷、手脚不温、容易累"],
+       ["yin","口干、失眠、手足心热"],
+       ["qi","气短、说话没劲、容易出汗"],
+       ["tan","身体沉重、困倦、舌苔厚"],
+       ["none","以上都不明显"]] },
+  { k:"tVisual", type:"multi", t:"什么画面最容易让你起念？", h:"可多选。这一题决定视觉管理方案。",
+    o:[["social","社交媒体的推荐流"],["ad","网页广告、弹窗"],["street","现实中的路人"],
+       ["memory","过往的记忆画面"],["fiction","小说、漫画、动画"]] },
+  { k:"tEmotion", type:"multi", t:"什么情绪下最容易失控？", h:"可多选。这是最关键的一题。",
+    o:[["bored","无聊、没事干"],["anxious","焦虑、有压力"],["lonely","孤独"],
+       ["reward","完成任务后想「奖励自己」"],["sad","难过、委屈"],["tired","累到不想动"]] },
+  { k:"tScene", type:"multi", t:"通常发生在什么场景？", h:"可多选。用于制定环境隔断规则。",
+    o:[["bed","床上"],["bath","浴室"],["night","深夜独处"],
+       ["home","独自在家一整天"],["trip","出差、住酒店"],["work","上班/上课间隙"]] },
+  { k:"motive", type:"multi", t:"你为什么想改变？", h:"可多选。动机越具体，越撑得住。",
+    o:[["health","恢复精力与健康"],["relation","改善伴侣关系"],["fertility","备孕"],
+       ["faith","信仰或戒律要求"],["self","自我提升、想掌控自己"],["focus","恢复专注与效率"]] },
+  { k:"tried", type:"one", t:"以前尝试过吗？结果如何？", h:"失败过很多次不是问题——那说明你一直没放弃。",
+    o:[["never","这是第一次认真尝试"],["few","试过几次，几天就破"],
+       ["weeks","坚持过几周"],["months","坚持过几个月后复发"],["many","试过太多次，记不清了"]] },
+  { k:"goal", type:"one", t:"这一次，目标是多少天？", h:"可以随时调整。建议第一次不要定太高。",
+    o:[["30","30 天 · 度过最难的排毒期"],["90","90 天 · 完成一轮基线重置"],
+       ["180","180 天 · 生活方式转变"],["365","365 天 · 一整年"],["life","不设终点"]] }
+];
+
+let quizAns = {};
+let quizIdx = 0;
+
+function startQuiz(){
+  quizAns = {};
+  quizIdx = 0;
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <p class="eyebrow">开始之前</p>
+    <h2 class="h-display">这不是审问，是一次诊断</h2>
+    <p class="lede">接下来 13 个问题，大约 5 分钟。它们会用来生成你的康复方案——包括推荐哪些功法、哪个时段需要重点防护、以及你的体质适合怎么补。</p>
+    <div class="card">
+      <div class="row" style="align-items:flex-start;gap:10px">
+        <span style="font-size:19px">🔒</span>
+        <div>
+          <div style="font-weight:650;font-size:14px">全部数据只存在这台设备上</div>
+          <p class="small" style="margin:3px 0 0">没有账号，不上传，不联网。清除浏览器数据即全部删除。</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="align-items:flex-start;gap:10px">
+        <span style="font-size:19px">🎯</span>
+        <div>
+          <div style="font-weight:650;font-size:14px">如实回答比答得「好」重要</div>
+          <p class="small" style="margin:3px 0 0">方案是照着答案生成的。美化答案只会得到一份不适合你的方案。</p>
+        </div>
+      </div>
+    </div>
+    <div class="disclaimer">本应用提供的是自助工具与科普内容，不构成医疗诊断或治疗建议。若你有严重的情绪困扰或成瘾问题，请寻求专业医师或心理咨询师帮助。</div>
+  `;
+  const foot = el("div");
+  const btn = el("button","btn block","开始测评");
+  btn.onclick = ()=> renderQuiz();
+  foot.appendChild(btn);
+  openSheet("个人诊断", wrap, { foot, noBack:true, progress:0, onClose:()=>{
+    if(confirm("现在退出会丢失已填写的答案，确定吗？")) closeSheet();
+  }});
+}
+
+function renderQuiz(){
+  if(quizIdx >= QUIZ.length){ buildReport(); return; }
+  const q = QUIZ[quizIdx];
+  const wrap = el("div");
+  const head = el("div");
+  head.innerHTML = `<div class="q-num">问题 ${quizIdx+1} / ${QUIZ.length}</div>
+                    <h2 class="q-title">${esc(q.t)}</h2>
+                    <p class="q-hint">${esc(q.h)}</p>`;
+  wrap.appendChild(head);
+
+  const foot = el("div");
+  const next = el("button","btn block", quizIdx === QUIZ.length-1 ? "生成我的诊断报告" : "下一题");
+
+  if(q.type === "one"){
+    const box = el("div","opts");
+    q.o.forEach(([val,label])=>{
+      const b = el("button","opt", `<span class="opt-mark"><i></i></span><span>${esc(label)}</span>`);
+      b.type = "button";
+      b.setAttribute("aria-pressed", quizAns[q.k] === val ? "true" : "false");
+      b.onclick = ()=>{
+        quizAns[q.k] = val;
+        box.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed","false"));
+        b.setAttribute("aria-pressed","true");
+        next.disabled = false;
+        setTimeout(()=>{ quizIdx++; renderQuiz(); }, 220);
+      };
+      box.appendChild(b);
+    });
+    wrap.appendChild(box);
+    next.disabled = !quizAns[q.k];
+    next.onclick = ()=>{ quizIdx++; renderQuiz(); };
+  }
+  else if(q.type === "multi"){
+    if(!quizAns[q.k]) quizAns[q.k] = [];
+    const box = el("div","opts");
+    q.o.forEach(([val,label])=>{
+      const b = el("button","opt multi", `<span class="opt-mark"><i></i></span><span>${esc(label)}</span>`);
+      b.type = "button";
+      const on = ()=> quizAns[q.k].includes(val);
+      b.setAttribute("aria-pressed", on() ? "true" : "false");
+      b.onclick = ()=>{
+        const arr = quizAns[q.k];
+        const i = arr.indexOf(val);
+        if(i >= 0) arr.splice(i,1); else arr.push(val);
+        b.setAttribute("aria-pressed", on() ? "true" : "false");
+        next.disabled = arr.length === 0;
+      };
+      box.appendChild(b);
+    });
+    wrap.appendChild(box);
+    wrap.appendChild(el("p","small","可以选多个，也可以只选一个。"));
+    next.disabled = quizAns[q.k].length === 0;
+    next.onclick = ()=>{ quizIdx++; renderQuiz(); };
+  }
+  else if(q.type === "slider"){
+    if(!quizAns[q.k]) quizAns[q.k] = {};
+    q.s.forEach(([key,label,lo,hi])=>{
+      if(quizAns[q.k][key] == null) quizAns[q.k][key] = 5;
+      const row = el("div","slider-row");
+      row.innerHTML = `<label>${esc(label)}<span class="num" data-out>${quizAns[q.k][key]}</span></label>`;
+      const inp = el("input");
+      inp.type = "range"; inp.min = "1"; inp.max = "10"; inp.step = "1";
+      inp.value = quizAns[q.k][key];
+      inp.setAttribute("aria-label", label);
+      const out = row.querySelector("[data-out]");
+      inp.oninput = ()=>{ quizAns[q.k][key] = +inp.value; out.textContent = inp.value; };
+      row.appendChild(inp);
+      row.appendChild(el("div","slider-scale",`<span>${esc(lo)}</span><span>${esc(hi)}</span>`));
+      wrap.appendChild(row);
+    });
+    next.disabled = false;
+    next.onclick = ()=>{ quizIdx++; renderQuiz(); };
+  }
+  foot.appendChild(next);
+
+  replaceSheetBody(wrap, {
+    foot,
+    progress: quizIdx / QUIZ.length,
+    noBack: false,
+    onBack: ()=>{ if(quizIdx === 0){ startQuiz(); } else { quizIdx--; renderQuiz(); } }
+  });
+  setSheetTitle("个人诊断");
+}
+
+/* ============================================================
+   诊断报告
+   ============================================================ */
+const T_LABEL = {
+  social:"社交媒体推荐流", ad:"网页广告弹窗", street:"现实中的路人", memory:"过往记忆画面", fiction:"小说漫画动画",
+  bored:"无聊、没事干", anxious:"焦虑与压力", lonely:"孤独", reward:"任务后的自我奖励", sad:"难过委屈", tired:"疲劳到极点",
+  bed:"床上", bath:"浴室", night:"深夜独处", home:"独自在家一整天", trip:"出差住酒店", work:"上班上课间隙"
+};
+const T_FIX = {
+  social:"清理关注列表，取消触发性账号；把推荐流换成主动订阅。",
+  ad:"安装广告拦截；避开劣质站点。",
+  street:"不刻意躲避，练习「看见但不停留」的两秒法则。",
+  memory:"记忆画面来时不对抗，用 5-4-3-2-1 把注意力拉回当下。",
+  fiction:"清理书架与追番列表——这类内容的成瘾性常被低估。",
+  bored:"预先准备一张「无聊清单」：出门走、练功、给人打电话。空白就是入口。",
+  anxious:"腹式呼吸 3 组，或 20 分钟力量训练。焦虑要靠身体代谢掉。",
+  lonely:"给一个人发消息，不用聊心事。孤独需要真实连接，不是替代品。",
+  reward:"换掉奖励方式：一顿好饭、一集剧、一次跑步都行，别用它。",
+  sad:"允许情绪存在，不用立刻解决。散步 15 分钟能降低情绪黏度。",
+  tired:"疲劳时前额叶刹车最弱。别硬拼，直接去睡。",
+  bed:"手机不进卧室——这是单条收益最高的规则。",
+  bath:"手机留在浴室外，缩短洗澡时间。",
+  night:"设定固定的关机时间，把高危时段整段拿掉。",
+  home:"提前安排整天的计划，独处一整天必须有事做。",
+  trip:"住酒店时开门帘、开灯，减少「与世隔绝」感；提前约好每晚跟人通话。",
+  work:"公共场合的间隙靠环境约束就够，重点是别把它带回家。"
+};
+
+function computeProfile(a){
+  // 严重度评分
+  let sev = 0;
+  sev += ({"<1":1,"1-3":2,"3-5":3,"5-10":4,"10+":5})[a.years] || 2;
+  sev += ({daily:5, w3:4, w1:3, m:2, down:1})[a.freq] || 3;
+  sev += ({"<12":3,"12-15":2,"16-18":1,"18+":0})[a.firstAge] || 1;
+  const bodyAvg = avg(Object.values(a.body));
+  const mindAvg = avg(Object.values(a.mind));
+  sev += bodyAvg > 7 ? 2 : bodyAvg > 5 ? 1 : 0;
+  sev += mindAvg > 7 ? 2 : mindAvg > 5 ? 1 : 0;
+  // 1..5 星
+  const stars = Math.max(1, Math.min(5, Math.round(sev / 3.4)));
+  const gradeName = ["轻度","轻中度","中度","中重度","重度"][stars-1];
+
+  // 康复周期预估
+  const base = 90;
+  const extra = (({"<1":0,"1-3":10,"3-5":20,"5-10":35,"10+":50})[a.years] || 10)
+              + (({daily:25, w3:15, w1:8, m:3, down:0})[a.freq] || 10);
+  const lo = base + Math.round(extra*0.6), hi = base + extra + 20;
+
+  // 体质
+  const cMap = { yang:"yang", yin:"yin", qi:"qi", tan:"tan" };
+  let constitution = "qi";
+  const cs = (a.consti || []).filter(x => x !== "none");
+  if(cs.length) constitution = cMap[cs[0]];
+  else {
+    if(a.body.fatigue >= 7) constitution = "yang";
+    else if(a.mind.anxiety >= 7 || a.body.sleepQ >= 7) constitution = "yin";
+    else if(a.body.focus >= 7) constitution = "tan";
+  }
+
+  // 诱因排序：情绪 > 场景 > 视觉（权重）
+  const raw = [];
+  (a.tEmotion || []).forEach((k,i) => raw.push({ k, w: 30 - i*5, kind:"情绪" }));
+  (a.tScene || []).forEach((k,i)   => raw.push({ k, w: 22 - i*4, kind:"场景" }));
+  (a.tVisual || []).forEach((k,i)  => raw.push({ k, w: 16 - i*3, kind:"视觉" }));
+  const total = raw.reduce((s,x) => s + Math.max(2,x.w), 0) || 1;
+  const triggers = raw
+    .map(x => ({ ...x, pct: Math.round(Math.max(2,x.w) / total * 100) }))
+    .sort((x,y) => y.pct - x.pct)
+    .slice(0,4);
+
+  // 高危时段
+  const sc = a.tScene || [];
+  let window = "22:00 – 01:00";
+  if(sc.includes("night")) window = "23:00 – 02:00";
+  else if(sc.includes("bed")) window = "22:30 – 00:30";
+  else if(sc.includes("work")) window = "13:00 – 15:00";
+  else if(sc.includes("home")) window = "全天独处时段";
+
+  const goalDays = a.goal === "life" ? 9999 : +a.goal;
+
+  return {
+    stars, gradeName, cycleLo:lo, cycleHi:hi, constitution,
+    triggers, window, goalDays,
+    bodyAvg:+bodyAvg.toFixed(1), mindAvg:+mindAvg.toFixed(1),
+    body:a.body, mind:a.mind,
+    motives:a.motive || [], tried:a.tried
+  };
+}
+function avg(arr){ return arr.reduce((s,x) => s + x, 0) / (arr.length || 1); }
+
+function buildReport(){
+  const rep = computeProfile(quizAns);
+  S.profile = Object.assign({}, quizAns, { constitution: rep.constitution });
+  S.report = rep;
+  S.onboarded = true;
+  S.startDate = today();
+  S.pet.lastTick = today();
+  if(!S.pet.name) S.pet.name = "";
+  save();
+  showReport(true);
+}
+
+function dimLabel(v){
+  if(v >= 7) return { pill:"crit", txt:"需重点关注" };
+  if(v >= 5) return { pill:"warn", txt:"轻度受影响" };
+  return { pill:"ok", txt:"状态良好" };
+}
+
+function showReport(isNew){
+  const r = S.report;
+  const con = DIET[r.constitution];
+  const bodyD = dimLabel(r.bodyAvg), mindD = dimLabel(r.mindAvg);
+  const wrap = el("div");
+
+  const bodyRows = [["fatigue","疲劳程度"],["memory","记忆力"],["focus","专注力"],["sleepQ","睡眠质量"]]
+    .map(([k,l]) => `<div class="stat-line"><b>${l}</b><div class="bar ${r.body[k]>=7?"crit":""}"><i style="width:${r.body[k]*10}%"></i></div><span>${r.body[k]}/10</span></div>`).join("");
+  const mindRows = [["anxiety","焦虑"],["low","情绪低落"],["avoid","社交回避"],["esteem","自我否定"]]
+    .map(([k,l]) => `<div class="stat-line"><b>${l}</b><div class="bar ${r.mind[k]>=7?"crit":""}"><i style="width:${r.mind[k]*10}%"></i></div><span>${r.mind[k]}/10</span></div>`).join("");
+  const trigRows = r.triggers.map(t =>
+    `<div class="trigger-item"><div><b>${esc(T_LABEL[t.k]||t.k)}</b><div class="small">${esc(t.kind)}触发 · ${esc(T_FIX[t.k]||"")}</div></div><div class="num">${t.pct}%</div></div>`
+  ).join("");
+
+  wrap.innerHTML = `
+    <p class="eyebrow">Reborn 个人康复诊断</p>
+    <div class="report-grade"><span class="stars">${"★".repeat(r.stars)}${"☆".repeat(5-r.stars)}</span><span>${esc(r.gradeName)}成瘾</span></div>
+    <p class="lede" style="margin-top:8px">评级只反映当前状态，不预测结果。真正决定走向的是接下来 30 天做了什么。</p>
+
+    <div class="card">
+      <div class="dim">
+        <div class="dim-head"><span class="dim-name">🫀 身体维度</span><span class="pill ${bodyD.pill}">${bodyD.txt}</span></div>
+        ${bodyRows}
+      </div>
+      <div class="dim">
+        <div class="dim-head"><span class="dim-name">🧠 心理维度</span><span class="pill ${mindD.pill}">${mindD.txt}</span></div>
+        ${mindRows}
+      </div>
+    </div>
+
+    <h3 class="h-sec">核心诱因</h3>
+    <div class="card">${trigRows || '<p class="small">未识别到明确诱因。</p>'}</div>
+
+    <h3 class="h-sec">高危时段</h3>
+    <div class="alert">
+      <div class="alert-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>${esc(r.window)}</div>
+      <p>这个时段会出现在首页的预警卡上。到点前把手机放到卧室外，是最省力的一步。</p>
+    </div>
+
+    <h3 class="h-sec">体质倾向</h3>
+    <div class="card">
+      <div class="row-between" style="margin-bottom:9px">
+        <b style="font-size:15px">${esc(con.name)}体质</b>
+        <span class="pill">${esc(con.sign)}</span>
+      </div>
+      <p class="small" style="color:var(--text-2);margin:0 0 10px">${esc(con.advice)}</p>
+      <div class="small"><b style="color:var(--ok)">宜：</b>${con.eat.map(esc).join("、")}</div>
+      <div class="small" style="margin-top:4px"><b style="color:var(--danger)">忌：</b>${con.avoid.map(esc).join("、")}</div>
+    </div>
+
+    <h3 class="h-sec">康复周期预估</h3>
+    <div class="card">
+      <div class="row" style="gap:16px">
+        <div><div class="hero-days" style="font-size:38px;background:none;color:var(--accent);-webkit-text-fill-color:currentColor">${r.cycleLo}–${r.cycleHi}</div></div>
+        <div class="small" style="flex:1">天，指的是「冲动频率明显下降、不再需要每天硬扛」所需的时间。不是指到那天就结束——之后是维护，不是冲刺。</div>
+      </div>
+    </div>
+
+    <h3 class="h-sec">你的方案</h3>
+    <div class="card">
+      <ol style="margin:0;padding-left:20px;color:var(--text-2);line-height:1.9;font-size:14px">
+        <li><b style="color:var(--text)">补能量</b>：每天一个功法 + 体质对应的调理项（已排进今日任务）</li>
+        <li><b style="color:var(--text)">断诱因</b>：针对上面识别出的 ${r.triggers.length} 个诱因逐条处理</li>
+        <li><b style="color:var(--text)">管冲动</b>：冲动来时按急救按钮，不靠硬扛</li>
+        <li><b style="color:var(--text)">建认知</b>：每天一篇科普，把「知道」变成「明白」</li>
+      </ol>
+    </div>
+
+    <div class="disclaimer">本报告由你填写的自评生成，用于安排自助练习，<b>不是医学诊断</b>。体质辨识与功法内容属传统养生经验范畴，非医疗建议。若有持续的身体症状或严重情绪困扰，请就医。</div>
+  `;
+
+  const foot = el("div");
+  if(isNew){
+    const b = el("button","btn block","进入 Reborn，开始第 1 天");
+    b.onclick = ()=>{
+      closeSheet();
+      renderAll();
+      dailyTick();
+      setTimeout(()=> celebrate("🥚","Day 1 · 觉醒者","蛋已经开始裂了。接下来 7 天最难，也最关键——每天只需要完成任务清单。"), 300);
+    };
+    foot.appendChild(b);
+  }else{
+    const b = el("button","btn ghost block","关闭");
+    b.onclick = closeSheet;
+    foot.appendChild(b);
+  }
+  if(isNew) openSheet("诊断报告", wrap, { foot, noBack:true, progress:1 });
+  else openSheet("诊断报告", wrap, { foot });
+}
+
+/* ============================================================
+   视图：首页
+   ============================================================ */
+function renderHome(){
+  const v = $("#view-home");
+  v.innerHTML = "";
+  const d = cleanDays();
+  const st = petStage();
+  const r = S.report;
+  const goal = r && r.goalDays < 9999 ? r.goalDays : null;
+  const nm = nextMilestone();
+
+  // 英雄卡
+  const hero = el("div","hero");
+  hero.innerHTML = `
+    <p class="hero-label">已坚守</p>
+    <div><span class="hero-days">${d}</span><span class="hero-unit">天</span></div>
+    <dl class="hero-meta">
+      <div><dt>最长记录</dt><dd>${Math.max(S.bestStreak, d)}</dd></div>
+      <div><dt>累计清醒</dt><dd>${S.totalClean + d}</dd></div>
+      <div><dt>${goal ? "目标" : "下一里程碑"}</dt><dd>${goal ? goal : (nm ? nm.d : "—")}</dd></div>
+    </dl>
+  `;
+  v.appendChild(hero);
+
+  // 进度到下一里程碑
+  if(nm){
+    const prev = [...MILESTONES].reverse().find(m => m.d <= d);
+    const from = prev ? prev.d : 0;
+    const pct = Math.round((d - from) / (nm.d - from) * 100);
+    const c = el("div","card");
+    c.style.marginTop = "12px";
+    c.innerHTML = `
+      <div class="row-between" style="margin-bottom:9px">
+        <span style="font-size:13.5px">下一站　<b>${nm.glyph} ${esc(nm.name)}</b></span>
+        <span class="num small">Day ${nm.d}</span>
+      </div>
+      <div class="bar gold"><i style="width:${pct}%"></i></div>
+      <p class="small" style="margin:8px 0 0">还有 ${nm.d - d} 天 · 解锁${esc(nm.reward)}</p>
+    `;
+    v.appendChild(c);
+  }
+
+  // 高危时段预警
+  if(r && r.window){
+    const inWindow = isRiskNow(r.window);
+    const a = el("div", "alert" + (inWindow ? " crit" : ""));
+    a.style.marginTop = "12px";
+    a.innerHTML = `
+      <div class="alert-title">
+        <svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        ${inWindow ? "你正处在高危时段" : "今日高危时段 " + esc(r.window)}
+      </div>
+      <p>${inWindow
+        ? "现在就把手机放到卧室外，或者去洗个冷水脸。别等到冲动上来再决定。"
+        : "根据你填写的场景诱因推算。到点前提前做好隔断，比到点后抵抗省力得多。"}</p>
+    `;
+    const b = el("button","btn ghost","设置今晚防护");
+    b.style.marginTop = "10px";
+    b.onclick = openGuard;
+    a.appendChild(b);
+    v.appendChild(a);
+  }
+
+  // 今日任务
+  v.appendChild(el("h2","h-sec","今日任务"));
+  const plan = planToday(), done = todayTasks();
+  const doneN = plan.filter(t => done[t.id]).length;
+  const sum = el("div","row-between");
+  sum.style.marginBottom = "10px";
+  sum.innerHTML = `<span class="small">完成 ${doneN} / ${plan.length}</span>`;
+  const bar = el("div","bar");
+  bar.style.flex = "1";
+  bar.innerHTML = `<i style="width:${Math.round(doneN/plan.length*100)}%"></i>`;
+  sum.appendChild(bar);
+  v.appendChild(sum);
+
+  const slots = [["morning","☀️ 晨间"],["any","🌤 白天"],["evening","🌙 晚间"]];
+  for(const [slot,label] of slots){
+    const items = plan.filter(t => t.slot === slot);
+    if(!items.length) continue;
+    const g = el("div","time-group");
+    g.appendChild(el("div","time-head",`<span>${label}</span>`));
+    const stack = el("div","stack");
+    for(const t of items){
+      const isDone = !!done[t.id];
+      const b = el("button","task" + (isDone ? " done" : ""));
+      b.innerHTML = `
+        <span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>
+        <span class="task-body">
+          <span class="task-name">${esc(t.name)}</span>
+          <span class="task-note">${esc(t.note)}</span>
+        </span>
+        <span class="task-coin">+${t.coin}</span>`;
+      b.onclick = ()=> t.act();
+      stack.appendChild(b);
+    }
+    g.appendChild(stack);
+    v.appendChild(g);
+  }
+
+  // 今日科普
+  const art = pickDailyArticle();
+  const c2 = el("button","item");
+  c2.style.marginTop = "18px";
+  c2.innerHTML = `
+    <span class="item-glyph">${art.glyph}</span>
+    <span class="item-main">
+      <span class="item-title">${esc(art.title)}</span>
+      <span class="item-sub">${esc(art.cat)} · ${art.min} 分钟${S.read.includes(art.id) ? " · 已读" : ""}</span>
+    </span>
+    <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+  c2.onclick = ()=> openArticle(art);
+  v.appendChild(c2);
+}
+function pickDailyArticle(){
+  const unread = ARTICLES.filter(a => !S.read.includes(a.id));
+  if(unread.length) return unread[0];
+  return ARTICLES[daysBetween(S.startDate, today()) % ARTICLES.length];
+}
+function isRiskNow(win){
+  const m = win.match(/(\d{1,2}):\d{2}\s*[–-]\s*(\d{1,2}):\d{2}/);
+  if(!m) return false;
+  const h = nowHour(), a = +m[1], b = +m[2];
+  return a <= b ? (h >= a && h < b) : (h >= a || h < b);
+}
+
+/* 今晚防护 */
+function openGuard(){
+  const sc = (S.profile && S.profile.tScene) || [];
+  const rules = [
+    { on: sc.includes("bed") || sc.includes("night"), t:"手机不进卧室", d:"放在客厅或走廊充电。这一条的收益高于任何意志力训练。" },
+    { on: sc.includes("bath"), t:"手机留在浴室外", d:"洗澡控制在 10 分钟内。" },
+    { on: sc.includes("night"), t:"设定关机时间", d:"到点断网，把整段高危时间直接拿掉，而不是在里面抵抗。" },
+    { on: true, t:"开启灰度模式", d:"iOS：设置 → 辅助功能 → 显示与文字大小 → 色彩滤镜 → 灰度。Android：开发者选项 → 模拟颜色空间 → 全色盲。视觉刺激强度会明显下降。" },
+    { on: true, t:"清理推荐流", d:"取消关注触发性账号。算法只会给你更多同类内容——源头断了才有用。" },
+    { on: sc.includes("home") || sc.includes("trip"), t:"预约一次通话", d:"独处整天或住酒店时，提前约好晚上跟人通话，把独处切断。" }
+  ].filter(x => x.on);
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="lede">这些规则是根据你填写的场景诱因生成的。改环境比改意志便宜得多。</p>`;
+  rules.forEach(r=>{
+    const c = el("div","card");
+    c.innerHTML = `<div style="font-weight:650;font-size:14.5px;margin-bottom:4px">${esc(r.t)}</div><p class="small" style="margin:0">${esc(r.d)}</p>`;
+    wrap.appendChild(c);
+  });
+  const foot = el("div");
+  const b = el("button","btn block","我已设置好");
+  b.onclick = ()=>{ markTask("guard", 20); closeSheet(); renderAll(); };
+  foot.appendChild(b);
+  openSheet("今晚防护", wrap, { foot });
+}
+
+/* ============================================================
+   视图：能量
+   ============================================================ */
+function renderEnergy(){
+  const v = $("#view-energy");
+  v.innerHTML = "";
+  const d = cleanDays();
+  const con = (S.profile && S.profile.constitution) || "qi";
+  const done = todayTasks();
+
+  v.innerHTML = `<p class="eyebrow">补，而不只是戒</p>
+    <h2 class="h-display">能量提升</h2>
+    <p class="lede">如果你每天都觉得在「忍」，说明补的部分没跟上。目标状态不是忍得住，是不太想。</p>`;
+
+  // 功法
+  v.appendChild(el("h3","h-sec","古法锻炼"));
+  PRACTICES.forEach(p=>{
+    const locked = d < p.unlock;
+    const b = el("button","item" + (locked ? " locked" : ""));
+    const doneToday = !!done["practice:"+p.id];
+    b.innerHTML = `
+      <span class="item-glyph">${p.glyph}</span>
+      <span class="item-main">
+        <span class="item-title">${esc(p.name)}
+          <span class="stars-diff">${"◆".repeat(p.diff)}</span>
+          ${doneToday ? '<span class="pill ok">今日已练</span>' : ""}
+        </span>
+        <span class="item-sub">${p.min} 分钟 · ${esc(p.good)}${locked ? " · Day " + p.unlock + " 解锁" : ""}</span>
+      </span>
+      <span class="item-arrow">${locked
+        ? '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'}</span>`;
+    b.onclick = ()=> locked
+      ? toast("坚持到 Day " + p.unlock + " 解锁")
+      : openPractice(p);
+    v.appendChild(b);
+  });
+
+  // 调理
+  v.appendChild(el("h3","h-sec","体质调理"));
+  RITUALS.forEach(r=>{
+    const isDone = !!done[r.id];
+    const b = el("button","item");
+    b.innerHTML = `
+      <span class="item-glyph">${r.glyph}</span>
+      <span class="item-main">
+        <span class="item-title">${esc(r.name)} ${isDone ? '<span class="pill ok">已完成</span>' : ""}</span>
+        <span class="item-sub">${esc(r.note)} · +${r.coin} 金币</span>
+      </span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = ()=> openRitual(r);
+    v.appendChild(b);
+  });
+
+  // 膳食
+  v.appendChild(el("h3","h-sec","膳食指导"));
+  const c = DIET[con];
+  const dc = el("div","card");
+  dc.innerHTML = `
+    <div class="row-between" style="margin-bottom:8px">
+      <b style="font-size:15px">${esc(c.name)}体质 · 你的方案</b>
+      <span class="pill">${esc(c.sign)}</span>
+    </div>
+    <p class="small" style="color:var(--text-2);margin:0 0 12px">${esc(c.advice)}</p>
+    <div class="small"><b style="color:var(--ok)">宜　</b>${c.eat.map(esc).join("、")}</div>
+    <div class="small" style="margin-top:5px"><b style="color:var(--danger)">忌　</b>${c.avoid.map(esc).join("、")}</div>`;
+  v.appendChild(dc);
+
+  const bc = el("div","card");
+  bc.innerHTML = `<b style="font-size:14.5px">${esc(BRAIN_FOOD.title)}</b>` +
+    BRAIN_FOOD.groups.map(g =>
+      `<div style="margin-top:10px"><div class="small" style="color:var(--accent);font-weight:650">${esc(g.k)}</div><div class="small">${esc(g.items)}</div></div>`
+    ).join("");
+  v.appendChild(bc);
+
+  v.appendChild(el("div","disclaimer","膳食与体质内容属传统养生经验与营养通识，非医疗建议。服用任何补剂前请咨询医师，尤其在服药或有基础疾病时。"));
+}
+
+/* --- 调理项详情 --- */
+function openRitual(r){
+  const isDone = !!todayTasks()[r.id];
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div style="text-align:center;font-size:52px;line-height:1;margin:4px 0 14px">${r.glyph}</div>
+    <h2 class="h-display" style="text-align:center">${esc(r.name)}</h2>
+    <p class="lede" style="text-align:center;margin-left:auto;margin-right:auto">${esc(r.note)}</p>
+    <div class="card"><b style="font-size:13.5px">为什么有用</b><p class="small" style="margin:5px 0 0;color:var(--text-2)">${esc(r.why)}</p></div>
+    <div class="card"><b style="font-size:13.5px">怎么做</b><p class="small" style="margin:5px 0 0;color:var(--text-2)">${esc(r.tip)}</p></div>`;
+
+  // 泡脚/呼吸带计时器
+  if(r.id === "footbath" || r.id === "breath"){
+    const mins = r.id === "footbath" ? 15 : 3;
+    const tc = el("div","card");
+    tc.innerHTML = `<b style="font-size:13.5px">计时器</b>`;
+    const disp = el("div","practice-timer");
+    disp.style.fontSize = "44px";
+    disp.textContent = mmss(mins*60);
+    tc.appendChild(disp);
+    const btn = el("button","btn block","开始 " + mins + " 分钟");
+    let iv = null, left = mins*60;
+    btn.onclick = ()=>{
+      if(iv){ clearInterval(iv); iv = null; btn.textContent = "继续"; return; }
+      btn.textContent = "暂停";
+      iv = setInterval(()=>{
+        left--;
+        disp.textContent = mmss(left);
+        if(left <= 0){
+          clearInterval(iv); iv = null;
+          disp.textContent = "完成";
+          btn.textContent = "已完成";
+          btn.disabled = true;
+          toast("计时结束 🎐");
+        }
+      }, 1000);
+    };
+    tc.appendChild(btn);
+    wrap.appendChild(tc);
+  }
+
+  const foot = el("div");
+  const b = el("button","btn block", isDone ? "今天已完成" : "标记完成　+" + r.coin);
+  b.disabled = isDone;
+  b.onclick = ()=>{
+    markTask(r.id, r.coin);
+    closeSheet(); renderAll();
+  };
+  foot.appendChild(b);
+  openSheet(r.name, wrap, { foot });
+}
+
+/* ============================================================
+   功法跟练（真实计时 + 分节引导）
+   ============================================================ */
+let practiceIV = null;
+function openPractice(p){
+  const total = p.phases.reduce((s,x) => s + x[0], 0);
+  let elapsed = 0, phaseIdx = 0, phaseLeft = p.phases[0][0], running = false;
+
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div class="ring-wrap">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+        <circle class="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"></circle>
+      </svg>
+      <div class="ring-center">
+        <div>
+          <div class="practice-timer" id="pTime" style="font-size:34px;margin:0">${mmss(total)}</div>
+          <div class="small" id="pStep">共 ${p.phases.length} 节</div>
+        </div>
+      </div>
+    </div>
+    <div class="practice-phase" id="pPhase">${esc(p.phases[0][1])}</div>
+    <div class="practice-cue" id="pCue">${esc(p.phases[0][2])}</div>`;
+
+  const ring = wrap.querySelector(".ring-fg");
+  const tEl = wrap.querySelector("#pTime");
+  const phEl = wrap.querySelector("#pPhase");
+  const cueEl = wrap.querySelector("#pCue");
+  const stepEl = wrap.querySelector("#pStep");
+
+  const list = el("div");
+  list.style.marginTop = "24px";
+  list.innerHTML = `<div class="time-head"><span>动作分节</span></div>`;
+  p.phases.forEach((ph,i)=>{
+    const d = el("div","ground-step");
+    d.dataset.i = i;
+    d.innerHTML = `<div class="row" style="align-items:flex-start;gap:11px">
+      <span class="ground-n">${i+1}</span>
+      <div><b style="font-size:14px">${esc(ph[1])}</b><p class="small" style="margin:3px 0 0">${esc(ph[2])}</p>
+      <span class="small num" style="color:var(--text-3)">${mmss(ph[0])}</span></div></div>`;
+    list.appendChild(d);
+  });
+  wrap.appendChild(list);
+  wrap.appendChild(el("div","disclaimer","练习中如出现头晕、心慌、关节疼痛，请立即停止。有心血管疾病、高血压或近期手术史者，练习前请咨询医师。动作宁慢勿快，宁轻勿重。"));
+
+  function paint(){
+    const pct = elapsed / total;
+    ring.style.strokeDashoffset = String(276.5 * (1 - pct));
+    tEl.textContent = mmss(total - elapsed);
+    stepEl.textContent = "第 " + (phaseIdx+1) + " / " + p.phases.length + " 节";
+    phEl.textContent = p.phases[phaseIdx][1];
+    cueEl.textContent = p.phases[phaseIdx][2];
+    list.querySelectorAll(".ground-step").forEach(n=>{
+      const i = +n.dataset.i;
+      n.classList.toggle("active", i === phaseIdx);
+      n.classList.toggle("done", i < phaseIdx);
+    });
+  }
+
+  const foot = el("div");
+  const startBtn = el("button","btn block","开始跟练");
+  const doneBtn = el("button","btn ghost block","直接标记完成");
+  doneBtn.style.marginTop = "8px";
+  foot.appendChild(startBtn); foot.appendChild(doneBtn);
+
+  function finish(){
+    clearInterval(practiceIV); practiceIV = null;
+    S.practice.push({ d:today(), id:p.id, min:p.min });
+    markTask("practice:"+p.id, 30);
+    save();
+    closeSheet(); renderAll();
+    celebrate(p.glyph, "练完了", p.name + "　" + p.min + " 分钟。这类内向型练习真正训练的是「与不适共处」——站桩时腿酸而不动，和冲动来时不动，是同一种能力。");
+  }
+
+  startBtn.onclick = ()=>{
+    if(running){
+      clearInterval(practiceIV); practiceIV = null; running = false;
+      startBtn.textContent = "继续"; return;
+    }
+    running = true; startBtn.textContent = "暂停";
+    practiceIV = setInterval(()=>{
+      elapsed++; phaseLeft--;
+      if(phaseLeft <= 0 && phaseIdx < p.phases.length-1){
+        phaseIdx++; phaseLeft = p.phases[phaseIdx][0];
+        toast("第 " + (phaseIdx+1) + " 节 · " + p.phases[phaseIdx][1]);
+      }
+      paint();
+      if(elapsed >= total) finish();
+    }, 1000);
+  };
+  doneBtn.onclick = ()=>{
+    if(practiceIV){ clearInterval(practiceIV); practiceIV = null; }
+    finish();
+  };
+
+  paint();
+  openSheet(p.name, wrap, { foot, onBack:()=>{
+    if(practiceIV){ clearInterval(practiceIV); practiceIV = null; }
+    popSheet();
+  }});
+}
+
+/* ============================================================
+   冲动急救中心
+   ============================================================ */
+let sosIV = null, sosStart = 0;
+function openSOS(){
+  // 延迟锁生效中
+  if(S.lockUntil > Date.now()){ showLock(); return; }
+  S.urges.push({ ts:Date.now(), resolved:false });
+  save();
+
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <p class="sos-quote">冲动是暂时的，<br>但你现在的选择会留下来。</p>
+    <div class="sos-timer" id="sosT">15:00</div>
+    <p class="small" style="text-align:center;margin:0 0 4px">强度曲线通常在 10–20 分钟内到峰并回落</p>
+    <p class="small" style="text-align:center;margin:0 0 22px;color:var(--text-3)">你不需要永远抵抗，只需要不在峰值时做决定</p>`;
+
+  const opts = [
+    { g:"🧊", t:"身体接地", s:"5-4-3-2-1 感官练习 · 3 分钟", act:openGrounding },
+    { g:"🧠", t:"真相核查", s:"三个问题，把理智调回来", act:openTruth },
+    { g:"🌬️", t:"呼吸调节", s:"跟着圆呼吸 · 4-2-6 节律", act:openBreath },
+    { g:"💪", t:"能量转移", s:"20 个俯卧撑 / 30 秒冲刺", act:openMove },
+    { g:"💬", t:"和教练聊聊", s:"引导式对话，一步一步来", act:openCoach }
+  ];
+  opts.forEach(o=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${o.g}</span>
+      <span class="item-main"><span class="item-title">${esc(o.t)}</span><span class="item-sub">${esc(o.s)}</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = o.act;
+    wrap.appendChild(b);
+  });
+
+  const still = el("button","btn ghost block","我还是想做");
+  still.style.marginTop = "16px";
+  still.onclick = offerLock;
+  wrap.appendChild(still);
+
+  const passed = el("button","btn block","冲动已经过去了");
+  passed.style.marginTop = "8px";
+  passed.onclick = ()=>{
+    const u = S.urges[S.urges.length-1];
+    if(u) u.resolved = true;
+    addCoins(25, "扛过一次冲动");
+    save();
+    closeSheet(); renderAll();
+    celebrate("🌊","它过去了","你刚刚证明了一件事：不需要它，你也能过去。这次的经验会让下一次更容易。");
+  };
+  wrap.appendChild(passed);
+
+  sosStart = Date.now();
+  openSheet("冲动急救", wrap, { noBack:true, onClose:()=>{
+    clearInterval(sosIV); sosIV = null; closeSheet();
+  }});
+
+  const t = wrap.querySelector("#sosT");
+  clearInterval(sosIV);
+  sosIV = setInterval(()=>{
+    const left = 900 - Math.floor((Date.now()-sosStart)/1000);
+    if(!document.body.contains(t)){ clearInterval(sosIV); sosIV = null; return; }
+    if(left <= 0){
+      t.textContent = "00:00";
+      clearInterval(sosIV); sosIV = null;
+      toast("15 分钟到了 🌊 峰值已经过去");
+      return;
+    }
+    t.textContent = mmss(left);
+  }, 1000);
+}
+
+/* 5-4-3-2-1 */
+function openGrounding(){
+  let step = 0;
+  const wrap = el("div");
+  function paint(){
+    wrap.innerHTML = "";
+    wrap.appendChild(el("p","lede","把注意力从念头拉回身体。不用做得完美，说得出来就有效。"));
+    GROUND_STEPS.forEach((g,i)=>{
+      const d = el("div","ground-step" + (i === step ? " active" : i < step ? " done" : ""));
+      d.innerHTML = `<div class="row" style="align-items:flex-start;gap:12px">
+        <span class="ground-n">${g.n}</span>
+        <div style="flex:1"><b style="font-size:14.5px">${esc(g.sense)}</b>
+        <p class="small" style="margin:2px 0 0">${esc(g.prompt)}</p></div></div>`;
+      if(i === step){
+        const box = el("div","sense-inputs");
+        for(let k = 0; k < g.n; k++){
+          const inp = el("input");
+          inp.type = "text";
+          inp.placeholder = g.sense + " " + (k+1);
+          inp.setAttribute("aria-label", g.sense + " 第 " + (k+1) + " 项");
+          box.appendChild(inp);
+        }
+        d.appendChild(box);
+        const nb = el("button","btn block", step === GROUND_STEPS.length-1 ? "完成练习" : "下一步");
+        nb.style.marginTop = "11px";
+        nb.onclick = ()=>{
+          step++;
+          if(step >= GROUND_STEPS.length){
+            addCoins(20,"完成接地练习");
+            popSheet();
+            toast("做得好 🧊 注意力已经回到当下");
+          } else paint();
+        };
+        d.appendChild(nb);
+      }
+      wrap.appendChild(d);
+    });
+  }
+  paint();
+  openSheet("身体接地", wrap);
+}
+
+/* 真相核查 */
+function openTruth(){
+  let i = 0;
+  const wrap = el("div");
+  function paint(){
+    const item = TRUTH_CHECK[i];
+    wrap.innerHTML = `
+      <div class="q-num">${i+1} / ${TRUTH_CHECK.length}</div>
+      <h2 class="q-title">${esc(item.q)}</h2>
+      <div class="card" style="margin-top:14px"><p class="small" style="margin:0;color:var(--text-2);line-height:1.75">${esc(item.a)}</p></div>`;
+    const b = el("button","btn block", i === TRUTH_CHECK.length-1 ? "我想清楚了" : "下一个问题");
+    b.style.marginTop = "16px";
+    b.onclick = ()=>{
+      i++;
+      if(i >= TRUTH_CHECK.length){
+        addCoins(20,"完成真相核查");
+        popSheet();
+        toast("理智已经上线 🧠");
+      } else paint();
+    };
+    wrap.appendChild(b);
+  }
+  paint();
+  openSheet("真相核查", wrap);
+}
+
+/* 呼吸 */
+function openBreath(){
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <p class="lede" style="text-align:center">跟着圆的节律。吸气 4 秒　屏 2 秒　呼气 6 秒——呼气要比吸气长，这样才能激活副交感神经。</p>
+    <div class="breathe-orb" id="orb">吸气</div>
+    <p class="small" style="text-align:center">已完成 <span class="num" id="bn">0</span> 次呼吸</p>`;
+  const orb = wrap.querySelector("#orb");
+  const bn = wrap.querySelector("#bn");
+  let t = 0, n = 0;
+  const iv = setInterval(()=>{
+    if(!document.body.contains(orb)){ clearInterval(iv); return; }
+    t = (t+1) % 12;
+    if(t < 4) orb.textContent = "吸气";
+    else if(t < 6) orb.textContent = "屏住";
+    else { orb.textContent = "呼气"; }
+    if(t === 0){ n++; bn.textContent = n; if(n === 10){ addCoins(15,"完成呼吸练习"); toast("10 次完成 🌬️ 感受一下心率"); } }
+  }, 1000);
+  const b = el("button","btn ghost block","结束");
+  b.style.marginTop = "18px";
+  b.onclick = ()=>{ clearInterval(iv); popSheet(); };
+  wrap.appendChild(b);
+  openSheet("呼吸调节", wrap, { onBack:()=>{ clearInterval(iv); popSheet(); }});
+}
+
+/* 能量转移 */
+function openMove(){
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <p class="lede">目标不是锻炼，是把交感神经的兴奋导出去，让内啡肽顶上来替代多巴胺。选一个，做完回来。</p>`;
+  [["20 个俯卧撑","做不了就做跪姿，或者做到力竭"],
+   ["30 秒原地冲刺","高抬腿也可以，要真的喘起来"],
+   ["50 个深蹲","慢下快起，感受大腿发热"],
+   ["冷水洗脸 30 秒","最快的物理开关，通过迷走神经起效"]].forEach(([t,d])=>{
+    const c = el("div","card");
+    c.innerHTML = `<b style="font-size:14.5px">${esc(t)}</b><p class="small" style="margin:4px 0 0">${esc(d)}</p>`;
+    wrap.appendChild(c);
+  });
+  const b = el("button","btn block","我做完了");
+  b.style.marginTop = "16px";
+  b.onclick = ()=>{ addCoins(25,"完成能量转移"); popSheet(); toast("感受一下 💪 强度是不是降了"); };
+  wrap.appendChild(b);
+  openSheet("能量转移", wrap);
+}
+
+/* 教练对话 */
+function openCoach(){
+  const wrap = el("div");
+  const chat = el("div","chat");
+  wrap.appendChild(chat);
+  wrap.appendChild(el("div","disclaimer","这是一套基于 CBT 原则编写的引导式对话脚本，不是真人也不是生成式 AI，无法处理危机情况。如有自伤念头，请立即联系专业心理援助或前往急诊。"));
+
+  function say(cls, text){
+    const m = el("div","msg " + cls);
+    m.innerHTML = text.replace(/\n/g,"<br>");
+    chat.appendChild(m);
+    wrap.scrollIntoView && $("#sheetBody").scrollTo({ top: 99999, behavior:"smooth" });
+  }
+  function go(key){
+    const node = COACH[key];
+    if(!node) return;
+    setTimeout(()=>{
+      say("bot", node.bot);
+      if(node.opts && node.opts.length){
+        const box = el("div","chat-opts");
+        node.opts.forEach(o=>{
+          const b = el("button","chat-opt", esc(o.t));
+          b.onclick = ()=>{
+            box.remove();
+            say("me", esc(o.t));
+            if(o.go === "ground_jump"){ openGrounding(); return; }
+            if(o.go === "go_practice"){ popSheet(); switchView("energy"); return; }
+            if(o.go === "go_restart"){ popSheet(); openRestart(); return; }
+            if(o.go === "go_lock"){ offerLock(); return; }
+            go(o.go);
+          };
+          box.appendChild(b);
+        });
+        chat.appendChild(box);
+        $("#sheetBody").scrollTo({ top: 99999, behavior:"smooth" });
+      } else {
+        addCoins(15,"完成一次对话");
+      }
+    }, 380);
+  }
+  openSheet("康复教练", wrap);
+  go("start");
+}
+
+/* 延迟锁 */
+function offerLock(){
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div style="text-align:center;font-size:48px;margin:6px 0 14px">⏳</div>
+    <h2 class="h-display" style="text-align:center">先等 15 分钟</h2>
+    <p class="lede" style="text-align:center;margin-left:auto;margin-right:auto">你不需要承诺「永远不」，只承诺「现在不」。这个承诺容易得多。</p>
+    <div class="card">
+      <p class="small" style="margin:0;color:var(--text-2);line-height:1.75">15 分钟后这里会解锁，那时你可以自己决定。绝大多数人到不了那一刻——不是因为忍住了，是因为峰值过去后，这件事就没那么重要了。</p>
+    </div>`;
+  const foot = el("div");
+  const b = el("button","btn block","启动 15 分钟延迟锁");
+  b.onclick = ()=>{
+    S.lockUntil = Date.now() + 15*60*1000;
+    save();
+    showLock();
+  };
+  const b2 = el("button","btn ghost block","返回急救工具");
+  b2.style.marginTop = "8px";
+  b2.onclick = ()=> popSheet();
+  foot.appendChild(b); foot.appendChild(b2);
+  openSheet("延迟锁", wrap, { foot });
+}
+function showLock(){
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div style="text-align:center;font-size:52px;margin:20px 0 14px">🔒</div>
+    <div class="sos-timer" id="lockT">15:00</div>
+    <p class="sos-quote" style="margin-top:16px">这段时间里，你什么都不用做。<br>让它自己过去。</p>`;
+  const b = el("button","btn ghost block","做点别的 · 回到首页");
+  b.style.marginTop = "10px";
+  b.onclick = ()=>{ closeSheet(); switchView("home"); };
+  wrap.appendChild(b);
+  openSheet("延迟锁生效中", wrap, { noBack:true, onClose:()=> closeSheet() });
+  const t = wrap.querySelector("#lockT");
+  const iv = setInterval(()=>{
+    if(!document.body.contains(t)){ clearInterval(iv); return; }
+    const left = Math.round((S.lockUntil - Date.now())/1000);
+    if(left <= 0){
+      clearInterval(iv);
+      t.textContent = "已解锁";
+      S.lockUntil = 0; save();
+      toast("15 分钟过去了 🌊 现在感觉如何？");
+      return;
+    }
+    t.textContent = mmss(left);
+  }, 1000);
+}
+
+/* ============================================================
+   视图：伙伴
+   ============================================================ */
+function renderPet(){
+  const v = $("#view-pet");
+  v.innerHTML = "";
+  const st = petStage();
+  const p = S.pet;
+  const d = cleanDays();
+  const nextSt = PET_STAGES.find(s => s.from > d);
+  const low = p.mood < 35 || p.hunger < 30;
+
+  const stage = el("div","card");
+  stage.style.textAlign = "center";
+  stage.innerHTML = `
+    <div class="pet-stage">
+      <div class="pet-ring"></div>
+      <div class="pet-glyph${low ? " sad" : ""}">${st.glyph}</div>
+    </div>
+    <div style="font-family:var(--font-display);font-size:19px;font-weight:600;margin-top:6px">
+      ${esc(p.name || "尚未命名")}
+    </div>
+    <div class="small" style="margin-bottom:12px">${esc(st.stage)} · Day ${d}</div>
+    <p class="small" style="color:var(--text-2);margin:0 auto;max-width:26em">${esc(st.desc)}</p>`;
+  v.appendChild(stage);
+
+  if(!p.name){
+    const nc = el("div","card");
+    nc.innerHTML = `<b style="font-size:14px">给它起个名字</b><p class="small" style="margin:4px 0 10px">名字会让它从「一个功能」变成「一个牵挂」。</p>`;
+    const inp = el("input");
+    inp.type = "text"; inp.placeholder = "比如：苍穹";
+    inp.maxLength = 12;
+    inp.setAttribute("aria-label","伙伴名字");
+    inp.style.cssText = "width:100%;padding:11px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px";
+    nc.appendChild(inp);
+    const b = el("button","btn block","确定");
+    b.style.marginTop = "9px";
+    b.onclick = ()=>{
+      const n = inp.value.trim();
+      if(!n){ toast("给它起个名字吧"); return; }
+      p.name = n; save(); renderPet();
+      toast("「" + n + "」记住你了");
+    };
+    nc.appendChild(b);
+    v.appendChild(nc);
+  }
+
+  // 状态条
+  const sc = el("div","card");
+  sc.innerHTML = `
+    <div class="stat-line" style="margin-bottom:9px"><b>饥饿度</b><div class="bar ${p.hunger<30?"crit":""}"><i style="width:${p.hunger}%"></i></div><span>${p.hunger}%</span></div>
+    <div class="stat-line" style="margin-bottom:9px"><b>心情值</b><div class="bar ${p.mood<35?"crit":""}"><i style="width:${p.mood}%"></i></div><span>${p.mood}%</span></div>
+    <div class="stat-line"><b>能量值</b><div class="bar gold"><i style="width:${p.energy}%"></i></div><span>${p.energy}%</span></div>`;
+  if(low){
+    const w = el("div","alert crit");
+    w.style.marginTop = "12px";
+    w.innerHTML = `<div class="alert-title">它有点萎靡</div><p>完成今日任务能喂养它。它的状态跟着你的状态走——这不是拟人化的把戏，是同一件事的两种显示方式。</p>`;
+    sc.appendChild(w);
+  }
+  v.appendChild(sc);
+
+  // 互动
+  const ac = el("div","card");
+  ac.innerHTML = `<b style="font-size:14px">今日互动</b>`;
+  const acts = [
+    { t:"喂食", g:"🍖", cost:20, eff:()=>{ p.hunger = Math.min(100,p.hunger+30); }, note:"+30 饥饿度" },
+    { t:"玩耍", g:"🎾", cost:10, eff:()=>{ p.mood = Math.min(100,p.mood+20); }, note:"+20 心情" },
+    { t:"训练", g:"🎯", cost:15, eff:()=>{ p.energy = Math.min(100,p.energy+20); }, note:"+20 能量" }
+  ];
+  const row = el("div","grid-3");
+  row.style.marginTop = "11px";
+  acts.forEach(a=>{
+    const b = el("button","btn ghost");
+    b.style.cssText = "flex-direction:column;gap:3px;padding:13px 6px";
+    b.innerHTML = `<span style="font-size:20px">${a.g}</span><span style="font-size:13px;font-weight:650">${a.t}</span><span class="small" style="font-size:10.5px">◈ ${a.cost}</span>`;
+    b.onclick = ()=>{
+      if(S.coins < a.cost){ toast("金币不够 · 完成任务可以赚"); return; }
+      S.coins -= a.cost; a.eff(); save();
+      $("#coinChip").textContent = "◈ " + S.coins;
+      renderPet();
+      toast(a.note);
+    };
+    row.appendChild(b);
+  });
+  ac.appendChild(row);
+  v.appendChild(ac);
+
+  // 进化进度
+  if(nextSt){
+    const pc = el("div","card");
+    const prevFrom = st.from;
+    const pct = Math.round((d - prevFrom) / (nextSt.from - prevFrom) * 100);
+    pc.innerHTML = `
+      <div class="row-between" style="margin-bottom:9px">
+        <span style="font-size:13.5px">下一次进化　<b>${nextSt.glyph} ${esc(nextSt.stage)}</b></span>
+        <span class="num small">Day ${nextSt.from}</span>
+      </div>
+      <div class="bar"><i style="width:${Math.max(0,Math.min(100,pct))}%"></i></div>
+      <p class="small" style="margin:8px 0 0">还有 ${nextSt.from - d} 天</p>`;
+    v.appendChild(pc);
+  }
+
+  // 成长阶段全览
+  v.appendChild(el("h3","h-sec","成长阶段"));
+  PET_STAGES.filter(s => s.from > 0).forEach(s=>{
+    const on = d >= s.from;
+    const b = el("div","item");
+    b.style.cursor = "default";
+    b.innerHTML = `<span class="item-glyph" style="${on?"":"filter:grayscale(1);opacity:.45"}">${s.glyph}</span>
+      <span class="item-main"><span class="item-title">${esc(s.stage)}${on?' <span class="pill ok">已达成</span>':""}</span>
+      <span class="item-sub">Day ${s.from}${s.to>1e8?"+":"–"+s.to}</span></span>`;
+    v.appendChild(b);
+  });
+}
+
+/* ============================================================
+   视图：科普
+   ============================================================ */
+function renderLearn(){
+  const v = $("#view-learn");
+  v.innerHTML = `<p class="eyebrow">不恐吓，不贩卖焦虑</p>
+    <h2 class="h-display">危害认知</h2>
+    <p class="lede">靠恐惧驱动的改变通常撑不过几周。这里只讲能站住的部分，也会明确指出哪些流行说法被夸大了。</p>`;
+  const cats = [...new Set(ARTICLES.map(a => a.cat))];
+  cats.forEach(cat=>{
+    v.appendChild(el("h3","h-sec",cat));
+    ARTICLES.filter(a => a.cat === cat).forEach(a=>{
+      const read = S.read.includes(a.id);
+      const b = el("button","item");
+      b.innerHTML = `<span class="item-glyph">${a.glyph}</span>
+        <span class="item-main"><span class="item-title">${esc(a.title)}${read?' <span class="pill ok">已读</span>':""}</span>
+        <span class="item-sub">${a.min} 分钟阅读</span></span>
+        <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+      b.onclick = ()=> openArticle(a);
+      v.appendChild(b);
+    });
+  });
+}
+function openArticle(a){
+  const wrap = el("div","article");
+  wrap.innerHTML = `<p class="eyebrow">${esc(a.cat)} · ${a.min} 分钟</p>
+    <h2 class="h-display">${esc(a.title)}</h2>` + a.body;
+  const foot = el("div");
+  const already = S.read.includes(a.id);
+  const b = el("button","btn block", already ? "已读完" : "读完了　+20");
+  b.disabled = already;
+  b.onclick = ()=>{
+    if(!S.read.includes(a.id)) S.read.push(a.id);
+    markTask("read:"+a.id, 20);
+    save(); closeSheet(); renderAll();
+  };
+  foot.appendChild(b);
+  openSheet("科普", wrap, { foot });
+}
+
+/* ============================================================
+   视图：我
+   ============================================================ */
+function renderMe(){
+  const v = $("#view-me");
+  v.innerHTML = "";
+  const d = cleanDays();
+
+  // 数据总览
+  const ov = el("div","grid-2");
+  const cells = [
+    ["当前天数", d],
+    ["最长记录", Math.max(S.bestStreak, d)],
+    ["累计清醒", S.totalClean + d],
+    ["扛过冲动", S.urges.filter(u => u.resolved).length]
+  ];
+  cells.forEach(([l,n])=>{
+    const c = el("div","card");
+    c.innerHTML = `<div class="small" style="margin-bottom:2px">${l}</div>
+      <div class="num" style="font-size:27px;font-weight:700;line-height:1.1">${n}</div>`;
+    ov.appendChild(c);
+  });
+  v.appendChild(ov);
+
+  // 本周打卡
+  v.appendChild(el("h3","h-sec","本周打卡"));
+  const strip = el("div","card");
+  const cellsRow = el("div","week-strip");
+  const names = ["一","二","三","四","五","六","日"];
+  const now = new Date();
+  const dow = (now.getDay() + 6) % 7;
+  for(let i = 0; i < 7; i++){
+    const ds = shiftDays(today(), i - dow);
+    const isFuture = daysBetween(today(), ds) > 0;
+    const t = S.tasks[ds];
+    const hit = t && Object.keys(t).filter(k => k !== "__perfect").length > 0;
+    const beforeStart = daysBetween(S.startDate, ds) < 0;
+    const cls = isFuture || beforeStart ? "future" : hit ? "hit" : "miss";
+    const cell = el("div","week-cell " + cls, names[i]);
+    cellsRow.appendChild(cell);
+  }
+  strip.appendChild(cellsRow);
+  strip.appendChild(el("p","small","绿色＝有打卡记录，红色＝当天没有任何记录。"));
+  v.appendChild(strip);
+
+  // 练习趋势
+  const last14 = [];
+  for(let i = 13; i >= 0; i--){
+    const ds = shiftDays(today(), -i);
+    const t = S.tasks[ds] || {};
+    last14.push(Object.keys(t).filter(k => k !== "__perfect").length);
+  }
+  if(last14.some(x => x > 0)){
+    v.appendChild(el("h3","h-sec","近 14 天完成量"));
+    const ch = el("div","card");
+    ch.appendChild(sparkline(last14));
+    v.appendChild(ch);
+  }
+
+  // 勋章墙
+  v.appendChild(el("h3","h-sec","里程碑"));
+  const mw = el("div","card");
+  MILESTONES.forEach((m,i)=>{
+    const reached = d >= m.d;
+    const isNext = !reached && MILESTONES.slice(0,i).every(x => d >= x.d);
+    const row = el("div","mile" + (reached ? " reached" : isNext ? " next" : ""));
+    row.innerHTML = `<div class="mile-dot">${reached ? m.glyph : "·"}</div>
+      <div class="mile-main">
+        <div class="mile-day">DAY ${m.d}</div>
+        <div class="mile-name">${esc(m.name)}</div>
+        <div class="mile-reward">${esc(m.reward)}　<span class="num" style="color:var(--gold)">+${m.coin}</span></div>
+      </div>`;
+    mw.appendChild(row);
+  });
+  v.appendChild(mw);
+
+  // 商城
+  v.appendChild(el("h3","h-sec","商城"));
+  SHOP.forEach(s=>{
+    const owned = S.skins.includes(s.id);
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${s.glyph}</span>
+      <span class="item-main"><span class="item-title">${esc(s.name)}${owned?' <span class="pill ok">已拥有</span>':""}</span>
+      <span class="item-sub">${esc(s.desc)}</span></span>
+      <span class="task-coin">◈ ${s.price}</span>`;
+    b.onclick = ()=> buy(s);
+    v.appendChild(b);
+  });
+
+  // 设置
+  v.appendChild(el("h3","h-sec","设置"));
+  const rows = [
+    { t:"重看诊断报告", s:"包含体质、诱因与方案", act:()=> showReport(false) },
+    { t:"每周复评", s:"7 天一次，用于调整方案", act:openReeval },
+    { t:"重新开始", s:"复发之后走这里 · 不会有羞辱", act:openRestart, danger:true },
+    { t:"清除全部数据", s:"不可恢复", act:wipe, danger:true }
+  ];
+  rows.forEach(r=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-main"><span class="item-title" style="${r.danger?"color:var(--danger)":""}">${esc(r.t)}</span>
+      <span class="item-sub">${esc(r.s)}</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = r.act;
+    v.appendChild(b);
+  });
+
+  v.appendChild(el("div","disclaimer","Reborn 是自助工具，不提供医疗服务。所有数据仅保存在本设备浏览器中，不上传、不联网。如遇严重情绪危机，请立即联系当地心理援助热线或前往医院急诊。"));
+}
+
+function sparkline(data){
+  const w = 300, h = 66, max = Math.max(...data, 1);
+  const pts = data.map((v,i) => [i/(data.length-1)*w, h - (v/max)*(h-8) - 4]);
+  const line = pts.map((p,i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const area = line + ` L${w} ${h} L0 ${h} Z`;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("class","spark");
+  svg.setAttribute("viewBox","0 0 " + w + " " + h);
+  svg.setAttribute("preserveAspectRatio","none");
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","近 14 天每日完成任务数趋势");
+  svg.innerHTML = `
+    <line class="grid-line" x1="0" y1="${h/2}" x2="${w}" y2="${h/2}"></line>
+    <path class="area" d="${area}"></path>
+    <path class="line" d="${line}"></path>
+    <circle class="end-dot" cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="3.4"></circle>`;
+  return svg;
+}
+
+function buy(s){
+  if(S.skins.includes(s.id)){ toast("已经拥有了"); return; }
+  if(S.coins < s.price){ toast("还差 " + (s.price - S.coins) + " 金币"); return; }
+  S.coins -= s.price;
+  if(s.kind === "box"){
+    const roll = Math.random();
+    if(roll < 0.55){ const c = 30 + Math.floor(Math.random()*90); S.coins += c; toast("开出 " + c + " 金币", true); }
+    else if(roll < 0.85){ toast("开出皮肤碎片 ×2"); }
+    else {
+      const locked = SHOP.filter(x => x.kind === "skin" && !S.skins.includes(x.id));
+      if(locked.length){ S.skins.push(locked[0].id); toast("稀有！开出「" + locked[0].name + "」", true); }
+      else { S.coins += 120; toast("开出 120 金币", true); }
+    }
+  } else {
+    S.skins.push(s.id);
+    toast("已获得「" + s.name + "」", true);
+  }
+  save();
+  $("#coinChip").textContent = "◈ " + S.coins;
+  renderMe();
+}
+
+/* 每周复评 */
+function openReeval(){
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="lede">和入职时问的是同样的问题。对比两次的结果，你能看到变化发生在哪里。</p>`;
+  const keys = [["fatigue","疲劳程度"],["focus","专注力"],["anxiety","焦虑程度"],["low","情绪低落"]];
+  const vals = {};
+  const base = S.report;
+  keys.forEach(([k,l])=>{
+    const start = base.body[k] != null ? base.body[k] : base.mind[k];
+    vals[k] = start;
+    const row = el("div","slider-row");
+    row.innerHTML = `<label>${l}<span class="num" data-out>${start}</span></label>`;
+    const inp = el("input");
+    inp.type = "range"; inp.min = "1"; inp.max = "10"; inp.value = start;
+    inp.setAttribute("aria-label", l);
+    const out = row.querySelector("[data-out]");
+    inp.oninput = ()=>{ vals[k] = +inp.value; out.textContent = inp.value; };
+    row.appendChild(inp);
+    row.appendChild(el("div","slider-scale","<span>好</span><span>差</span>"));
+    wrap.appendChild(row);
+  });
+  const foot = el("div");
+  const b = el("button","btn block","提交复评");
+  b.onclick = ()=>{
+    S.ratings.push({ d:today(), v:vals });
+    addCoins(40,"完成每周复评");
+    save();
+    // 对比
+    const diffs = keys.map(([k,l])=>{
+      const start = base.body[k] != null ? base.body[k] : base.mind[k];
+      return { l, delta: vals[k] - start };
+    });
+    const better = diffs.filter(x => x.delta < 0);
+    closeSheet();
+    celebrate("📈","复评完成",
+      better.length
+        ? better.map(x => x.l + "改善 " + Math.abs(x.delta) + " 分").join("；") + "。这些不是错觉，是记录。"
+        : "这次没有明显变化——很正常，身体的恢复不是线性的。继续做下去，两周后再看。");
+  };
+  foot.appendChild(b);
+  openSheet("每周复评", wrap, { foot });
+}
+
+/* 重新开始（relapse） */
+function openRestart(){
+  const answers = {};
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div style="text-align:center;font-size:46px;margin:4px 0 12px">🔁</div>
+    <h2 class="h-display" style="text-align:center">这不是终点</h2>
+    <p class="lede" style="text-align:center;margin-left:auto;margin-right:auto">
+      天数是计分板，不是资产。它归零的时候，你学到的东西一样都没丢。<br>
+      现在只做一件事：复盘，不自责。</p>`;
+  const qs = [
+    { k:"scene", t:"前 2 小时你在做什么？", o:["在床上刷手机","独自在家","刚下班/放学","熬夜到很晚","出门在外","记不清了"] },
+    { k:"emotion", t:"当时的情绪最接近哪一种？", o:["无聊","焦虑或压力大","孤独","累到极点","刚完成任务想放松","说不清"] },
+    { k:"weak", t:"哪一个环节如果不同，结果就会不同？", o:["手机不在身边","早点睡","出门或找人说话","当时按了急救按钮","不确定"] }
+  ];
+  qs.forEach(q=>{
+    const c = el("div","card");
+    c.innerHTML = `<b style="font-size:14.5px">${esc(q.t)}</b>`;
+    const box = el("div","opts");
+    box.style.marginTop = "10px";
+    q.o.forEach(o=>{
+      const b = el("button","opt", `<span class="opt-mark"><i></i></span><span>${esc(o)}</span>`);
+      b.setAttribute("aria-pressed","false");
+      b.onclick = ()=>{
+        answers[q.k] = o;
+        box.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed","false"));
+        b.setAttribute("aria-pressed","true");
+      };
+      box.appendChild(b);
+    });
+    c.appendChild(box);
+    wrap.appendChild(c);
+  });
+  const foot = el("div");
+  const b = el("button","btn block","记录并重新开始");
+  b.onclick = ()=>{
+    const d = cleanDays();
+    S.bestStreak = Math.max(S.bestStreak, d);
+    S.totalClean += d;
+    S.relapses.push({ d:today(), days:d, why:answers });
+    S.startDate = today();
+    S.tasks[today()] = {};
+    S.pet.mood = Math.max(20, S.pet.mood - 15);
+    save();
+    closeSheet(); renderAll();
+    const fix = answers.weak && answers.weak !== "不确定"
+      ? "下一次的关键环节：" + answers.weak + "。已经记在你的诱因图谱里。"
+      : "这次没找到明确的薄弱环节也没关系，多记几次就看出模式了。";
+    celebrate("🌱","第 1 天，重新开始",
+      "上一轮你坚持了 " + d + " 天，累计已经清醒 " + S.totalClean + " 天——这个数字永远不会归零。" + fix);
+  };
+  const b2 = el("button","btn ghost block","我按错了，返回");
+  b2.style.marginTop = "8px";
+  b2.onclick = closeSheet;
+  foot.appendChild(b); foot.appendChild(b2);
+  openSheet("重新开始", wrap, { foot });
+}
+
+function wipe(){
+  if(!confirm("这会清除全部记录，包括天数、金币和测评结果。不可恢复。确定吗？")) return;
+  if(!confirm("再确认一次：真的要清除吗？")) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  S = blankState();
+  closeSheet();
+  location.reload();
+}
+
+/* ============================================================
+   导航与初始化
+   ============================================================ */
+let currentView = "home";
+function switchView(name){
+  currentView = name;
+  $$(".main").forEach(m => m.classList.remove("active"));
+  $("#view-" + name).classList.add("active");
+  $$(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === name)));
+  $("#coinChip").textContent = "◈ " + S.coins;
+  renderView(name);
+  window.scrollTo({ top:0 });
+}
+function renderView(name){
+  ({ home:renderHome, energy:renderEnergy, pet:renderPet, learn:renderLearn, me:renderMe })[name]();
+}
+function renderAll(){
+  $("#coinChip").textContent = "◈ " + S.coins;
+  renderView(currentView);
+}
+
+$$(".tab").forEach(t => t.onclick = ()=> switchView(t.dataset.view));
+$("#sosBtn").onclick = ()=> openSOS();
+
+/* 主题切换 */
+function applyTheme(){
+  if(S.theme) document.documentElement.setAttribute("data-theme", S.theme);
+  else document.documentElement.removeAttribute("data-theme");
+}
+$("#themeBtn").onclick = ()=>{
+  const isDark = S.theme
+    ? S.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  S.theme = isDark ? "light" : "dark";
+  save(); applyTheme();
+};
+
+/* 键盘 Esc 关闭面板 */
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape" && $("#sheet").classList.contains("open")){
+    const cur = sheetStack[sheetStack.length-1];
+    if(cur && cur.opts.noBack) return;
+    popSheet();
+  }
+});
+
+/* 窗口变化时重设彩带画布 */
+addEventListener("resize", ()=>{
+  const c = $("#confetti");
+  if(c.classList.contains("on")){ c.width = innerWidth; c.height = innerHeight; }
+});
+
+/* 跨天自动刷新 */
+let lastSeenDay = today();
+setInterval(()=>{
+  if(today() !== lastSeenDay){
+    lastSeenDay = today();
+    dailyTick();
+    renderAll();
+    toast("新的一天 · 第 " + cleanDays() + " 天");
+  }
+}, 60000);
+
+/* 启动 */
+applyTheme();
+if(!S.onboarded){
+  switchView("home");
+  $("#view-home").innerHTML = `
+    <div style="padding:34px 4px 10px">
+      <p class="eyebrow">系统性成瘾康复</p>
+      <h2 class="h-display" style="font-size:32px">不是让你忍住，<br>是让你不想。</h2>
+      <p class="lede">市面上的戒色应用只做一件事：拦截和监控。堵而不疏，压得越久弹得越狠。</p>
+      <p class="lede">Reborn 走另一条路——先把亏空的能量补回来，再处理诱因，让冲动的相对吸引力自然下降。判断标准很简单：<b style="color:var(--text)">如果你每天都觉得在忍，说明补的部分没跟上。</b></p>
+      <div class="card" style="margin-top:20px">
+        <div style="font-family:var(--font-display);font-size:15px;font-weight:600;margin-bottom:12px">康复飞轮</div>
+        ${[["认知重塑","知道危害，看清多巴胺的话术"],
+           ["能量补充","功法、晒太阳、膳食、睡眠"],
+           ["冲动脱敏","诱因管理 + 急救工具"],
+           ["习惯替代","把空白时间填满"],
+           ["成就巩固","打卡、里程碑、伙伴成长"]]
+          .map((x,i) => `<div class="row" style="align-items:flex-start;gap:11px;padding:7px 0">
+            <span class="num" style="color:var(--accent);font-weight:700;flex:none;width:20px">${i+1}</span>
+            <div><b style="font-size:14px">${x[0]}</b><div class="small">${x[1]}</div></div></div>`).join("")}
+      </div>
+    </div>`;
+  const b = el("button","btn block","开始个人诊断　·　约 5 分钟");
+  b.style.marginTop = "18px";
+  b.onclick = startQuiz;
+  $("#view-home").appendChild(b);
+  $("#sosBtn").classList.add("hidden");
+  $(".tabbar").style.display = "none";
+} else {
+  dailyTick();
+  switchView("home");
+}
+</script>
