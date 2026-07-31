@@ -1,14 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseRoute, emptyParams, isSafeKey } from '../src/lib/route.js';
+import { parseRoute, emptyParams, paramInt } from '../src/lib/route.js';
 
 const KNOWN = ['home', 'knowledge', 'search', 'guide'];
 
 test('解析路由 id 与查询参数', () => {
-  assert.deepEqual(parseRoute('#knowledge?a=first72h', KNOWN), { id: 'knowledge', params: params({ a: 'first72h' }) });
+  const { id, params } = parseRoute('#knowledge?a=first72h', KNOWN);
+  assert.equal(id, 'knowledge');
+  assert.equal(params.get('a'), 'first72h');
   assert.equal(parseRoute('#home', KNOWN).id, 'home');
-  assert.deepEqual({ ...parseRoute('#home', KNOWN).params }, {});
+  assert.equal(parseRoute('#home', KNOWN).params.size, 0);
 });
 
 test('未知路由回退到 fallback', () => {
@@ -20,49 +22,47 @@ test('未知路由回退到 fallback', () => {
 
 test('多个参数与百分号编码都能正确解码', () => {
   const { params } = parseRoute('#search?q=%E6%B4%8B%E8%91%B1&kind=food', KNOWN);
-  assert.equal(params.q, '洋葱');
-  assert.equal(params.kind, 'food');
+  assert.equal(params.get('q'), '洋葱');
+  assert.equal(params.get('kind'), 'food');
 });
 
 test('值里包含 = 或 & 编码时不会截断', () => {
   const { params } = parseRoute('#search?q=' + encodeURIComponent('a=b&c'), KNOWN);
-  assert.equal(params.q, 'a=b&c');
+  assert.equal(params.get('q'), 'a=b&c');
 });
 
 // ── 安全性：地址栏是完全由用户控制的输入 ──────────────────────
 
-test('参数容器没有原型，无法被污染', () => {
+test('参数用 Map 承载，不做任何动态属性写入', () => {
   const { params } = parseRoute('#home?a=1', KNOWN);
-  assert.equal(Object.getPrototypeOf(params), null);
-  assert.equal(Object.getPrototypeOf(emptyParams()), null);
+  assert.ok(params instanceof Map);
+  assert.ok(emptyParams() instanceof Map);
 });
 
-test('拒绝写入 __proto__ / constructor / prototype 等危险键', () => {
-  const { params } = parseRoute('#home?__proto__=polluted&constructor=x&prototype=y&safe=ok', KNOWN);
-  assert.equal(params.safe, 'ok');
-  assert.equal(params.__proto__, undefined);
-  assert.equal(params.constructor, undefined);
-  assert.equal(params.prototype, undefined);
+test('危险键名只是普通的 Map 键，不会碰到原型', () => {
+  const { params } = parseRoute('#home?__proto__=polluted&constructor=x&safe=ok', KNOWN);
+  assert.equal(params.get('safe'), 'ok');
+  assert.equal(params.get('__proto__'), 'polluted'); // 作为数据存在，但只是 Map 的键
+  assert.equal({}.polluted, undefined);
+  assert.equal(Object.prototype.polluted, undefined);
 });
 
 test('解析恶意 hash 之后，全局原型未被污染', () => {
   parseRoute('#home?__proto__=polluted', KNOWN);
   parseRoute('#home?__proto__[polluted]=1', KNOWN);
+  parseRoute('#home?constructor[prototype][polluted]=1', KNOWN);
   assert.equal({}.polluted, undefined);
   assert.equal(Object.prototype.polluted, undefined);
-  assert.equal(({}).__proto__, Object.prototype);
+  assert.equal(Object.getPrototypeOf({}), Object.prototype);
+  assert.equal(new Map().polluted, undefined);
 });
 
-test('isSafeKey 拦截危险键名', () => {
-  assert.equal(isSafeKey('species'), true);
-  assert.equal(isSafeKey('__proto__'), false);
-  assert.equal(isSafeKey('constructor'), false);
-  assert.equal(isSafeKey('prototype'), false);
-  assert.equal(isSafeKey(''), false);
-  assert.equal(isSafeKey(null), false);
+test('paramInt 只接受有效数字', () => {
+  const { params } = parseRoute('#guide?n_a=2&n_b=abc&n_c=&n_d=0', KNOWN);
+  assert.equal(paramInt(params, 'n_a'), 2);
+  assert.equal(paramInt(params, 'n_b'), null);
+  assert.equal(paramInt(params, 'n_c'), null);
+  assert.equal(paramInt(params, 'n_d'), 0);
+  assert.equal(paramInt(params, 'missing'), null);
+  assert.equal(paramInt(null, 'x'), null);
 });
-
-/** 构造用于比较的无原型对象。 */
-function params(obj) {
-  return Object.assign(Object.create(null), obj);
-}

@@ -38,7 +38,8 @@ export default {
   title: '健康档案',
 
   render(ctx) {
-    const tab = TABS.some((t) => t.id === ctx.params.t) ? ctx.params.t : 'meds';
+    const requested = ctx.params.get('t');
+    const tab = TABS.some((t) => t.id === requested) ? requested : 'meds';
     const pet = ctx.pet;
 
     return h`

@@ -9,7 +9,7 @@ export default {
   title: '搜索',
 
   render(ctx) {
-    const q = ctx.params.q ?? '';
+    const q = ctx.params.get('q') ?? '';
     const sp = SPECIES[ctx.pet.species];
     const results = searchAll(q, ctx.pet.species);
     const grouped = new Map();

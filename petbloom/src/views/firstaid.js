@@ -13,7 +13,7 @@ export default {
   title: '急救',
 
   render(ctx) {
-    const focus = ctx.params.c;
+    const focus = ctx.params.get('c');
     const cards = focus ? FIRST_AID.filter((f) => f.id === focus) : FIRST_AID;
 
     return h`

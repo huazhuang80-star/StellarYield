@@ -7,9 +7,9 @@
 
 import { h, raw, esc, card, linkRow, linkGroup } from '../ui.js';
 import { GUIDES, guideById } from '../data/guide.js';
-import { emptyParams, isSafeKey } from '../lib/route.js';
+import { paramInt } from '../lib/route.js';
 
-/** 走一遍决策树：answers 是节点 id 到所选项索引的映射。 */
+/** 走一遍决策树：answers 是 Map<节点 id, 所选项索引>。 */
 function walk(guide, answers) {
   const path = [];
   let nodeId = guide.start;
@@ -19,7 +19,7 @@ function walk(guide, answers) {
   while (nodeId && guard++ < 20) {
     const node = guide.nodes[nodeId];
     if (!node) break;
-    const picked = answers[nodeId];
+    const picked = answers.get(nodeId);
     path.push({ id: nodeId, node, picked });
     if (picked == null) break;
     const option = node.options[picked];
@@ -38,7 +38,7 @@ export default {
   title: '养护向导',
 
   render(ctx) {
-    const guide = guideById(ctx.params.g);
+    const guide = guideById(ctx.params.get('g'));
     if (!guide) {
       return h`
         <h1 class="page-title">🧭 养护向导</h1>
@@ -55,15 +55,17 @@ export default {
         )}`;
     }
 
-    // 答案的键来自地址栏，同样用无原型容器承接
-    const answers = emptyParams();
-    for (const [k, v] of Object.entries(ctx.params)) {
-      if (!k.startsWith('n_')) continue;
-      const node = k.slice(2);
-      if (isSafeKey(node) && Object.hasOwn(guide.nodes, node)) answers[node] = Number(v);
+    // 答案的键来自地址栏，用 Map 承接（不做动态属性写入），
+    // 并且只接受这个向导里真实存在的节点名
+    const answers = new Map();
+    for (const key of ctx.params.keys()) {
+      if (!key.startsWith('n_')) continue;
+      const node = key.slice(2);
+      const value = paramInt(ctx.params, key);
+      if (value !== null && Object.hasOwn(guide.nodes, node)) answers.set(node, value);
     }
     const { path, result } = walk(guide, answers);
-    const baseParams = Object.entries(answers).map(([k, v]) => `n_${k}=${v}`);
+    const baseParams = [...answers].map(([k, v]) => `n_${k}=${v}`);
 
     return h`
       <a class="back-link" href="#guide">‹ 全部向导</a>

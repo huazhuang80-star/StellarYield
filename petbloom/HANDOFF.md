@@ -132,17 +132,24 @@ petbloom/
 
 ## 七点五、安全相关（已修，别改回去）
 
-`src/lib/route.js` 是专门为"地址栏是完全不可信输入"这件事存在的：
-- 参数容器用 `Object.create(null)`，没有原型也就没有可污染的原型；
-- 显式拒绝 `__proto__` / `constructor` / `prototype` 三个键名；
-- 用 `URLSearchParams` 而不是手工 `split`（顺带修掉值里含编码 `=`/`&` 会被截断的问题）。
+`src/lib/route.js` 是专门为"地址栏是完全不可信输入"这件事存在的。
 
-`views/guide.js` 把地址栏参数键转成决策树节点 id、`lib/store.js` 的集合 `kind`
-同样做了白名单校验。`tests/route.test.js` 有 8 个针对性用例守着这条线，
-其中一条专门断言"解析恶意 hash 之后全局原型未被污染"。
+**路由参数一律用 `Map`，不用普通对象。** 把远程可控的字符串当属性名写进对象，
+本身就是一类漏洞；用 Map 之后这类写入根本不存在，也就不需要依赖"我有没有把
+危险键名列全"这种容易漏的判断。代价只是取值写成 `ctx.params.get('a')`。
 
-这一处是 CodeQL 报的高危（remote property injection），已在 `a7a389b` 修复并在
-PR #6 回复。**后续如果重构路由，请保留无原型容器与键名白名单。**
+同类约定：
+- `views/guide.js` 的答案集合也是 Map，且只接受该向导里真实存在的节点名
+  （`Object.hasOwn(guide.nodes, node)` —— 固定白名单）。
+- `lib/store.js` 的集合 `kind` 按 `COLLECTIONS` 白名单校验。
+
+`tests/route.test.js` 有 8 个用例守着这条线，其中一条专门断言"解析恶意 hash
+之后全局原型未被污染"。
+
+这一处是 CodeQL 报的高危（remote property injection）。第一版修复用的是
+无原型对象 + 键名黑名单，**CodeQL 不认**（它的判定是：只要属性名来自远程输入
+的写入，除非键名来自固定白名单，否则一律算问题），第二版换成 Map 才彻底消除
+这个 sink。**后续重构路由请不要改回"对象 + 过滤键名"的写法。**
 
 ## 八、当前遗留问题
 

@@ -9,12 +9,12 @@ export default {
   title: '知识库',
 
   render(ctx) {
-    const articleId = ctx.params.a;
+    const articleId = ctx.params.get('a');
     if (articleId) return renderArticle(articleId, ctx);
 
     const sp = SPECIES[ctx.pet.species];
     const available = articlesFor(ctx.pet.species);
-    const activeCat = ctx.params.c;
+    const activeCat = ctx.params.get('c');
     const shown = activeCat ? available.filter((a) => a.cat === activeCat) : available;
 
     return h`
