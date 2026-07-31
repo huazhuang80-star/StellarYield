@@ -8,9 +8,10 @@ import { levelOf } from '../lib/progress'
 import { SLOT_LABELS, buildDailyTasks } from '../lib/tasks'
 import { useStore } from '../state/store'
 import type { TimeSlot } from '../data/exercises'
+import type { Tab } from '../App'
 
 /** 模块三：综合能量提升模块（PRD 5.3） */
-export function Energy() {
+export function Energy({ go }: { go: (tab: Tab, payload?: string) => void }) {
   const { state, dispatch, days } = useStore()
   const [tab, setTab] = useState<'tasks' | 'exercises' | 'nutrition'>('tasks')
   const [openEx, setOpenEx] = useState<string | null>(null)
@@ -208,11 +209,20 @@ export function Energy() {
           <button
             className="btn primary"
             onClick={() => {
+              setOpenEx(null)
+              go('practice', exercise.id)
+            }}
+          >
+            开始跟练（分节计时）
+          </button>
+          <button
+            className="btn ghost"
+            onClick={() => {
               dispatch({ type: 'toggle-task', taskId: `ex-${exercise.id}` })
               setOpenEx(null)
             }}
           >
-            开始跟练（标记完成）
+            我已在别处练完，直接标记
           </button>
         </Sheet>
       )}

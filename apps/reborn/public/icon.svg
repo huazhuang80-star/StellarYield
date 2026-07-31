@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Reborn">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10B981" />
+      <stop offset="1" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0F172A" />
+  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#g)" stroke-width="16" opacity="0.55" />
+  <path
+    d="M256 132c48 42 74 82 74 122 0 44-33 78-74 78s-74-34-74-78c0-40 26-80 74-122z"
+    fill="url(#g)"
+  />
+  <path d="M256 300c22 0 40 18 40 42s-18 42-40 42-40-18-40-42 18-42 40-42z" fill="#0F172A" opacity="0.85" />
+</svg>

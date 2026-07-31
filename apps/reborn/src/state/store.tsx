@@ -8,7 +8,7 @@ import { scoreAssessment } from '../lib/assessment'
 import type { AppState, CoachMessage, DayLog, RelapseRecord, UrgeEvent } from '../types'
 
 const STORAGE_KEY = 'reborn:state:v1'
-const STATE_VERSION = 1
+const STATE_VERSION = 2
 
 function emptyLog(date: string): DayLog {
   return { date, tasks: {}, water: 0, checkedIn: false }
@@ -43,7 +43,48 @@ export function initialState(now: Date = new Date()): AppState {
     },
     coachLog: [],
     seenEggs: [],
-    settings: { delayLockUntil: null, grayscaleTip: false, secularMode: true },
+    readNotifications: [],
+    awards: [],
+    membership: 'free',
+    buddyCode: '',
+    practiceMinutes: {},
+    settings: {
+      delayLockUntil: null,
+      grayscaleTip: false,
+      beliefMode: 'secular',
+      theme: 'dark',
+      reduceMotion: false,
+      reminders: { morning: true, morningTime: '07:00', evening: true, eveningTime: '22:00', risk: true, water: false },
+    },
+  }
+}
+
+/**
+ * 迁移旧版本存档。v1 没有通知 / 会员 / 提醒等字段，逐层补默认值而不是直接丢弃用户数据 ——
+ * 天数与打卡记录是用户最在意的东西，升级不该清零。
+ */
+export function migrate(raw: unknown, now: Date = new Date()): AppState {
+  const base = initialState(now)
+  if (!raw || typeof raw !== 'object') return base
+  const parsed = raw as Partial<AppState> & { settings?: Partial<AppState['settings']> & { secularMode?: boolean } }
+
+  return {
+    ...base,
+    ...parsed,
+    companion: { ...base.companion, ...(parsed.companion ?? {}) },
+    settings: {
+      ...base.settings,
+      ...(parsed.settings ?? {}),
+      // v1 的布尔字段 secularMode 升级为四选一的信仰模式
+      beliefMode: parsed.settings?.beliefMode ?? (parsed.settings?.secularMode === false ? 'buddhist' : 'secular'),
+      reminders: { ...base.settings.reminders, ...(parsed.settings?.reminders ?? {}) },
+    },
+    readNotifications: parsed.readNotifications ?? [],
+    awards: parsed.awards ?? [],
+    membership: parsed.membership ?? 'free',
+    buddyCode: parsed.buddyCode ?? '',
+    practiceMinutes: parsed.practiceMinutes ?? {},
+    version: STATE_VERSION,
   }
 }
 
@@ -67,8 +108,16 @@ export type Action =
   | { type: 'coach-send'; message: CoachMessage }
   | { type: 'see-egg'; id: string }
   | { type: 'unlock'; id: string }
+  | { type: 'rename'; name: string }
+  | { type: 'read-notifications'; ids: string[] }
+  | { type: 'award'; key: string; coins: number }
+  | { type: 'update-settings'; patch: Partial<AppState['settings']> }
+  | { type: 'update-reminders'; patch: Partial<AppState['settings']['reminders']> }
+  | { type: 'set-membership'; tier: AppState['membership'] }
+  | { type: 'set-buddy-code'; code: string }
+  | { type: 'log-practice'; exerciseId: string; minutes: number }
+  | { type: 'import'; state: AppState }
   | { type: 'reset' }
-  | { type: 'seed-demo'; state: AppState }
 
 function withLog(state: AppState, date: string, patch: (log: DayLog) => DayLog): AppState {
   const log = state.logs[date] ?? emptyLog(date)
@@ -242,8 +291,44 @@ export function reducer(state: AppState, action: Action, now: Date = new Date())
     case 'unlock':
       return { ...state, unlocked: Array.from(new Set([...state.unlocked, action.id])) }
 
-    case 'seed-demo':
-      return action.state
+    case 'rename':
+      return { ...state, name: action.name.trim() || state.name }
+
+    case 'read-notifications':
+      return { ...state, readNotifications: Array.from(new Set([...state.readNotifications, ...action.ids])) }
+
+    case 'award':
+      // key 已发放过就静默忽略，调用方无需自己判重
+      if (state.awards.includes(action.key)) return state
+      return { ...state, coins: state.coins + action.coins, awards: [...state.awards, action.key] }
+
+    case 'update-settings':
+      return { ...state, settings: { ...state.settings, ...action.patch } }
+
+    case 'update-reminders':
+      return { ...state, settings: { ...state.settings, reminders: { ...state.settings.reminders, ...action.patch } } }
+
+    case 'set-membership':
+      return { ...state, membership: action.tier }
+
+    case 'set-buddy-code':
+      return { ...state, buddyCode: action.code }
+
+    case 'log-practice':
+      return {
+        ...state,
+        practiceMinutes: { ...state.practiceMinutes, [action.exerciseId]: (state.practiceMinutes[action.exerciseId] ?? 0) + action.minutes },
+        logs: {
+          ...state.logs,
+          [today]: {
+            ...(state.logs[today] ?? emptyLog(today)),
+            tasks: { ...(state.logs[today]?.tasks ?? {}), [`ex-${action.exerciseId}`]: true },
+          },
+        },
+      }
+
+    case 'import':
+      return migrate(action.state, now)
 
     case 'reset':
       return initialState(now)
@@ -258,9 +343,7 @@ function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return initialState()
-    const parsed = JSON.parse(raw) as AppState
-    if (parsed.version !== STATE_VERSION) return initialState()
-    return { ...initialState(), ...parsed }
+    return migrate(JSON.parse(raw))
   } catch {
     return initialState()
   }

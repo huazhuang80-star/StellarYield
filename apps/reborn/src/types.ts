@@ -121,10 +121,42 @@ export interface AppState {
   coachLog: CoachMessage[]
   /** 已展示过的彩蛋 id（部分彩蛋每天可重复） */
   seenEggs: string[]
-  settings: {
-    /** 15 分钟延迟锁到期时间戳 */
-    delayLockUntil: number | null
-    grayscaleTip: boolean
-    secularMode: boolean
+  /** 已读通知 id */
+  readNotifications: string[]
+  /** 已发放的一次性奖励 key（如 poster:2026-07-30），防止重复领取 */
+  awards: string[]
+  /** 会员状态（原型内为本地演示，不含真实支付） */
+  membership: MembershipTier
+  /** 问责伙伴邀请码 */
+  buddyCode: string
+  /** 功法练习记录：exerciseId -> 累计分钟 */
+  practiceMinutes: Record<string, number>
+  settings: Settings
+}
+
+export type MembershipTier = 'free' | 'pro-monthly' | 'pro-yearly' | 'lifetime' | 'family'
+
+/** 信仰模式：影响文案与冥想引导用词，默认世俗（PRD 风险表：宗教敏感问题） */
+export type BeliefMode = 'secular' | 'buddhist' | 'christian' | 'muslim'
+
+export type ThemePref = 'dark' | 'light' | 'system'
+
+export interface Settings {
+  /** 15 分钟延迟锁到期时间戳 */
+  delayLockUntil: number | null
+  grayscaleTip: boolean
+  beliefMode: BeliefMode
+  theme: ThemePref
+  reduceMotion: boolean
+  /** 提醒开关与时间（原型内本地生效，正式版接 OneSignal） */
+  reminders: {
+    morning: boolean
+    morningTime: string
+    evening: boolean
+    eveningTime: string
+    /** 高风险时段前 30 分钟提醒 */
+    risk: boolean
+    /** 补水提醒 */
+    water: boolean
   }
 }

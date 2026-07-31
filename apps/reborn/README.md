@@ -12,12 +12,13 @@
 cd apps/reborn
 npm install
 npm run dev      # http://localhost:5180
-npm test         # 88 个单元测试（纯逻辑层）
+npm test         # 126 个单元测试（纯逻辑层）
 npm run build    # tsc -b && vite build
 ```
 
-无后端、无账号系统、无网络请求：全部状态存在浏览器 `localStorage`（key `reborn:state:v1`）。
-清空数据：「更多 → 设置 → 清空本地数据」。
+无后端、无账号系统、无网络请求：全部状态存在浏览器 `localStorage`（key `reborn:state:v1`，存档格式 v2）。
+可安装为 PWA（含 Service Worker，离线可用）。数据可在「设置 → 数据备份」导出 / 导入 JSON，
+「设置 → 清空本地数据」永久删除。
 
 ## 已实现的模块
 
@@ -34,7 +35,26 @@ npm run build    # tsc -b && vite build
 | 6.1 AI 康复教练 | 规则引擎版 CBT 对话 + 晨间诊断 / 晚间复盘 / 周报 / 危机关怀 | `screens/Coach.tsx`、`lib/coach.ts` |
 | 6.2 社区 | 匿名广场、分组、导师问答、互助匹配（示意数据） | `screens/Community.tsx` |
 | 6.3 数据仪表盘 | 五维追踪、14 天完成率、情绪趋势、勋章墙 | `screens/Dashboard.tsx` |
-| 7 UI/UX | 深空蓝 #0F172A / 翡翠绿 #10B981 / 琥珀金 #F59E0B，东方禅意 × 游戏化 | `styles.css` |
+| 7 UI/UX | 深空蓝 #0F172A / 翡翠绿 #10B981 / 琥珀金 #F59E0B，东方禅意 × 游戏化；深色 / 浅色 / 跟随系统三套主题 | `styles.css` |
+| 9.1 定价 | 5 档会员方案 + 13 项权益对比 + 资助名额说明（不接支付） | `screens/Membership.tsx` |
+
+### 0.2.0 补齐的产品化模块
+
+| 模块 | 内容 | 位置 |
+| --- | --- | --- |
+| 通知中心 | 里程碑 / 危机关怀 / 风险时段 / 伙伴状态 / 复评提醒，未读徽标；通知由状态推导，不留过期条目 | `screens/Notifications.tsx`、`lib/notifications.ts` |
+| 个人资料 | 身份、五维统计、测评档案、勋章墙、Canvas 成就海报（1080×1350 可下载） | `screens/Profile.tsx`、`lib/poster.ts` |
+| 设置 | 主题 / 减少动效 / 四档提醒 / 信仰模式（世俗·佛·基督·伊斯兰）/ 起始日修正 / 数据导出导入 / 清空 | `screens/Settings.tsx`、`lib/backup.ts` |
+| 关于 | 版本与内容规模、更新日志、内容来源、致谢、联系方式 | `screens/About.tsx`、`data/about.ts` |
+| 帮助中心 | 5 步快速上手、17 条 FAQ（5 分类可搜）、8 条术语表、反馈入口 | `screens/Help.tsx`、`data/help.ts` |
+| 安全与条款 | 紧急求助热线（中/美/国际）、免责声明、隐私说明、用户协议 | `screens/Legal.tsx`、`data/legal.ts` |
+| 学习中心 | 5 门课程 20 节，按天数解锁，完成给币 | `screens/Courses.tsx`、`data/courses.ts` |
+| 功法播放器 | 分节步骤 + 每节计时 + 完成记录练习分钟数 | `screens/Practice.tsx` |
+| 呼吸与冥想 | 4 种呼吸法（动画圆环按阶段缩放）+ 4 种冥想引导与计时 | `screens/Breathing.tsx`、`data/breathing.ts` |
+| 日记与历史 | 30 天时间线、4 周周报、冲动与复发事件流、单日详情 | `screens/Journal.tsx` |
+| 问责伙伴 | 邀请码生成校验、匹配示意、共享范围透明化（只暴露 4 个字段） | `screens/Buddy.tsx`、`lib/buddy.ts` |
+| 全局搜索 | 索引 60+ 条内容，中文子串匹配，标题命中优先 | `screens/Search.tsx`、`lib/search.ts` |
+| 系统能力 | Toast、空状态、分段选择器、开关、焦点可见、reduce-motion、PWA 离线、存档 v1→v2 迁移 | `components/shell.tsx`、`public/sw.js`、`state/store.tsx` |
 
 ### 冲动风险预警
 
