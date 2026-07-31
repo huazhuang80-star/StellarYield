@@ -89,58 +89,39 @@ const w=D.W;
 group('shell1');
 box(X0-0.06, Y0-0.06, 0, X1+0.06, AY1+0.06, D.FF, M.plinth);
 
-/* 外墙洞口：同样一律从平面图数据 FLOORS.wins 生成，平面上开几个窗、多宽，模型就是几个、多宽。
-   洞口高度按类型给，不用在平面图上再标一遍：
-     普通窗 窗台 0.90 / 过梁下 2.30——坐着看得见院子，站着不晒头；
-     高窗 e  窗台 1.55 / 上沿 2.15——卫生间储物间只要通风不要对视；
-     落地门 d 0 → 2.55；通道洞口 o 0 → 2.10。 */
-const OPENH = { '':[0.90,2.30], e:[1.55,2.15], d:[0.00,2.55], o:[0.00,2.10] };
-function shellOpenings(key, blk, lvl, zTop, mat){
-  const yF = blk==='a' ? AY0 : Y0, yB = blk==='a' ? AY1 : Y1;
-  const H={F:[],B:[],L:[],R:[]};
-  (FLOORS[key].wins||[]).filter(q=>(q[3]||'m')===blk).forEach(q=>{
-    const k=q[4]||'', h=OPENH[k]||OPENH[''];
-    H[q[0]].push({a:q[1], b:q[2], z0:lvl+h[0], z1:lvl+h[1], k:k, side:q[0]});
-  });
-  const conv = s => H[s].map(o=>({a:(s==='F'||s==='B')?X0+o.a:Y0+o.a,
-                                 b:(s==='F'||s==='B')?X0+o.b:Y0+o.b, z0:o.z0, z1:o.z1}));
-  /* 后附房的前墙就是主楼的后墙，只砌一道，不然会砌成 0.30 m 的傻墙 */
-  if(blk!=='a') wallOpen('x', X0,X1, yF,yF+w, lvl,zTop, mat, conv('F'));
-  wallOpen('x', X0,X1, yB-w,yB, lvl,zTop, mat, conv('B'));
-  wallOpen('y', yF,yB, X0,X0+w, lvl,zTop, mat, conv('L'));
-  wallOpen('y', yF,yB, X1-w,X1, lvl,zTop, mat, conv('R'));
-  return {H:H, yF:yF, yB:yB, lvl:lvl};
-}
-/* 玻璃、纱窗、防盗栅、窗台、遮阳板：一层全部带纱窗 + 防盗栅 + 滴水遮阳板，
-   二层带遮阳板不带栅（逃生），落地门不做窗台。 */
-function shellGlazing(key, blk, ctx, ground){
-  const{H,yF,yB}=ctx;
-  const has=(side,a,b)=>(FLOORS[key].doors||[]).some(d=>{
-    if(!d.p) return false;
-    const R=x=>x*Math.PI/180, e=[d.p[0]+d.r*Math.cos(R(d.a[0])), d.p[1]+d.r*Math.sin(R(d.a[0]))];
-    const u0=Math.min((side==='F'||side==='B')?d.p[0]:d.p[1], (side==='F'||side==='B')?e[0]:e[1]);
-    return Math.abs(u0-a)<0.12;
-  });
-  const emit=(side,o)=>{
-    const dir=(side==='F'||side==='B')?'x':'y';
-    const a=((side==='F'||side==='B')?X0:Y0)+o.a, b=((side==='F'||side==='B')?X0:Y0)+o.b;
-    const v = side==='F' ? [yF,yF+w] : side==='B' ? [yB-w,yB] : side==='L' ? [X0,X0+w] : [X1-w,X1];
-    const out = (side==='F'||side==='L') ? -1 : 1;
-    if(o.k==='o'){                                  // 通道洞口：只做门套，门扇由 planDoors 画
-      if(!has(side,o.a,o.b)) doorway(dir, a,b, o.z0,o.z1, v[0],v[1], out, {open:1});
-      return;
-    }
-    const wide=(b-a)>1.30;
-    glazing(dir, a,b, o.z0,o.z1, v[0],v[1], out, o.k==='d'
-      ? {mull: wide?2:1, transom:0.80, sill:false, bars:0}
-      : {mull: o.k==='e'?0:undefined, hood:1, bars: ground?1:0});
-  };
-  ['F','B','L','R'].forEach(s=>H[s].forEach(o=>emit(s,o)));
-}
-
-/* 一层外墙：主楼 + 后附房 */
-const CTX1  = shellOpenings('f1','m', D.FF, D.F1,        M.wallOut);
-const CTX1a = shellOpenings('f1','a', D.FF, D.annexTop,  M.wallOut);
+/* 一层外墙洞口（局部 lx 换算：X0+lx） */
+wallOpen('x', X0,X1, Y0,Y0+w, D.FF,D.F1, M.wallOut, [
+  {a:X0+1.00, b:X0+3.20, z0:0.50, z1:3.05},        // 客厅推拉门
+  {a:X0+5.90, b:X0+6.90, z0:D.FF, z1:2.75}         // 入户门
+]);
+wallOpen('y', Y0,Y1, X0,X0+w, D.FF,D.F1, M.wallOut, [
+  {a:Y0+1.60, b:Y0+3.20, z0:1.20, z1:2.95},        // 客厅侧窗
+  {a:Y0+5.20, b:Y0+6.50, z0:1.35, z1:2.95},        // 餐厅侧窗
+  {a:Y0+7.70, b:Y0+8.90, z0:1.55, z1:2.55}         // 卫4 高窗
+]);
+wallOpen('y', Y0,Y1, X1-w,X1, D.FF,D.F1, M.wallOut, [
+  {a:Y0+2.30, b:Y0+3.60, z0:1.35, z1:2.95},        // 楼梯窗
+  {a:Y0+5.80, b:Y0+6.90, z0:1.70, z1:2.60},        // 公厕高窗
+  {a:Y0+7.90, b:Y0+8.90, z0:1.55, z1:2.55}         // 储物窗
+]);
+wallOpen('x', X0,X1, Y1-w,Y1, D.FF,D.F1, M.wallOut, [
+  {a:X0+1.40, b:X0+3.00, z0:1.35, z1:2.75},        // 次卧4 后窗
+  {a:X0+5.45, b:X0+6.30, z0:D.FF, z1:2.55}         // 走廊 → 后附房
+]);
+/* 后附房外墙 */
+wallOpen('y', AY0,AY1, X0,X0+w, D.FF,D.annexTop, M.wallOut, [
+  {a:AY0+0.70, b:AY0+2.60, z0:1.30, z1:2.75}       // 厨房大窗（操作台上方）
+]);
+wallOpen('y', AY0,AY1, X1-w,X1, D.FF,D.annexTop, M.wallOut, [
+  {a:AY0+0.50, b:AY0+1.40, z0:1.55, z1:2.55},      // 洗衣房窗
+  {a:AY0+2.30, b:AY0+3.10, z0:1.75, z1:2.55}       // 淋浴间高窗
+]);
+wallOpen('x', X0,X1, AY1-w,AY1, D.FF,D.annexTop, M.wallOut, [
+  {a:X0+0.80, b:X0+1.80, z0:D.FF, z1:2.55},        // 厨房后门（通后院操作台）
+  {a:X0+3.20, b:X0+4.60, z0:1.30, z1:2.55},        // 厨房后窗
+  {a:X0+5.45, b:X0+6.30, z0:D.FF, z1:2.55},        // 走廊 → 后院 主通道
+  {a:X0+7.10, b:X0+8.00, z0:D.FF, z1:2.55}         // 泳池淋浴间外门
+]);
 box(IX0,IY0,D.FF-0.02, IX1,IY1,D.FF, M.floorTile);
 box(IX0,AIY0,D.FF-0.02, IX1,AIY1,D.FF, M.floorTile);
 group('ceil1'); box(IX0,IY0,D.ceil1, IX1,IY1,D.ceil1+0.03, M.ceil);
@@ -157,17 +138,58 @@ group('shell1');
 })();
 
 group('shell2');
-const CTX2 = shellOpenings('f2','m', D.F1, D.F2, M.wallOut);
+wallOpen('x', X0,X1, Y0,Y0+w, D.F1,D.F2, M.wallOut, [
+  {a:X0+2.00, b:X0+3.60, z0:4.15, z1:6.55},        // 主卧阳台门
+  {a:X0+6.20, b:X0+7.60, z0:4.55, z1:6.35}         // 楼梯厅窗
+]);
+wallOpen('y', Y0,Y1, X0,X0+w, D.F1,D.F2, M.wallOut, [
+  {a:Y0+0.60, b:Y0+1.70, z0:5.05, z1:6.25},        // 衣帽间高窗
+  {a:Y0+2.60, b:Y0+3.90, z0:4.95, z1:6.25},        // 主卫窗
+  {a:Y0+4.90, b:Y0+6.20, z0:4.95, z1:6.25},        // 卫1 窗
+  {a:Y0+7.50, b:Y0+8.80, z0:4.95, z1:6.25}         // 卫2 窗
+]);
+wallOpen('y', Y0,Y1, X1-w,X1, D.F1,D.F2, M.wallOut, [
+  {a:Y0+2.30, b:Y0+3.60, z0:4.65, z1:6.25},        // 楼梯井采光
+  {a:Y0+5.80, b:Y0+7.40, z0:4.55, z1:6.25}         // 二层起居窗
+]);
+wallOpen('x', X0,X1, Y1-w,Y1, D.F1,D.F2, M.wallOut, [
+  {a:X0+2.20, b:X0+3.30, z0:4.65, z1:6.25},        // 次卧2 后窗
+  {a:X0+6.60, b:X0+8.10, z0:4.15, z1:6.35}         // 后阳台门
+]);
 group('ceil2'); box(IX0,IY0,D.ceil2, IX1,IY1,D.ceil2+0.03, M.ceil);
 group('roof'); box(X0,Y0,D.F2, X1,Y1,D.F2+0.14, M.slab);
 group('shell2');
 
-/* 门窗构件：三段外墙的玻璃、纱窗、防盗栅、遮阳板全部按上面生成的洞口配 */
+/* 门窗构件 */
 group('glass');
-shellGlazing('f1','m', CTX1,  true);
-shellGlazing('f1','a', CTX1a, true);
-shellGlazing('f2','m', CTX2,  false);
+glazing('x', X0+1.00,X0+3.20, 0.50,3.05, Y0,Y0+w, -1, {mull:2, transom:0.82});
+glazing('y', Y0+1.60,Y0+3.20, 1.20,2.95, X0,X0+w, -1, {hood:1, bars:1});
+glazing('y', Y0+5.20,Y0+6.50, 1.35,2.95, X0,X0+w, -1, {hood:1, bars:1});
+glazing('y', Y0+7.70,Y0+8.90, 1.55,2.55, X0,X0+w, -1, {mull:0, bars:1});
+glazing('y', Y0+2.30,Y0+3.60, 1.35,2.95, X1-w,X1, 1, {hood:1, bars:1});
+glazing('y', Y0+5.80,Y0+6.90, 1.70,2.60, X1-w,X1, 1, {mull:0, bars:1});
+glazing('y', Y0+7.90,Y0+8.90, 1.55,2.55, X1-w,X1, 1, {mull:0, bars:1});
+glazing('x', X0+1.40,X0+3.00, 1.35,2.75, Y1-w,Y1, 1, {hood:1, bars:1});
+glazing('y', AY0+0.70,AY0+2.60, 1.30,2.75, X0,X0+w, -1, {hood:1, bars:1});
+glazing('y', AY0+0.50,AY0+1.40, 1.55,2.55, X1-w,X1, 1, {mull:0, bars:1});
+glazing('y', AY0+2.30,AY0+3.10, 1.75,2.55, X1-w,X1, 1, {mull:0});
+glazing('x', X0+3.20,X0+4.60, 1.30,2.55, AY1-w,AY1, 1, {hood:1, bars:1});
+glazing('x', X0+2.00,X0+3.60, 4.15,6.55, Y0,Y0+w, -1, {mull:1, transom:0.80, sill:false});
+glazing('x', X0+6.20,X0+7.60, 4.55,6.35, Y0,Y0+w, -1, {hood:1});
+glazing('y', Y0+0.60,Y0+1.70, 5.05,6.25, X0,X0+w, -1, {mull:0});
+glazing('y', Y0+2.60,Y0+3.90, 4.95,6.25, X0,X0+w, -1, {hood:1});
+glazing('y', Y0+4.90,Y0+6.20, 4.95,6.25, X0,X0+w, -1, {hood:1});
+glazing('y', Y0+7.50,Y0+8.80, 4.95,6.25, X0,X0+w, -1, {hood:1});
+glazing('y', Y0+2.30,Y0+3.60, 4.65,6.25, X1-w,X1, 1, {hood:1});
+glazing('y', Y0+5.80,Y0+7.40, 4.55,6.25, X1-w,X1, 1, {hood:1});
+glazing('x', X0+2.20,X0+3.30, 4.65,6.25, Y1-w,Y1, 1, {mull:0, hood:1});
+glazing('x', X0+6.60,X0+8.10, 4.15,6.35, Y1-w,Y1, 1, {mull:1, transom:0.80, sill:false});
 group('shell1');
+doorway('x', X0+5.90,X0+6.90, D.FF,2.75, Y0,Y0+w, -1, {leafMat:M.woodDk, ajar:0.82});
+doorway('x', X0+5.45,X0+6.30, D.FF,2.55, Y1-w,Y1, 1, {open:1});
+doorway('x', X0+0.80,X0+1.80, D.FF,2.55, AY1-w,AY1, 1, {leafMat:M.woodDk, glazed:1});
+doorway('x', X0+5.45,X0+6.30, D.FF,2.55, AY1-w,AY1, 1, {leafMat:M.woodDk, glazed:1});
+doorway('x', X0+7.10,X0+8.00, D.FF,2.55, AY1-w,AY1, 1, {leafMat:M.woodDk});
 
 /* ───────────────────────── 7. 屋面 ───────────────────────── */
 group('roof');
@@ -280,70 +302,31 @@ for(const yy of [Y0+2.2, Y0+5.6, Y0+8.4])
 box(X0-0.62,Y0-1.6,0.005, X0-0.10,AY1+1.8,0.05, M.concrete);
 box(X1+0.10,Y0-1.6,0.005, X1+0.50,AY1+1.8,0.05, M.concrete);
 
-/* ───────────────────────── 9. 隔墙与内门 ─────────────────────────
-   第四版起，隔墙和内门不再手写，全部由平面图数据 FLOORS 生成。
-   业主在平面图上审的是哪一道墙、哪一扇门朝哪边开，三维里就是哪一道、朝哪边开。
-   以前两套数据各写各的，改了平面忘了改模型，才会出现「图上有门、模型里是堵墙」。 */
+/* ───────────────────────── 9. 隔墙与内门 ───────────────────────── */
 const L = (lx,ly)=>[X0+lx, Y0+ly];
 function parts(list, z0, z1, m){
   for(const p of list){ const a=L(p[0],p[1]), b=L(p[2],p[3]);
     box(a[0],a[1],z0, b[0],b[1],z1, m||M.wallIn); }
 }
-/* 找出洞口两侧的墙段，取它的厚度范围。找不到就是外墙上的门，按外墙厚 0.15 处理。 */
-function wallSpan(key, axis, u0, u1, pv){
-  const ws = FLOORS[key].walls||[];
-  for(const w of ws){
-    if(axis==='y'){
-      if(w[0]<=pv+0.03 && w[2]>=pv-0.03 && (Math.abs(w[1]-u1)<0.03 || Math.abs(w[3]-u0)<0.03))
-        return [w[0],w[2]];
-    } else {
-      if(w[1]<=pv+0.03 && w[3]>=pv-0.03 && (Math.abs(w[0]-u1)<0.03 || Math.abs(w[2]-u0)<0.03))
-        return [w[1],w[3]];
-    }
-  }
-  /* 找不到隔墙 → 这扇门开在外墙上。贴到最近的一条外墙面，不要让门套浮在墙外 */
-  const edges = axis==='y' ? [[0,1],[8.8,-1]] : [[0,1],[9.6,-1],[13.5,-1]];
-  let best=null, bd=1e9;
-  for(const[e,s] of edges){ const dd=Math.abs(e-pv); if(dd<bd){ bd=dd; best=[e,s]; } }
-  if(bd<0.30) return best[1]>0 ? [best[0], best[0]+0.15] : [best[0]-0.15, best[0]];
-  return [pv-0.075, pv+0.075];
-}
-/* 门：{p,r,a:[起,止]} → 洞口范围 + 门扇开启方向。开启方向直接取自平面图的弧线终点，
-   平面图上门往哪边扫，模型里门扇就往哪边转，不可能一个朝里一个朝外。 */
-function planDoors(key, lvl, hdr){
-  const R=x=>x*Math.PI/180;
-  (FLOORS[key].doors||[]).forEach(d=>{
-    if(d.o){                                       // 无门扇的门洞
-      const[a,b,c,e]=d.o, ax=(c-a)>(e-b);
-      if(ax) doorway('x', X0+a,X0+c, lvl,lvl+hdr, Y0+b,Y0+e, 1, {open:1});
-      else   doorway('y', Y0+b,Y0+e, lvl,lvl+hdr, X0+a,X0+c, 1, {open:1});
-      return;
-    }
-    const[px,py]=d.p, r=d.r, a0=R(d.a[0]), a1=R(d.a[1]);
-    const ex=px+r*Math.cos(a0), ey=py+r*Math.sin(a0);
-    const axis = Math.abs(Math.cos(a0))>0.5 ? 'x' : 'y';
-    const ext = /外开/.test(d.n||'');
-    if(axis==='x'){
-      const u0=Math.min(px,ex), u1=Math.max(px,ex);
-      const[v0,v1]=wallSpan(key,'x',u0,u1,py);
-      const sd = Math.sin(a1)>0 ? 1 : -1;
-      doorway('x', X0+u0,X0+u1, lvl,lvl+hdr, Y0+v0,Y0+v1, sd>0?-1:1,
-              {ajar:0.80, leafMat: ext?M.woodDk:M.woodLt, glazed: ext?1:0});
-    } else {
-      const u0=Math.min(py,ey), u1=Math.max(py,ey);
-      const[v0,v1]=wallSpan(key,'y',u0,u1,px);
-      const sd = Math.cos(a1)>0 ? 1 : -1;
-      doorway('y', Y0+u0,Y0+u1, lvl,lvl+hdr, X0+v0,X0+v1, sd>0?-1:1,
-              {ajar:0.80, leafMat: ext?M.woodDk:M.woodLt, glazed: ext?1:0});
-    }
-  });
-}
 group('part1');
-/* 一层：主楼段到 ceil1，后附房段到 annexTop（局部 ly ≥ 9.60 的就是后附房） */
-const W1=FLOORS.f1.walls;
-parts(W1.filter(w=>w[3]<=9.62), D.FF, D.ceil1);
-parts(W1.filter(w=>w[1]>=9.58), D.FF, D.annexTop-0.10);
-planDoors('f1', D.FF, 2.15);
+/* 一层：客厅/餐厅 开放；次卧4、卫4 在西后；走廊贯通至后院 */
+parts([
+  [5.25,0.15,5.35,1.60],[5.25,2.95,5.35,4.60],       // 客厅|玄关（1.60-2.95 为 1.35 m 宽门洞）
+  [5.25,4.70,5.35,5.30],[5.25,6.10,5.35,6.60],       // 餐厅|走廊（门 5.30-6.10）
+  [0.15,6.60,1.75,6.70],[2.60,6.60,5.25,6.70],       // 餐厅|适老卧室（门 1.75-2.60）
+  [1.75,6.70,1.85,7.30],[1.75,8.10,1.85,9.45],       // 适老卧室|卫4（门 7.30-8.10）
+  [5.25,6.70,5.35,7.60],[5.25,8.40,5.35,9.45],       // 适老卧室|走廊（门 7.60-8.40）
+  [6.50,3.60,8.65,3.70],                              // 玄关楼梯厅|公厕
+  [6.40,3.70,6.50,4.20],[6.40,5.00,6.50,5.70],       // 走廊|公厕（门 4.20-5.00）
+  [6.50,5.70,8.65,5.80],                              // 公厕|储物
+  [6.40,5.80,6.50,6.40],[6.40,7.20,6.50,9.45]        // 走廊|储物（门 6.40-7.20）
+], D.FF, D.ceil1);
+parts([
+  [5.25,9.75,5.35,10.75],[5.25,11.55,5.35,13.35],     // 厨房|后走廊（门洞 10.75-11.55）
+  [6.40,9.75,6.50,10.15],[6.40,10.95,6.50,12.05],     // 后走廊|洗衣（门 10.15-10.95）
+  [6.40,12.85,6.50,13.35],                            // 后走廊|农具房（门 12.05-12.85）
+  [6.50,11.55,8.65,11.65]                             // 洗衣|农具房
+], D.FF, D.annexTop-0.10);
 // 湿区墙砖（四面 12 mm 贴面，不是实心体块）
 function wetLining(x0,y0,x1,y1,z0,h){
   const t=0.012;
@@ -353,18 +336,52 @@ function wetLining(x0,y0,x1,y1,z0,h){
   box(x1-t,y0+t,z0, x1,y1-t,z0+h, M.wetTile);
   box(x0,y0,z0, x1,y1,z0+0.008, M.wetTile);   // 防水地砖
 }
-/* 所有 t:'wet' 的房间自动贴砖到 1.85 m，不用一间一间手写坐标 */
-function wetRooms(key, lvl){
-  (FLOORS[key].rooms||[]).filter(r=>r.t==='wet').forEach(r=>{ const[a,b,c,d]=r.r;
-    wetLining(X0+a+0.03, Y0+b+0.03, X0+c-0.03, Y0+d-0.03, lvl, 1.85); });
-}
-wetRooms('f1', D.FF);
+wetLining(X0+0.18,Y0+6.73, X0+1.78,Y0+9.42, D.FF, 1.85);   // 卫4（无障碍）
+wetLining(X0+6.52,Y0+3.73, X0+8.62,Y0+5.67, D.FF, 1.85);   // 公厕
+// 内门
+doorway('x', X0+1.60,X0+2.55, D.FF,2.55, Y0+0.15,Y0+0.15, -1, {open:1});   // 占位（客厅无门）
+doorway('y', Y0+5.30,Y0+6.10, D.FF,2.55, X0+5.25,X0+5.35, 1, {ajar:0.9});  // 餐厅
+doorway('y', Y0+7.60,Y0+8.40, D.FF,2.55, X0+5.25,X0+5.35, 1, {ajar:0.60}); // 适老卧室
+doorway('x', X0+1.75,X0+2.60, D.FF,2.55, Y0+6.60,Y0+6.70, -1, {open:1});
+doorway('y', Y0+7.30,Y0+8.10, D.FF,2.45, X0+1.75,X0+1.85, -1, {ajar:0.72});// 卫4（外开，适老）
+doorway('y', Y0+4.20,Y0+5.00, D.FF,2.45, X0+6.40,X0+6.50, -1, {ajar:0.75});// 公厕
+doorway('y', Y0+6.40,Y0+7.20, D.FF,2.45, X0+6.40,X0+6.50, -1, {ajar:0.8}); // 储物
+doorway('y', AY0+1.15,AY0+1.95, D.FF,2.45, X0+5.25,X0+5.35, 1, {open:1});  // 厨房宽门洞
+doorway('y', AY0+0.55,AY0+1.35, D.FF,2.45, X0+6.40,X0+6.50, -1, {ajar:0.78});// 洗衣
+doorway('y', AY0+2.45,AY0+3.25, D.FF,2.45, X0+6.40,X0+6.50, -1, {ajar:0.72});// 淋浴
 
 group('part2');
-const W2=FLOORS.f2.walls;
-parts(W2, D.F1, D.ceil2);
-planDoors('f2', D.F1, 2.10);
-wetRooms('f2', D.F1);
+/* 二层：三间卧室全部开门在走廊上 */
+parts([
+  [1.75,0.15,1.85,0.90],[1.75,1.70,1.85,2.90],        // 主卧|衣帽间（门洞 0.90-1.70）
+  [1.75,3.70,1.85,4.30],                              // 主卧|主卫（门 2.90-3.70）
+  [0.15,2.15,1.75,2.25],                              // 衣帽间|主卫
+  [1.85,4.30,5.25,4.40],                              // 主卧|次卧1
+  [1.75,4.40,1.85,5.20],[1.75,6.00,1.85,6.90],        // 次卧1|卫1（门 5.20-6.00）
+  [0.15,6.90,5.25,7.00],                              // 次卧1|次卧2
+  [1.75,7.00,1.85,7.20],[1.75,8.00,1.85,9.45],        // 次卧2|卫2（门 7.20-8.00）
+  [5.25,0.15,5.35,1.70],
+  [5.25,1.70,5.35,2.60],[5.25,3.40,5.35,4.30],        // 主卧门 2.60-3.40
+  [5.25,4.40,5.35,5.20],[5.25,6.00,5.35,6.90],        // 次卧1门 5.20-6.00
+  [5.25,7.00,5.35,7.80],[5.25,8.60,5.35,9.45],        // 次卧2门 7.80-8.60
+  [6.40,1.70,6.50,5.40],
+  [6.40,5.50,6.50,6.25],[6.40,7.05,6.50,7.80],        // 走廊|起居·书房（门 6.25-7.05）
+  [6.40,7.90,6.50,8.20],[6.40,9.00,6.50,9.45],        // 走廊|后阳台（门洞 8.20-9.00）
+  [6.50,5.40,8.65,5.50],
+  [6.50,7.80,8.65,7.90]
+], D.F1, D.ceil2);
+wetLining(X0+0.18,Y0+2.28, X0+1.72,Y0+4.27, D.F1, 1.85);   // 主卫
+wetLining(X0+0.18,Y0+4.43, X0+1.72,Y0+6.87, D.F1, 1.85);   // 卫1
+wetLining(X0+0.18,Y0+7.03, X0+1.72,Y0+9.42, D.F1, 1.85);   // 卫2
+doorway('y', Y0+2.60,Y0+3.40, D.F1,D.F1+2.10, X0+5.25,X0+5.35, 1, {ajar:0.9});
+doorway('y', Y0+5.20,Y0+6.00, D.F1,D.F1+2.10, X0+5.25,X0+5.35, 1, {ajar:0.88});
+doorway('y', Y0+7.80,Y0+8.60, D.F1,D.F1+2.10, X0+5.25,X0+5.35, 1, {ajar:0.88});
+doorway('y', Y0+0.90,Y0+1.70, D.F1,D.F1+2.10, X0+1.75,X0+1.85, -1, {open:1});    // 衣帽间（无门扇）
+doorway('y', Y0+2.90,Y0+3.70, D.F1,D.F1+2.10, X0+1.75,X0+1.85, -1, {ajar:0.72}); // 主卫
+doorway('y', Y0+5.20,Y0+6.00, D.F1,D.F1+2.10, X0+1.75,X0+1.85, -1, {ajar:0.72}); // 卫1
+doorway('y', Y0+7.20,Y0+8.00, D.F1,D.F1+2.10, X0+1.75,X0+1.85, -1, {ajar:0.72}); // 卫2
+doorway('y', Y0+6.25,Y0+7.05, D.F1,D.F1+2.10, X0+6.40,X0+6.50, -1, {ajar:0.85}); // 起居·书房
+doorway('y', Y0+8.20,Y0+9.00, D.F1,D.F1+2.10, X0+6.40,X0+6.50, -1, {open:1});    // 后阳台
 
 /* ───────────────────────── 10. 旋转楼梯（Ø2.0 m 中柱式钢结构） ─────────────────────────
    为什么用旋转梯：U 型梯占 7.7 m²，Ø2.0 旋转梯只占 3.1 m²，省下 4.6 m² 全部还给卧室。
@@ -629,129 +646,172 @@ function ceilFan(cx,cy,z){
 }
 
 /* —— 室内布置 ——
-   第四版起，家具不再手写世界坐标。上面第 9 节的墙和门已经从 FLOORS 生成，
-   这里家具同样从 FLOORS[key].furn 生成：平面图上画的是哪一件、在哪个位置，
-   三维里就摆哪一件、在哪个位置。业主在平面图上审过的东西，不可能在三维里变样。
-   平面局部坐标 (lx,ly) → 世界坐标 (X0+lx, Y0+ly)。 */
+   下面这一整块家具坐标是按「主楼前墙 y = 5.60」那一版世界坐标写的。
+   第三版把房子整体北移到 y = 15.50，与其把几百个数字逐个改（极易改错），
+   不如在这里套一层坐标包装：把每个摆放函数的 y 参数统一 +FY。
+   房子将来再挪，只需要改 D.hy0，家具会跟着走。 */
 (function(){
-  /* 家具朝向：取矩形中心到房间中心的方向，家具背靠最近的那面墙。
-     床头、沙发靠背、马桶水箱、洗手台镜子都按这个方向摆，不会出现背对房间的怪事。 */
-  function roomOf(key, r){
-    const cx=(r[0]+r[2])/2, cy=(r[1]+r[3])/2;
-    return (FLOORS[key].rooms||[]).find(q=>{
-      const[a,b,c,d]=q.r; return cx>=a-0.02&&cx<=c+0.02&&cy>=b-0.02&&cy<=d+0.02; });
-  }
-  /* 家具贴着哪面墙：比较四边到所在房间四边的距离，最小的那边就是背靠的墙，
-     返回家具「正面」朝向（n=朝北/y 增大，s=朝南，e=朝东/x 增大，w=朝西）。 */
-  function facing(rm, r){
-    if(!rm) return 'n';
-    const[a,b,c,d]=r, [A,B,C,Dd]=rm.r;
-    /* 背靠西墙就朝东，背靠南墙就朝北——床头永远贴墙，沙发靠背永远贴墙 */
-    const dist={ e:a-A, w:C-c, n:b-B, s:Dd-d };
-    let best='n', bv=1e9;
-    for(const k in dist) if(dist[k]<bv){ bv=dist[k]; best=k; }
-    return best;
-  }
-  const H = {                       // 无专用模型的柜体高度（按名字判断）
-    '电视柜':0.48, '矮鞋柜 h1.2':1.20, '凳':0.45, '衣柜':2.15, '通高衣柜':2.30,
-    '书桌':0.75, '长书桌':0.76, '抽屉':0.85, '洗衣机×2':0.86, '洗涤池':0.85
-  };
-  function place(key, lvl, ceil, tag){
-    group(tag);
-    const F=FLOORS[key], Z=lvl+0.02;
-    (F.furn||[]).forEach(f=>{
-      const r=f.r, x0=X0+r[0], y0=Y0+r[1], x1=X0+r[2], y1=Y0+r[3];
-      const cx=(x0+x1)/2, cy=(y0+y1)/2, w=x1-x0, l=y1-y0;
-      const rm=roomOf(key,r), fc=facing(rm,r), t=f.t, n=f.n||'';
-      switch(t){
-        case 'bed':      bed(cx,cy,w,l,Z, fc, M.fabricW, M.fabric); break;
-        case 'sofa':     sofa(cx,cy,w,l,Z, fc); break;
-        case 'table':    table(cx,cy,w,l,Z, l<0.75?0.42:0.75, l<0.75?M.woodDk:M.woodLt); break;
-        case 'chair':    chair(cx,cy,Z, fc); break;
-        case 'wc':       wc(cx,cy,Z, fc); break;
-        case 'basin':    basin(cx,cy,Z, fc, Math.max(w,l)); break;
-        case 'shower':   shower(x0,y0,x1,y1,Z, w>l?'x':'y'); break;
-        case 'wet':      wetFloor(x0,y0,x1,y1,Z); break;
-        case 'tub':      bathtub(x0,y0,x1,y1,Z); break;
-        case 'sink':     break;                    // 水槽随台面一起做，见下
-        case 'stove':    break;                    // 灶台同上
-        case 'fridge':   fridge(x0,y0,x1,y1,Z); break;
-        case 'shelf':    shelving(x0,y0,x1,y1,Z, 2.05); break;
-        case 'counter':  counterRun(key,f,Z); break;
-        default:         cabinet(x0,y0,x1,y1,Z, H[n]!==undefined?H[n]:0.80, n); break;
-      }
-    });
-    lighting(key, ceil, Z);
-  }
-  /* 台面：厨房那三段 counter 要带水槽、灶、上柜和挡水；餐厅半岛只做台面不做上柜 */
-  function counterRun(key,f,Z){
-    const r=f.r, x0=X0+r[0], y0=Y0+r[1], x1=X0+r[2], y1=Y0+r[3];
-    const F=FLOORS[key];
-    const inside=(q)=> q[0]>=r[0]-0.10&&q[2]<=r[2]+0.10&&q[1]>=r[1]-0.10&&q[3]<=r[3]+0.10;
-    const sk=(F.furn||[]).find(q=>q.t==='sink'&&inside(q.r));
-    const hb=(F.furn||[]).find(q=>q.t==='stove'&&inside(q.r));
-    const wall = (r[0]<0.30||r[2]>8.50||r[1]<0.30||r[3]>9.30);   // 贴外墙的才有上柜
-    const o={};
-    if(sk) o.sink=[X0+(sk.r[0]+sk.r[2])/2, Y0+(sk.r[1]+sk.r[3])/2];
-    if(hb) o.hob =[X0+(hb.r[0]+hb.r[2])/2, Y0+(hb.r[1]+hb.r[3])/2];
-    if(wall){ o.splash=1; if(!sk||hb) o.upper=1; }
-    kitchenRun(x0,y0,x1,y1,Z,o);
-  }
-  function cabinet(x0,y0,x1,y1,z,h,n){
-    if(/衣柜/.test(n)) return wardrobe(x0,y0,x1,y1,z,h,(x1-x0)>(y1-y0)?'x':'y');
-    if(/电视柜/.test(n)){ tvUnit((x0+x1)/2,(y0+y1)/2,z,(y1-y0)<(x1-x0)?'n':'e',x1-x0); return; }
-    if(/洗衣机/.test(n)){ const n2=Math.max(1,Math.round((x1-x0)/0.62));
-      for(let i=0;i<n2;i++) washer(x0+(x1-x0)*(i+0.5)/n2, (y0+y1)/2, z); return; }
-    box(x0,y0,z, x1,y1,z+h, M.woodLt);
-    if(h>0.60){                                    // 柜门分格 + 拉手，免得看着像一块砖
-      const ax=(x1-x0)>(y1-y0), n2=Math.max(2,Math.round((ax?x1-x0:y1-y0)/0.55));
-      for(let i=1;i<n2;i++){ const t=i/n2;
-        if(ax) box(x0+(x1-x0)*t-0.007,y0-0.005,z+0.02, x0+(x1-x0)*t+0.007,y1+0.005,z+h-0.02, M.woodDk);
-        else   box(x0-0.005,y0+(y1-y0)*t-0.007,z+0.02, x1+0.005,y0+(y1-y0)*t+0.007,z+h-0.02, M.woodDk); }
-    }
-    if(/书桌|长书桌/.test(n)) box(x0+0.04,y0+0.04,z+h-0.05, x1-0.04,y1-0.04,z+h, M.woodDk);
-  }
-  function shelving(x0,y0,x1,y1,z,h){
-    const ax=(x1-x0)>(y1-y0), n=Math.max(3,Math.round(h/0.45));
-    box(x0,y0,z, x1,y1,z+0.04, M.woodDk);
-    for(let i=1;i<=n;i++) box(x0,y0,z+h*i/n-0.02, x1,y1,z+h*i/n, M.woodDk);
-    if(ax){ box(x0,y0,z, x0+0.03,y1,z+h, M.woodDk); box(x1-0.03,y0,z, x1,y1,z+h, M.woodDk); }
-    else  { box(x0,y0,z, x1,y0+0.03,z+h, M.woodDk); box(x0,y1-0.03,z, x1,y1,z+h, M.woodDk); }
-    for(let i=0;i<n;i++){                           // 随手码几个箱子，储物间空着不真实
-      if((i*7)%3===0) continue;
-      const t=(i+0.5)/n, u0=ax?x0+(x1-x0)*0.12:x0+0.05, u1=ax?x0+(x1-x0)*0.42:x1-0.05;
-      box(u0, ax?y0+0.05:y0+(y1-y0)*0.15, z+h*i/n, u1, ax?y1-0.05:y0+(y1-y0)*0.55, z+h*i/n+h/n*0.62, i%2?M.cloth:M.brick);
-    }
-  }
-  function wetFloor(x0,y0,x1,y1,z){                 // 无隔断淋浴区：找坡 + 地漏 + 花洒 + 玻璃挡板
-    box(x0,y0,z, x1,y1,z+0.012, M.wetTile);
-    cyl((x0+x1)/2,(y0+y1)/2, z+0.010, z+0.018, 0.05,0.05, 10, M.steel);
-    const sx=x0+0.18, sy=y0+0.18;
-    cyl(sx,sy,z+0.30, z+2.05, 0.016,0.016, 8, M.steel, false);
-    box(sx-0.09,sy-0.09,z+2.02, sx+0.09,sy+0.09,z+2.07, M.steel);
-    box(sx-0.05,sy-0.05,z+1.10, sx+0.05,sy+0.05,z+1.24, M.steel);
-    if((x1-x0)>(y1-y0)) box(x0,y1-0.010,z, x0+(x1-x0)*0.45,y1+0.010,z+1.40, M.glass);
-    else                box(x1-0.010,y0,z, x1+0.010,y0+(y1-y0)*0.45,z+1.40, M.glass);
-  }
-  /* 灯与风扇：每个房间按面积配吸顶灯，卧室客厅另加吊扇，卧室外墙上加空调内机。
-     数量不是随手写的——热带自然通风房间，吊扇是把 28 ℃ 拉到体感 26 ℃ 的关键设备。 */
-  function lighting(key, ceil, Z){
-    (FLOORS[key].rooms||[]).forEach(rm=>{
-      const[a,b,c,d]=rm.r, cx=X0+(a+c)/2, cy=Y0+(b+d)/2, w=c-a, l=d-b, A=w*l;
-      const nx = w>3.6?2:1, ny = l>3.8?2:1;
-      for(let i=0;i<nx;i++) for(let j=0;j<ny;j++){
-        const px = X0+a + w*(i+0.5)/nx, py = Y0+b + l*(j+0.5)/ny;
-        ceilLamp(px,py, ceil, A>14?0.24:A>7?0.18:0.13);
-      }
-      if(rm.t==='bed'||rm.t==='live'){
-        ceilFan(cx, cy + (l>3.2?l*0.22:0), ceil);
-        const wallN = (b<0.30);                    // 贴南外墙的房间把空调挂在南墙
-        acUnit(cx, Y0+(wallN?b+0.18:d-0.18), Z+2.25, 'n');
-      }
-    });
-  }
-  place('f1', D.FF,  D.ceil1, 'furn1');
-  place('f2', D.F1,  D.ceil2, 'furn2');
+const FY = D.hy0 - 5.60;
+const box=(x0,y0,z0,x1,y1,z1,m,sk)=>_box(x0,y0+FY,z0,x1,y1+FY,z1,m,sk);
+const cyl=(cx,cy,z0,z1,r0,r1,sg,m,cap)=>_cyl(cx,cy+FY,z0,z1,r0,r1,sg,m,cap);
+const bed=(cx,cy,w,l,z,d,m1,m2)=>_bed(cx,cy+FY,w,l,z,d,m1,m2);
+const nightstand=(cx,cy,z)=>_nightstand(cx,cy+FY,z);
+const wardrobe=(x0,y0,x1,y1,z,h,d)=>_wardrobe(x0,y0+FY,x1,y1+FY,z,h,d);
+const sofa=(cx,cy,w,d,z,f)=>_sofa(cx,cy+FY,w,d,z,f);
+const table=(cx,cy,w,d,z,h,m)=>_table(cx,cy+FY,w,d,z,h,m);
+const chair=(cx,cy,z,d,m)=>_chair(cx,cy+FY,z,d,m);
+const wc=(cx,cy,z,d)=>_wc(cx,cy+FY,z,d);
+const basin=(cx,cy,z,d,w,t)=>_basin(cx,cy+FY,z,d,w,t);
+const shower=(x0,y0,x1,y1,z,o)=>_shower(x0,y0+FY,x1,y1+FY,z,o);
+const bathtub=(x0,y0,x1,y1,z)=>_bathtub(x0,y0+FY,x1,y1+FY,z);
+const bathCabinet=(x0,y0,x1,y1,z,h)=>_bathCabinet(x0,y0+FY,x1,y1+FY,z,h);
+const kitchenRun=(x0,y0,x1,y1,z,o)=>_kitchenRun(x0,y0+FY,x1,y1+FY,z,o);
+const fridge=(x0,y0,x1,y1,z)=>_fridge(x0,y0+FY,x1,y1+FY,z);
+const washer=(cx,cy,z)=>_washer(cx,cy+FY,z);
+const tvUnit=(cx,cy,z,d,w)=>_tvUnit(cx,cy+FY,z,d,w);
+const rug=(cx,cy,w,l,z)=>_rug(cx,cy+FY,w,l,z);
+const ceilLamp=(cx,cy,z,r)=>_ceilLamp(cx,cy+FY,z,r);
+const ceilFan=(cx,cy,z)=>_ceilFan(cx,cy+FY,z);
+const acUnit=(cx,cy,z,d)=>_acUnit(cx,cy+FY,z,d);
+const plantPot=(cx,cy,z,h)=>_plantPot(cx,cy+FY,z,h);
+group('furn1');
+const Z1=D.FF+0.02;
+// 客厅 x 0.80–5.90, y 5.75–10.20
+rug(3.10,8.35,3.20,2.30,Z1);
+sofa(3.10,9.75,2.90,0.95,Z1,'s');
+sofa(1.35,8.30,0.95,1.85,Z1,'e');
+table(3.05,8.30,1.25,0.68,Z1,0.42,M.woodDk);
+tvUnit(3.10,6.15,Z1,'n',2.10);
+plantPot(5.55,6.20,Z1,1.40);
+acUnit(3.10,5.95,Z1+2.25,'n');
+ceilLamp(3.10,8.20,D.ceil1,0.26);
+ceilFan(3.10,9.60,D.ceil1);
+// 餐厅 x 0.80–5.90, y 10.30–12.65
+table(3.20,11.20,1.70,0.95,Z1,0.75,M.woodLt);
+chair(2.10,10.85,Z1,'e'); chair(2.10,11.55,Z1,'e');
+chair(4.30,10.85,Z1,'w'); chair(4.30,11.55,Z1,'w');
+chair(2.85,10.30,Z1,'n'); chair(3.55,10.30,Z1,'n');
+chair(2.85,12.10,Z1,'s'); chair(3.55,12.10,Z1,'s');
+ceilLamp(3.20,11.20,D.ceil1,0.17); ceilLamp(2.45,11.20,D.ceil1,0.17); ceilLamp(3.95,11.20,D.ceil1,0.17);
+box(0.85,11.85,Z1, 2.10,12.15,Z1+0.92, M.woodLt);          // 餐边柜（贴北墙）
+// 次卧4（适老客房）x 2.50–5.90, y 12.75–15.05
+bed(4.05,13.85,1.55,2.00,Z1,'e',M.fabricW,M.fabric);
+nightstand(4.05,14.95,Z1);
+wardrobe(2.55,14.05,3.15,15.00,Z1,2.15,'y');
+box(4.95,12.80,Z1, 5.85,13.40,Z1+0.74, M.woodLt);
+chair(5.40,13.72,Z1,'s');
+acUnit(4.20,12.85,Z1+2.25,'n');
+ceilLamp(4.30,13.90,D.ceil1,0.19);
+// 卫4 x 0.80–2.40, y 12.75–15.05（门在东墙 13.20–14.00；适老：坐便扶手 + 淋浴凳）
+wc(1.15,14.62,Z1,'w'); basin(1.55,13.03,Z1,'n',0.76);
+shower(1.60,14.08,2.35,15.00,Z1,'y');
+box(0.86,14.20,Z1+0.70, 0.92,14.95,Z1+0.76, M.steel);   // 坐便扶手
+box(1.72,14.30,Z1+0.06, 2.06,14.64,Z1+0.44, M.rattan);  // 淋浴凳
+bathCabinet(0.85,13.40,1.25,14.05,Z1,1.70);
+// 玄关 + 楼梯厅 x 6.00–9.30, y 5.75–9.20（旋转梯居中偏东）
+box(8.40,5.80,Z1, 9.25,6.35,Z1+0.45, M.woodDk);          // 换鞋凳（贴前墙东端）
+wardrobe(7.70,5.80,8.25,6.35,Z1,1.20,'x');               // 矮鞋柜，不挡旋转梯
+ceilLamp(7.30,6.15,D.ceil1,0.15); ceilLamp(6.45,8.60,D.ceil1,0.13);
+// 走廊 x 6.00–7.05
+ceilLamp(6.52,10.40,D.ceil1,0.12); ceilLamp(6.52,12.60,D.ceil1,0.12); ceilLamp(6.52,14.60,D.ceil1,0.12);
+// 公厕 x 7.15–9.30, y 9.30–11.30（门在西墙 9.70–10.50）
+wc(7.60,10.82,Z1,'w'); basin(9.00,10.10,Z1,'w',0.70);
+bathCabinet(8.95,10.50,9.25,11.05,Z1,1.60);
+// 储物间 x 7.15–9.30, y 11.40–15.05（门在西墙 12.30–13.10）
+for(let i=0;i<4;i++) box(7.20,11.45,Z1+0.35+i*0.52, 9.25,11.85,Z1+0.40+i*0.52, M.woodLt);
+box(7.20,14.40,Z1, 8.10,15.00,Z1+0.85, M.woodDk);
+cyl(8.70,14.60,Z1+0.05, Z1+1.35, 0.28,0.28, 12, M.tank);   // 生活水箱
+box(9.20,14.30,Z1+1.45, 9.26,14.85,Z1+1.95, M.metalDk);    // 配电箱（东墙贴面）
+// 厨房 x 0.80–5.90, y 15.35–18.95（L 形：西墙 + 北墙，门口完全空出）
+kitchenRun(0.86,15.45,1.46,18.30,D.FF,{sink:[1.16,16.35], sinkBack:0.30, upper:1, splash:1});
+kitchenRun(1.56,18.35,5.30,18.90,D.FF,{hob:[3.30,18.62], upper:1, splash:1});
+fridge(4.95,15.45,5.85,16.15,D.FF);
+box(2.30,16.30,D.FF, 4.30,17.30,D.FF+0.88, M.woodLt);       // 中岛
+box(2.24,16.24,D.FF+0.88, 4.36,17.36,D.FF+0.94, M.slab);
+for(const q of [[2.60,16.00],[3.30,16.00],[4.00,16.00]]) chair(q[0],q[1],D.FF,'n',M.rattan);
+ceilLamp(3.30,16.80,D.annexTop-0.12,0.22); ceilLamp(1.60,17.50,D.annexTop-0.12,0.16);
+acUnit(4.60,15.45,D.FF+2.25,'n');
+// 洗衣房 x 7.15–9.30, y 15.35–17.15（门在西墙 15.75–16.55，机位全部靠东，门口留空）
+washer(8.15,16.62,D.FF); washer(8.85,16.62,D.FF);
+box(7.85,15.40,D.FF+0.80, 9.25,15.95,D.FF+0.90, M.slab);   // 折叠台面
+box(7.85,15.40,D.FF+0.30, 9.25,15.95,D.FF+0.80, M.woodLt);
+cyl(8.60,15.58,D.FF+1.35, D.FF+2.05, 0.20,0.20, 12, M.tank); // 电热水器
+for(let i=0;i<3;i++) box(7.30,16.16,D.FF+1.32+i*0.42, 9.20,16.22,D.FF+1.36+i*0.42, M.steel); // 室内晾杆
+// 泳池淋浴更衣 x 7.15–9.30, y 17.25–18.95（内门西墙 17.65–18.45；外门北墙 7.75–8.65）
+shower(8.45,17.30,9.25,18.20,D.FF,'x');
+wc(7.45,18.58,D.FF,'n'); basin(8.05,17.55,D.FF,'n',0.66);
+box(7.20,17.30,D.FF, 7.72,17.62,D.FF+0.42, M.woodDk);       // 更衣凳
+for(let i=0;i<4;i++) box(7.06,18.20+i*0.18,D.FF+1.55, 7.16,18.26+i*0.18,D.FF+1.62, M.steel); // 挂钩
+
+/* —— 二层布置 —— */
+group('furn2');
+const Z2=D.F1+0.02;
+// 主卧 x 2.50–5.90, y 5.75–9.90
+bed(4.05,7.95,1.85,2.05,Z2,'e',M.fabricW,M.fabric);
+nightstand(4.05,6.75,Z2); nightstand(4.05,9.15,Z2);
+tvUnit(2.75,7.95,Z2,'w',1.60);
+rug(3.60,7.95,1.70,2.30,Z2);
+box(4.95,9.10,Z2, 5.85,9.85,Z2+0.74, M.woodLt);
+chair(5.35,8.70,Z2,'n');
+acUnit(4.20,5.95,Z2+2.25,'n');
+ceilLamp(4.05,7.90,D.ceil2,0.26);
+ceilFan(4.05,8.90,D.ceil2);
+// 衣帽间 x 0.80–2.40, y 5.75–7.75（门洞在东墙 6.50–7.30，中间留 0.95 m 通道）
+wardrobe(0.85,5.80,2.35,6.35,Z2,2.30,'x');
+box(0.85,7.32,Z2+1.10, 2.35,7.72,Z2+1.16, M.woodLt);
+box(0.85,7.32,Z2+1.80, 2.35,7.72,Z2+1.86, M.woodLt);
+cyl(0.88,7.50,Z2+1.66, Z2+1.68, 0.016,0.016, 6, M.steel, false);
+for(let i=0;i<6;i++) box(0.98+i*0.22,7.38,Z2+0.66, 1.12+i*0.22,7.64,Z2+1.62, M.cloth);
+box(0.85,6.55,Z2, 1.40,7.15,Z2+0.45, M.woodDk);            // 抽屉柜靠西墙
+ceilLamp(1.60,6.70,D.ceil2,0.13);
+// 主卫 x 0.80–2.40, y 7.85–9.90（门在东墙 8.50–9.30）
+wc(1.10,8.35,Z2,'w'); basin(1.85,8.10,Z2,'n',0.70);
+shower(0.85,9.05,1.62,9.85,Z2,'y');
+bathCabinet(2.05,9.35,2.35,9.85,Z2,1.60);
+ceilLamp(1.60,9.10,D.ceil2,0.13);
+// 次卧1 x 2.50–5.90, y 10.00–12.50
+bed(3.95,11.10,1.55,2.00,Z2,'w',M.fabricW,M.fabric);
+nightstand(3.95,12.25,Z2);
+wardrobe(5.25,10.05,5.85,11.85,Z2,2.15,'y');
+box(2.55,12.00,Z2, 3.05,12.45,Z2+0.74, M.woodLt);
+acUnit(4.20,10.10,Z2+2.25,'n');
+ceilLamp(4.05,11.20,D.ceil2,0.19);
+// 卫1 x 0.80–2.40, y 10.00–12.50（含浴缸；门在东墙 10.80–11.60，正对洗手台）
+bathtub(0.86,10.05,2.35,10.76,Z2);
+wc(1.15,12.15,Z2,'w'); basin(1.15,11.35,Z2,'e',0.70);
+bathCabinet(2.05,11.85,2.35,12.45,Z2,1.60);
+ceilLamp(1.60,11.30,D.ceil2,0.13);
+// 次卧2 x 2.50–5.90, y 12.60–15.05
+bed(3.90,13.70,1.55,2.00,Z2,'w',M.fabricW,M.fabric);
+nightstand(3.90,14.85,Z2);
+wardrobe(5.25,12.65,5.85,14.45,Z2,2.15,'y');
+box(2.55,14.55,Z2, 3.35,15.00,Z2+0.74, M.woodLt);
+chair(3.00,14.20,Z2,'s');
+acUnit(4.20,12.70,Z2+2.25,'n');
+ceilLamp(4.00,13.80,D.ceil2,0.19);
+// 卫2 x 0.80–2.40, y 12.60–15.05（门在东墙 12.80–13.60）
+basin(1.45,12.88,Z2,'n',0.72);
+shower(0.85,14.05,1.70,15.00,Z2,'y');
+wc(2.10,14.60,Z2,'e');
+bathCabinet(2.05,13.70,2.35,14.25,Z2,1.60);
+ceilLamp(1.60,13.90,D.ceil2,0.13);
+// 楼梯厅 x 6.00–9.30, y 5.75–7.30
+sofa(6.70,6.15,1.30,0.75,Z2,'n');
+table(8.15,6.20,0.72,0.52,Z2,0.42,M.woodDk);
+plantPot(9.00,7.00,Z2,1.30);
+ceilLamp(7.30,6.60,D.ceil2,0.16);
+// 二层起居 / 书房 x 7.15–9.30, y 11.10–13.40（门在西墙 11.85–12.65）
+box(7.20,11.20,Z2, 9.25,11.75,Z2+0.76, M.woodLt);          // 长书桌靠南墙
+chair(8.15,12.10,Z2,'n'); chair(8.85,12.10,Z2,'n');
+for(let i=0;i<3;i++) box(8.20,12.90,Z2+0.35+i*0.50, 9.25,13.35,Z2+0.40+i*0.50, M.woodLt);
+sofa(7.80,13.00,0.90,0.72,Z2,'e');                          // 单人阅读椅
+plantPot(9.05,12.30,Z2,1.00);
+ceilLamp(8.20,12.20,D.ceil2,0.18);
+acUnit(8.20,11.15,Z2+2.25,'n');
+// 后阳台 x 7.15–9.30, y 13.50–15.05（门洞在西墙 13.80–14.60，晾杆全部退到 x≥7.85）
+for(let i=0;i<2;i++) box(7.85,13.75+i*0.45,Z2+1.55, 9.20,13.77+i*0.45,Z2+1.57, M.steel);
+for(let i=0;i<4;i++) box(7.95+i*0.30,13.70,Z2+0.85, 8.15+i*0.30,13.84,Z2+1.54, M.cloth);
+box(8.65,14.55,Z2, 9.25,14.98,Z2+0.55, M.steel);
 })();
 
 /* ───────────────────────── 12. 场地 · 地形 · 分区铺装 ───────────────────────── */
@@ -1240,14 +1300,16 @@ tree(0.42,4.60,3.10,0.58,'papaya');
 tree(0.42,6.90,3.00,0.56,'papaya');
 tree(0.38,9.60,4.40,1.05,'jackfruit');              // 矮化波罗蜜
 tree(0.40,12.60,3.90,1.15,'mango');
+tree(0.44,17.90,3.10,0.58,'papaya');                // 西通道
+tree(0.44,21.40,3.00,0.56,'papaya');
+tree(0.38,26.00,4.20,1.00,'jackfruit');
 // 东边界果树带
-/* 房子两侧的通道只有 0.65 m（西）和 0.55 m（东），第三版在这里种了六棵果树——
-   这是错的：香蕉、木瓜、波罗蜜的树冠半径都在 0.55 m 以上，种下去树冠直接压在外墙上，
-   叶子常年贴墙会让墙面长期潮湿发霉，根系还会顶坏散水。这两条通道的用途是排水沟 +
-   检修通道 + 穿堂风的进风口，本来就不该种树。第四版全部去掉，果树只留在前院和后端。 */
 tree(9.58,4.40,2.60,0.85,'acerola');                // 西印度樱桃（替代无法结果的甜樱桃）
 tree(9.62,6.60,3.20,0.90,'banana');
 tree(9.60,12.90,2.55,0.95,'pomegranate');
+tree(9.56,17.60,3.30,0.95,'banana');                // 东通道
+tree(9.56,20.80,3.10,0.90,'banana');
+tree(9.56,24.20,2.70,0.60,'papaya');
 // 院内两株遮荫大树
 tree(7.10,13.30,2.45,0.85,'acerola');               // 锦鲤池东北，给凉亭下午遮荫
 tree(2.10,3.10,4.30,1.45,'mango');                  // 停车位北侧，给车遮荫
