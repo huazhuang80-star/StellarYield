@@ -1,0 +1,21 @@
+{
+  "name": "Reborn · 重生",
+  "short_name": "Reborn",
+  "description": "成瘾康复与能量提升 —— 测评诊断、冲动急救、能量任务与成长激励",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "categories": ["health", "lifestyle", "productivity"],
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
