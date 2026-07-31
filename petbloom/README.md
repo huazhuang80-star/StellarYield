@@ -9,7 +9,7 @@
 ```bash
 cd petbloom
 npm run dev          # http://localhost:4173  开发用（多文件 + Service Worker）
-npm test             # 71 个单测，覆盖全部纯逻辑
+npm test             # 79 个单测，覆盖全部纯逻辑
 npm run build        # 打成单文件 dist/petbloom.html
 ```
 
@@ -99,7 +99,7 @@ petbloom/
 │   ├── data/               species / foods / behavior / care / triage / myths
 │   │                       knowledge / firstaid / guide / meta
 │   ├── lib/                nutrition / triage / alerts / growth / projection
-│   │                       reminders / search / finance / store
+│   │                       reminders / search / finance / store / route
 │   └── views/              onboarding home records nutrition behavior triage more
 │                           knowledge firstaid reminders timeline health search
 │                           guide settings about help
