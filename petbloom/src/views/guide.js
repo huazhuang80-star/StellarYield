@@ -7,6 +7,7 @@
 
 import { h, raw, esc, card, linkRow, linkGroup } from '../ui.js';
 import { GUIDES, guideById } from '../data/guide.js';
+import { emptyParams, isSafeKey } from '../lib/route.js';
 
 /** 走一遍决策树：answers 是节点 id 到所选项索引的映射。 */
 function walk(guide, answers) {
@@ -54,9 +55,12 @@ export default {
         )}`;
     }
 
-    const answers = {};
+    // 答案的键来自地址栏，同样用无原型容器承接
+    const answers = emptyParams();
     for (const [k, v] of Object.entries(ctx.params)) {
-      if (k.startsWith('n_')) answers[k.slice(2)] = Number(v);
+      if (!k.startsWith('n_')) continue;
+      const node = k.slice(2);
+      if (isSafeKey(node) && Object.hasOwn(guide.nodes, node)) answers[node] = Number(v);
     }
     const { path, result } = walk(guide, answers);
     const baseParams = Object.entries(answers).map(([k, v]) => `n_${k}=${v}`);

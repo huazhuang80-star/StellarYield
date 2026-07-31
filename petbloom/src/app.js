@@ -4,6 +4,7 @@
  */
 
 import * as store from './lib/store.js';
+import { parseRoute } from './lib/route.js';
 import { SPECIES } from './data/species.js';
 import { buildReminders, actionable } from './lib/reminders.js';
 import onboarding from './views/onboarding.js';
@@ -41,17 +42,11 @@ const app = document.querySelector('#app');
 const nav = document.querySelector('#nav');
 const bar = document.querySelector('#appbar');
 
-/** 解析 `#route?a=1&b=2`。 */
+const ROUTE_IDS = Object.keys(VIEWS);
+
+/** 解析 `#route?a=1&b=2`。地址栏内容完全由用户控制，按不可信输入处理。 */
 function parseHash() {
-  const raw = (location.hash || '#home').slice(1);
-  const [id, query = ''] = raw.split('?');
-  const params = {};
-  for (const pair of query.split('&')) {
-    if (!pair) continue;
-    const [k, v = ''] = pair.split('=');
-    params[decodeURIComponent(k)] = decodeURIComponent(v);
-  }
-  return { id: VIEWS[id] ? id : 'home', params };
+  return parseRoute(location.hash || '#home', ROUTE_IDS, 'home');
 }
 
 function navigate(to, opts = {}) {
@@ -67,7 +62,9 @@ let pendingOpts = null;
 
 function render(opts = {}) {
   const pet = store.activePet();
-  let { id: routeId, params } = parseHash();
+  const parsed = parseHash();
+  let routeId = parsed.id;
+  const params = parsed.params;
 
   // 没有任何宠物时，强制走建档流程
   if (!pet && routeId !== 'onboarding') routeId = 'onboarding';

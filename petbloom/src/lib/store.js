@@ -288,6 +288,7 @@ export function unlockSignal(petId, signalName) {
 // ── 通用集合（用药 / 就诊 / 花费 / 里程碑 / 化验） ──────────────
 
 function bucket(petId, kind) {
+  if (!Object.hasOwn(COLLECTIONS, kind)) throw new Error(`未知的集合类型：${kind}`);
   const s = load();
   s.items = s.items ?? {};
   s.items[petId] = s.items[petId] ?? {};
