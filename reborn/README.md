@@ -71,6 +71,10 @@ python3 -m http.server 8000 --directory reborn
 - Esc 关闭面板、键盘焦点可见、图表带 `aria-label`、开关用 `role="switch"`
 - 空状态、锁定态、已完成态均有对应设计
 
+## 交接文档
+
+如果你是在新的对话/会话里接手这个项目，请先读 [`HANDOFF.md`](HANDOFF.md) —— 里面有完整上下文：git 状态、设计系统、数据模型、代码组织的坑、测试方法、CI 问题诊断、以及下一步方向。
+
 ## 技术说明
 
 - **无后端**：全部状态存在 `localStorage`（key `reborn.state.v1`），不联网、不上传。隐私模式下自动降级到内存存储。可导出 JSON 备份、导入还原。
