@@ -611,6 +611,151 @@ input[type=range]::-moz-range-thumb{
 }
 .hidden{display:none !important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ============ 扩展组件 ============ */
+body.no-motion *,body.no-motion *::before,body.no-motion *::after{
+  animation-duration:.001ms !important;transition-duration:.001ms !important
+}
+
+/* 每日一言 */
+.quote-card{
+  border-radius:var(--r); padding:16px 18px; margin-top:14px;
+  background:var(--surface-2); border-left:3px solid var(--accent);
+}
+.quote-card p{
+  margin:0 0 6px; font-family:var(--font-display); font-size:15.5px;
+  line-height:1.7; color:var(--text); text-wrap:balance;
+}
+.quote-card cite{font-size:11.5px; color:var(--text-3); font-style:normal; letter-spacing:.05em}
+
+/* 快捷操作 */
+.quick-row{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:14px}
+.quick{
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  padding:13px 4px; border-radius:var(--r); border:1px solid var(--line);
+  background:var(--surface); font-size:11.5px; font-weight:600; color:var(--text-2);
+  transition:.16s;
+}
+.quick:hover{border-color:color-mix(in srgb,var(--accent) 45%, var(--line)); color:var(--text); transform:translateY(-1px)}
+.quick-g{font-size:21px; line-height:1}
+
+/* 计数器 */
+.counter{display:flex; align-items:center; gap:14px}
+.counter-btn{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
+  background:var(--surface); font-size:20px; line-height:1; display:grid; place-items:center;
+  color:var(--text); flex:none;
+}
+.counter-btn:hover{background:var(--surface-2)}
+.counter-btn:disabled{opacity:.35}
+.counter-val{
+  flex:1; text-align:center; font-family:var(--font-mono);
+  font-size:26px; font-weight:700; font-variant-numeric:tabular-nums;
+}
+.cups{display:flex; gap:5px; flex-wrap:wrap; margin-top:11px; justify-content:center}
+.cup{font-size:19px; opacity:.25; transition:opacity .2s}
+.cup.on{opacity:1}
+
+/* 心情 */
+.mood-row{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:11px}
+.mood-btn{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:9px 2px; border-radius:11px; border:1.5px solid var(--line);
+  background:var(--surface); font-size:10.5px; color:var(--text-2); transition:.16s;
+}
+.mood-btn.on{border-color:var(--accent); background:var(--accent-soft); color:var(--accent); font-weight:650}
+.mood-g{font-size:20px; line-height:1}
+
+/* 文本域 */
+.ta{
+  width:100%; margin-top:9px; padding:12px 13px; border-radius:var(--r-sm);
+  border:1px solid var(--line); background:var(--bg); color:var(--text);
+  font-family:inherit; font-size:14px; line-height:1.7; resize:vertical;
+}
+.ta:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+
+/* 标签行 */
+.tag-row{display:flex; gap:7px; flex-wrap:wrap; margin:12px 0}
+.tag{
+  padding:6px 13px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); font-size:12.5px; font-weight:600; color:var(--text-2);
+  transition:.16s;
+}
+.tag:hover{border-color:var(--accent)}
+.tag.on{background:var(--accent); border-color:var(--accent); color:#fff}
+
+/* 开关 */
+.switch{
+  width:46px; height:27px; border-radius:999px; border:0; padding:0;
+  background:var(--surface-2); position:relative; flex:none; transition:background .2s;
+}
+.switch i{
+  position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%;
+  background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s;
+}
+.switch.on{background:var(--accent)}
+.switch.on i{transform:translateX(19px); background:#fff}
+
+/* FAQ 折叠 */
+.faq{border-bottom:1px solid var(--line)}
+.faq-q{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  width:100%; text-align:left; background:none; border:0;
+  padding:15px 0; font-size:14.5px; font-weight:600; line-height:1.55;
+}
+.faq-mark{
+  flex:none; width:22px; height:22px; border-radius:50%; background:var(--surface-2);
+  display:grid; place-items:center; font-size:15px; color:var(--accent); font-weight:400;
+}
+.faq-a{display:none; padding:0 0 16px}
+.faq.open .faq-a{display:block; animation:fadeIn .2s}
+
+/* 时段柱状图 */
+.hour-chart{
+  display:grid; grid-template-columns:repeat(24,1fr); gap:2px;
+  height:96px; align-items:end; margin:6px 0 4px;
+}
+.hour-col{display:flex; flex-direction:column; justify-content:flex-end; height:100%; position:relative}
+.hour-bar{width:100%; background:var(--surface-2); border-radius:2px 2px 0 0; min-height:3px}
+.hour-bar.peak{background:var(--danger)}
+.hour-lab{
+  position:absolute; bottom:-16px; left:0; font-size:9px; color:var(--text-3);
+  font-family:var(--font-mono);
+}
+.hour-chart + .small{margin-top:20px}
+
+/* 点赞按钮 */
+.like-btn{
+  padding:6px 13px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); font-size:12.5px; color:var(--text-3); font-weight:600;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.like-btn:hover{border-color:var(--danger); color:var(--danger)}
+.like-btn.on{background:var(--danger-soft); border-color:transparent; color:var(--danger)}
+
+/* 搜索框 */
+.search{
+  width:100%; padding:12px 15px; border-radius:999px;
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  font-family:inherit; font-size:14px; margin-bottom:4px;
+}
+.search:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+
+/* 分组标题 */
+.group-title{
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-3); font-weight:700; margin:22px 0 9px;
+}
+
+/* 皮肤选择 */
+.skin-row{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:11px}
+.skin{
+  aspect-ratio:1; border-radius:var(--r); border:1.5px solid var(--line);
+  background:var(--surface); display:grid; place-items:center; font-size:24px; gap:2px;
+}
+.skin.on{border-color:var(--accent); background:var(--accent-soft)}
+.skin.off{opacity:.4}
+.skin span{font-size:9.5px; color:var(--text-3); font-weight:600}
 </style>
 
 <div class="shell">
@@ -619,6 +764,9 @@ input[type=range]::-moz-range-thumb{
     <span class="chip gold" id="coinChip">◈ 0</span>
     <button class="icon-btn" id="themeBtn" aria-label="切换深浅色主题" title="切换主题">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    </button>
+    <button class="icon-btn" id="menuBtn" aria-label="更多" title="更多">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="18.5" r="1.6" fill="currentColor" stroke="none"/></svg>
     </button>
   </header>
 
@@ -1221,6 +1369,13 @@ $("#sheetClose").onclick = ()=>{
    派生计算
    ============================================================ */
 function cleanDays(){ return daysBetween(S.startDate, today()) + 1; }
+function petGlyph(){
+  if(S.activeSkin && S.activeSkin !== "default"){
+    const sk = SHOP.find(x => x.id === S.activeSkin);
+    if(sk && S.skins.includes(sk.id)) return sk.glyph;
+  }
+  return petStage().glyph;
+}
 function petStage(){
   const d = S.onboarded ? cleanDays() : 0;
   for(const s of PET_STAGES){ if(d >= s.from && d <= s.to) return s; }
@@ -1735,10 +1890,18 @@ function renderHome(){
   const nm = nextMilestone();
 
   // 英雄卡
+  const hour = nowHour();
+  const greet = hour < 5 ? "夜深了" : hour < 11 ? "早安" : hour < 14 ? "午安" : hour < 18 ? "下午好" : hour < 23 ? "晚上好" : "夜深了";
+  const gv = el("div");
+  gv.style.cssText = "margin-bottom:14px";
+  gv.innerHTML = `<div style="font-family:var(--font-display);font-size:20px;font-weight:600">${greet}${S.nick ? "，" + esc(S.nick) : ""}</div>`;
+  v.appendChild(gv);
+
+  const hide = S.settings.hideNumbers;
   const hero = el("div","hero");
   hero.innerHTML = `
     <p class="hero-label">已坚守</p>
-    <div><span class="hero-days">${d}</span><span class="hero-unit">天</span></div>
+    <div><span class="hero-days">${hide ? "·" : d}</span><span class="hero-unit">天</span></div>
     <dl class="hero-meta">
       <div><dt>最长记录</dt><dd>${Math.max(S.bestStreak, d)}</dd></div>
       <div><dt>累计清醒</dt><dd>${S.totalClean + d}</dd></div>
@@ -1823,6 +1986,74 @@ function renderHome(){
     v.appendChild(g);
   }
 
+  // 快捷操作
+  const quick = el("div","quick-row");
+  [["🆘","急救",()=>openSOS()],
+   ["☯️","冥想",()=>openMeditationList()],
+   ["📓","日记",()=>openDiary()],
+   ["🎯","脱敏",()=>openDesensList()]].forEach(([g,t,fn])=>{
+    const b = el("button","quick");
+    b.innerHTML = `<span class="quick-g">${g}</span><span>${t}</span>`;
+    b.onclick = fn;
+    quick.appendChild(b);
+  });
+  v.appendChild(quick);
+
+  // 喝水计数器
+  const wCard = el("div","card");
+  wCard.style.marginTop = "14px";
+  const wN = () => (S.water[today()] || 0);
+  function paintWater(){
+    wCard.innerHTML = `<div class="row-between" style="margin-bottom:10px">
+      <b style="font-size:14px">💧 今日饮水</b>
+      <span class="small">目标 8 杯</span></div>`;
+    const row = el("div","counter");
+    const minus = el("button","counter-btn","−");
+    minus.setAttribute("aria-label","减少一杯");
+    minus.disabled = wN() <= 0;
+    minus.onclick = ()=>{ S.water[today()] = Math.max(0, wN()-1); save(); paintWater(); };
+    const val = el("div","counter-val", wN() + " / 8");
+    const plus = el("button","counter-btn","+");
+    plus.setAttribute("aria-label","增加一杯");
+    plus.onclick = ()=>{
+      const n = wN()+1;
+      S.water[today()] = n; save();
+      if(n === 8){ markTask("water", 10); checkAchievements(); toast("八杯达成 💧", true); }
+      paintWater(); renderHome();
+    };
+    row.appendChild(minus); row.appendChild(val); row.appendChild(plus);
+    wCard.appendChild(row);
+    const cups = el("div","cups");
+    for(let i = 0; i < 8; i++) cups.appendChild(el("span","cup" + (i < wN() ? " on" : ""), "🥛"));
+    wCard.appendChild(cups);
+  }
+  paintWater();
+  v.appendChild(wCard);
+
+  // 今日心情
+  const mCard = el("div","card");
+  mCard.style.marginTop = "12px";
+  const todayD = S.diary.find(e => e.d === today());
+  mCard.innerHTML = `<div class="row-between"><b style="font-size:14px">今天心情如何？</b>
+    <span class="small">写点什么 →</span></div>`;
+  const mrow = el("div","mood-row");
+  MOODS.forEach(m=>{
+    const b = el("button","mood-btn" + (todayD && todayD.mood === m.k ? " on" : ""));
+    b.innerHTML = `<span class="mood-g">${m.g}</span><span>${m.n}</span>`;
+    b.onclick = ()=>{
+      let e = S.diary.find(x => x.d === today());
+      if(!e){ e = { d:today(), mood:m.k, text:"" }; S.diary.push(e); }
+      else e.mood = m.k;
+      save(); checkAchievements(); renderHome();
+      toast("记下了 " + m.g);
+    };
+    mrow.appendChild(b);
+  });
+  mCard.appendChild(mrow);
+  mCard.querySelector(".small").style.cursor = "pointer";
+  mCard.querySelector(".small").onclick = openDiary;
+  v.appendChild(mCard);
+
   // 今日科普
   const art = pickDailyArticle();
   const c2 = el("button","item");
@@ -1836,6 +2067,14 @@ function renderHome(){
     <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
   c2.onclick = ()=> openArticle(art);
   v.appendChild(c2);
+
+  // 每日一言
+  const [qt, qs] = QUOTES[daysBetween(S.startDate, today()) % QUOTES.length];
+  const qc = el("div","quote-card");
+  qc.innerHTML = `<p>${esc(qt)}</p><cite>— ${esc(qs)}</cite>`;
+  v.appendChild(qc);
+
+  checkAchievements();
 }
 function pickDailyArticle(){
   const unread = ARTICLES.filter(a => !S.read.includes(a.id));
@@ -1887,6 +2126,37 @@ function renderEnergy(){
   v.innerHTML = `<p class="eyebrow">补，而不只是戒</p>
     <h2 class="h-display">能量提升</h2>
     <p class="lede">如果你每天都觉得在「忍」，说明补的部分没跟上。目标状态不是忍得住，是不太想。</p>`;
+
+  // 冥想入口
+  v.appendChild(el("h3","h-sec","冥想引导"));
+  const medB = el("button","item");
+  medB.innerHTML = `<span class="item-glyph">☯️</span>
+    <span class="item-main"><span class="item-title">冥想练习 <span class="pill">5 种法门</span></span>
+    <span class="item-sub">累计 ${S.medMin||0} 分钟 · 数息 / 观息 / 身体扫描 / 慈心 / 冲动冲浪</span></span>
+    <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+  medB.onclick = openMeditationList;
+  v.appendChild(medB);
+
+  // 睡眠记录
+  const slp = el("div","card");
+  const sN = S.sleep[today()];
+  slp.innerHTML = `<div class="row-between" style="margin-bottom:9px">
+    <b style="font-size:14px">🌙 昨晚睡了多久</b>
+    <span class="small">${sN ? sN + " 小时" : "未记录"}</span></div>`;
+  const srow = el("div","tag-row");
+  srow.style.margin = "0";
+  [5,6,7,8,9].forEach(h=>{
+    const b = el("button","tag" + (sN === h ? " on" : ""), h + "h");
+    b.onclick = ()=>{
+      S.sleep[today()] = h; save();
+      if(h >= 7) addCoins(10,"睡眠达标");
+      renderEnergy();
+    };
+    srow.appendChild(b);
+  });
+  slp.appendChild(srow);
+  slp.appendChild(el("p","small","睡眠是最被低估的戒断工具。低于 6 小时时，前额叶的刹车能力会明显下降。"));
+  v.appendChild(slp);
 
   // 功法
   v.appendChild(el("h3","h-sec","古法锻炼"));
@@ -2400,7 +2670,7 @@ function renderPet(){
   stage.innerHTML = `
     <div class="pet-stage">
       <div class="pet-ring"></div>
-      <div class="pet-glyph${low ? " sad" : ""}">${st.glyph}</div>
+      <div class="pet-glyph${low ? " sad" : ""}">${petGlyph()}</div>
     </div>
     <div style="font-family:var(--font-display);font-size:19px;font-weight:600;margin-top:6px">
       ${esc(p.name || "尚未命名")}
@@ -2470,6 +2740,44 @@ function renderPet(){
   ac.appendChild(row);
   v.appendChild(ac);
 
+  // 皮肤
+  const ownedSkins = SHOP.filter(x => x.kind === "skin" && S.skins.includes(x.id));
+  const skc = el("div","card");
+  skc.innerHTML = `<b style="font-size:14px">外观皮肤</b>
+    <p class="small" style="margin:4px 0 0">在商城解锁更多。</p>`;
+  const srow = el("div","skin-row");
+  const allSkins = [{ id:"default", name:"默认", glyph:st.glyph }].concat(
+    SHOP.filter(x => x.kind === "skin").map(x => ({ id:x.id, name:x.name.replace("皮肤",""), glyph:x.glyph })));
+  allSkins.forEach(sk=>{
+    const owned = sk.id === "default" || S.skins.includes(sk.id);
+    const on = S.activeSkin === sk.id;
+    const b = el("button","skin" + (on ? " on" : owned ? "" : " off"));
+    b.innerHTML = `<span>${owned ? sk.glyph : "🔒"}</span><span>${esc(sk.name)}</span>`;
+    b.onclick = ()=>{
+      if(!owned){ toast("在「我 → 商城」里解锁"); return; }
+      S.activeSkin = sk.id; save(); renderPet();
+      toast("已切换到「" + sk.name + "」");
+    };
+    srow.appendChild(b);
+  });
+  skc.appendChild(srow);
+  v.appendChild(skc);
+
+  // 伙伴日志
+  const logC = el("div","card");
+  const logs = [];
+  if(p.mood >= 80) logs.push("今天心情很好，绕着你转了好几圈。");
+  else if(p.mood < 35) logs.push("它看起来没什么精神，趴在角落里。");
+  if(p.hunger < 30) logs.push("肚子在叫。它没抱怨，但你看得出来。");
+  if(p.energy >= 80) logs.push("精力充沛，试着扑腾了几下翅膀。");
+  const doneN = Object.keys(todayTasks()).filter(k => k !== "__perfect").length;
+  if(doneN >= 4) logs.push("看到你今天完成了 " + doneN + " 项任务，它显得很得意。");
+  else if(doneN === 0) logs.push("它一直在门口张望，等你开始今天的第一件事。");
+  if(!logs.length) logs.push("一切如常。它就在那里，安静地陪着。");
+  logC.innerHTML = `<b style="font-size:14px">伙伴日志</b>` +
+    logs.map(x => `<p class="small" style="margin:7px 0 0;color:var(--text-2)">· ${esc(x)}</p>`).join("");
+  v.appendChild(logC);
+
   // 进化进度
   if(nextSt){
     const pc = el("div","card");
@@ -2501,25 +2809,85 @@ function renderPet(){
 /* ============================================================
    视图：科普
    ============================================================ */
+let learnQuery = "", learnCat = "全部";
 function renderLearn(){
   const v = $("#view-learn");
   v.innerHTML = `<p class="eyebrow">不恐吓，不贩卖焦虑</p>
-    <h2 class="h-display">危害认知</h2>
+    <h2 class="h-display">认知与工具</h2>
     <p class="lede">靠恐惧驱动的改变通常撑不过几周。这里只讲能站住的部分，也会明确指出哪些流行说法被夸大了。</p>`;
-  const cats = [...new Set(ARTICLES.map(a => a.cat))];
-  cats.forEach(cat=>{
-    v.appendChild(el("h3","h-sec",cat));
-    ARTICLES.filter(a => a.cat === cat).forEach(a=>{
+
+  // 工具入口
+  const tools = [
+    { g:"👁️", n:"视觉管理", s:"灰度模式、信息流净化、拦截方案、环境隔断", fn:openVisualTools },
+    { g:"🎯", n:"冲动脱敏训练", s:"五级递进 · 从认知重构到正念观察", fn:openDesensList },
+    { g:"❓", n:"常见问题", s:FAQ.length + " 个问题的直接回答", fn:openHelp }
+  ];
+  tools.forEach(t=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${t.g}</span>
+      <span class="item-main"><span class="item-title">${esc(t.n)}</span><span class="item-sub">${esc(t.s)}</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = t.fn;
+    v.appendChild(b);
+  });
+
+  // 搜索
+  v.appendChild(el("h3","h-sec","科普文库"));
+  const box = el("input","search");
+  box.type = "search";
+  box.placeholder = "搜索文章标题或内容…";
+  box.value = learnQuery;
+  box.setAttribute("aria-label","搜索科普文章");
+  box.oninput = ()=>{
+    learnQuery = box.value;
+    paintList();
+  };
+  v.appendChild(box);
+
+  const cats = ["全部"].concat([...new Set(ARTICLES.map(a => a.cat))]);
+  const tagRow = el("div","tag-row");
+  cats.forEach(c=>{
+    const b = el("button","tag" + (learnCat === c ? " on" : ""), c);
+    b.onclick = ()=>{ learnCat = c; renderLearn(); setTimeout(()=>{ const i = $("#view-learn .search"); if(i) i.value = learnQuery; },0); };
+    tagRow.appendChild(b);
+  });
+  v.appendChild(tagRow);
+
+  const listWrap = el("div");
+  v.appendChild(listWrap);
+  const readN = ARTICLES.filter(a => S.read.includes(a.id)).length;
+  const prog = el("div");
+  prog.innerHTML = `<div class="row-between" style="margin:4px 0 8px"><span class="small">已读 ${readN} / ${ARTICLES.length}</span></div>
+    <div class="bar"><i style="width:${Math.round(readN/ARTICLES.length*100)}%"></i></div>`;
+  listWrap.appendChild(prog);
+
+  function paintList(){
+    Array.from(listWrap.querySelectorAll(".item")).forEach(n => n.remove());
+    const q = learnQuery.trim().toLowerCase();
+    const hits = ARTICLES.filter(a=>{
+      if(learnCat !== "全部" && a.cat !== learnCat) return false;
+      if(!q) return true;
+      return (a.title + a.cat + a.body).toLowerCase().includes(q);
+    });
+    if(!hits.length){
+      const e = el("div","item");
+      e.style.cssText = "justify-content:center;color:var(--text-3)";
+      e.textContent = "没有匹配的文章";
+      listWrap.appendChild(e);
+      return;
+    }
+    hits.forEach(a=>{
       const read = S.read.includes(a.id);
       const b = el("button","item");
       b.innerHTML = `<span class="item-glyph">${a.glyph}</span>
         <span class="item-main"><span class="item-title">${esc(a.title)}${read?' <span class="pill ok">已读</span>':""}</span>
-        <span class="item-sub">${a.min} 分钟阅读</span></span>
+        <span class="item-sub">${esc(a.cat)} · ${a.min} 分钟阅读</span></span>
         <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
       b.onclick = ()=> openArticle(a);
-      v.appendChild(b);
+      listWrap.appendChild(b);
     });
-  });
+  }
+  paintList();
 }
 function openArticle(a){
   const wrap = el("div","article");
@@ -2545,6 +2913,20 @@ function renderMe(){
   const v = $("#view-me");
   v.innerHTML = "";
   const d = cleanDays();
+  checkAchievements();
+
+  // 档案头
+  const st = petStage();
+  const head = el("div","card");
+  head.innerHTML = `<div class="row" style="gap:14px">
+      <div style="font-size:38px;line-height:1">${st.glyph}</div>
+      <div style="flex:1">
+        <div style="font-family:var(--font-display);font-size:19px;font-weight:600">${esc(S.nick || "旅人")}</div>
+        <div class="small">加入于 ${esc(S.relapses.length ? S.relapses[0].d : S.startDate)} · 第 ${d} 天 · ${esc(st.stage)}</div>
+      </div>
+      <span class="chip gold">◈ ${S.coins}</span>
+    </div>`;
+  v.appendChild(head);
 
   // 数据总览
   const ov = el("div","grid-2");
@@ -2627,21 +3009,42 @@ function renderMe(){
     v.appendChild(b);
   });
 
-  // 设置
-  v.appendChild(el("h3","h-sec","设置"));
-  const rows = [
-    { t:"重看诊断报告", s:"包含体质、诱因与方案", act:()=> showReport(false) },
-    { t:"每周复评", s:"7 天一次，用于调整方案", act:openReeval },
-    { t:"重新开始", s:"复发之后走这里 · 不会有羞辱", act:openRestart, danger:true },
-    { t:"清除全部数据", s:"不可恢复", act:wipe, danger:true }
+  // 功能入口
+  const groups = [
+    { title:"记录与分析", rows:[
+      { g:"📓", t:"情绪日记", s:(S.diary.filter(e=>e.text).length) + " 篇记录 · 每天写一点", act:openDiary },
+      { g:"📊", t:"统计详情", s:"冲动时段、心情分布、诱因图谱、复评趋势", act:openStats },
+      { g:"🏅", t:"成就墙", s:"已解锁 " + S.achieved.length + " / " + ACHIEVEMENTS.length, act:openAchievements },
+      { g:"📋", t:"诊断报告", s:"体质、诱因与康复方案", act:()=> showReport(false) },
+      { g:"📈", t:"每周复评", s:"和入职同题，看变化发生在哪里", act:openReeval }
+    ]},
+    { title:"支持系统", rows:[
+      { g:"💬", t:"心声墙", s:"匿名分享 · 本地保存", act:openCommunity },
+      { g:"🤝", t:"问责伙伴", s:S.contacts.length ? S.contacts.length + " 位伙伴" : "还没有添加", act:openBuddy },
+      { g:"🎯", t:"脱敏训练", s:"五级递进训练", act:openDesensList },
+      { g:"👁️", t:"视觉管理", s:"从源头减少刺激", act:openVisualTools }
+    ]},
+    { title:"应用", rows:[
+      { g:"⚙️", t:"设置", s:"档案、目标、提醒、外观、数据备份", act:openSettings },
+      { g:"❓", t:"帮助与常见问题", s:FAQ.length + " 个问题", act:openHelp },
+      { g:"🔒", t:"隐私说明", s:"你的数据在哪里、发给谁", act:openPrivacy },
+      { g:"🌱", t:"关于 Reborn", s:"设计理念与版本信息", act:openAbout }
+    ]},
+    { title:"重新开始", rows:[
+      { g:"🔁", t:"我破戒了", s:"三问复盘 · 累计天数不归零 · 不会有羞辱", act:openRestart, danger:true }
+    ]}
   ];
-  rows.forEach(r=>{
-    const b = el("button","item");
-    b.innerHTML = `<span class="item-main"><span class="item-title" style="${r.danger?"color:var(--danger)":""}">${esc(r.t)}</span>
-      <span class="item-sub">${esc(r.s)}</span></span>
-      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
-    b.onclick = r.act;
-    v.appendChild(b);
+  groups.forEach(grp=>{
+    v.appendChild(el("div","group-title", grp.title));
+    grp.rows.forEach(r=>{
+      const b = el("button","item");
+      b.innerHTML = `<span class="item-glyph">${r.g}</span>
+        <span class="item-main"><span class="item-title" style="${r.danger?"color:var(--danger)":""}">${esc(r.t)}</span>
+        <span class="item-sub">${esc(r.s)}</span></span>
+        <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+      b.onclick = r.act;
+      v.appendChild(b);
+    });
   });
 
   v.appendChild(el("div","disclaimer","Reborn 是自助工具，不提供医疗服务。所有数据仅保存在本设备浏览器中，不上传、不联网。如遇严重情绪危机，请立即联系当地心理援助热线或前往医院急诊。"));
@@ -2861,8 +3264,1225 @@ setInterval(()=>{
   }
 }, 60000);
 
+/* ============================================================
+   扩展内容数据
+   ============================================================ */
+
+/* --- 每日一言 --- */
+const QUOTES = [
+  ["冲动是暂时的，但你现在的选择会留下来。","急救中心"],
+  ["不是忍住不想，而是充实到不想。","Reborn 核心理念"],
+  ["天数是计分板，不是资产。","复发篇"],
+  ["改环境比改意志便宜得多。","诱因管理"],
+  ["你感受到的不是欲望强，而是基线低。","多巴胺篇"],
+  ["站桩时腿酸而不动，和冲动来时不动，是同一种能力。","古法锻炼"],
+  ["自责制造痛苦，复盘产生信息。","心理篇"],
+  ["如果你每天都觉得在忍，说明补的部分没跟上。","能量视角"],
+  ["成瘾记忆不会被删除，只会被覆盖。","神经科学篇"],
+  ["你不需要永远抵抗，只需要不在峰值时做决定。","15 分钟法则"],
+  ["空白就是入口。把时间填满，比守住时间容易。","习惯替代"],
+  ["跌倒之后还回来的人，比没跌倒的人更强。","重启篇"],
+  ["手机不进卧室——这一条的收益高于任何意志力训练。","环境隔断"],
+  ["恐惧驱动的改变撑不过几周，事实驱动的才撑得久。","认知重塑"],
+  ["它的状态跟着你的状态走。","伙伴系统"]
+];
+
+/* --- 成就系统（独立于里程碑） --- */
+const ACHIEVEMENTS = [
+  { id:"first_sos",  g:"🆘", n:"第一次求助",   d:"首次使用冲动急救",           chk:S => S.urges.length >= 1 },
+  { id:"sos_5",      g:"🌊", n:"五次浪过",     d:"扛过 5 次冲动",             chk:S => S.urges.filter(u=>u.resolved).length >= 5 },
+  { id:"sos_20",     g:"🏄", n:"弄潮儿",       d:"扛过 20 次冲动",            chk:S => S.urges.filter(u=>u.resolved).length >= 20 },
+  { id:"read_all",   g:"📚", n:"通读者",       d:"读完全部科普文章",           chk:S => ARTICLES.every(a=>S.read.includes(a.id)) },
+  { id:"prac_1",     g:"🧘", n:"初次入定",     d:"完成第一次功法练习",         chk:S => S.practice.length >= 1 },
+  { id:"prac_10",    g:"🎋", n:"勤修者",       d:"累计练功 10 次",            chk:S => S.practice.length >= 10 },
+  { id:"prac_50",    g:"⛩️", n:"功法大成",     d:"累计练功 50 次",            chk:S => S.practice.length >= 50 },
+  { id:"prac_all",   g:"🐲", n:"六艺俱通",     d:"六套功法各练过至少一次",     chk:S => PRACTICES.every(p=>S.practice.some(x=>x.id===p.id)) },
+  { id:"perfect_1",  g:"✨", n:"完美一日",     d:"完成某天的全部任务",         chk:S => Object.values(S.tasks).some(t=>t.__perfect) },
+  { id:"perfect_7",  g:"🌟", n:"完美一周",     d:"累计 7 个完美日",           chk:S => Object.values(S.tasks).filter(t=>t.__perfect).length >= 7 },
+  { id:"diary_1",    g:"📓", n:"开始记录",     d:"写下第一篇日记",            chk:S => (S.diary||[]).length >= 1 },
+  { id:"diary_30",   g:"📔", n:"三十日志",     d:"累计 30 篇日记",            chk:S => (S.diary||[]).length >= 30 },
+  { id:"early_bird", g:"🌅", n:"早起的人",     d:"在 6 点前打开过应用",        chk:S => S.eggs.some(e=>e.startsWith("dawn:")) },
+  { id:"night_owl",  g:"🌌", n:"深夜访客",     d:"在深夜打开过应用（不是好事）",chk:S => S.eggs.some(e=>e.startsWith("night:")) },
+  { id:"comeback",   g:"🌱", n:"重新站起",     d:"复发后第二天照常打卡",       chk:S => S.eggs.some(e=>e.startsWith("comeback:")) },
+  { id:"reeval_1",   g:"📈", n:"回头看看",     d:"完成一次每周复评",           chk:S => S.ratings.length >= 1 },
+  { id:"reeval_4",   g:"📊", n:"月度观察",     d:"完成 4 次每周复评",         chk:S => S.ratings.length >= 4 },
+  { id:"rich",       g:"💰", n:"小有积蓄",     d:"金币累计达到 1000",         chk:S => (S.coinsEver||S.coins) >= 1000 },
+  { id:"pet_named",  g:"🏷️", n:"取名字",       d:"给伙伴起了名字",            chk:S => !!S.pet.name },
+  { id:"pet_happy",  g:"💚", n:"照料有方",     d:"伙伴三项状态同时达到 90",    chk:S => S.pet.hunger>=90 && S.pet.mood>=90 && S.pet.energy>=90 },
+  { id:"guard",      g:"🛡️", n:"筑起防线",     d:"设置过今晚防护",            chk:S => Object.values(S.tasks).some(t=>t.guard) },
+  { id:"desens",     g:"🎯", n:"脱敏入门",     d:"完成一次脱敏训练",          chk:S => (S.desens||[]).length >= 1 },
+  { id:"meditate",   g:"☯️", n:"静心",         d:"累计冥想 60 分钟",          chk:S => (S.medMin||0) >= 60 },
+  { id:"water_full", g:"💧", n:"水足",         d:"某天喝满 8 杯水",           chk:S => Object.values(S.water||{}).some(v=>v>=8) }
+];
+
+/* --- 冥想引导（独立模块） --- */
+const MEDITATIONS = [
+  { id:"count", n:"数息", g:"🔢", min:10, lv:"入门",
+    intro:"最基础也最可靠的法门。呼气时数数，从一到十，再回到一。念头跑掉了就重新从一开始——这不是失败，重新开始本身就是练习。",
+    steps:[[60,"安坐","找一个舒服的坐姿，脊柱正直而不僵硬。眼帘微垂，或完全闭上。"],
+           [60,"三次深呼吸","先用力吸满，缓缓吐尽。做三次，把胸中的浊气换掉。"],
+           [240,"开始数息","呼气时在心里数「一」，再呼数「二」……到十，回到一。"],
+           [180,"继续","念头来了很正常。发现自己走神的那一刻，就是觉察生起的时刻。从一重新开始。"],
+           [60,"收","停止计数，静坐片刻。缓缓睁眼，动一动手指脚趾。"]] },
+  { id:"observe", n:"观息", g:"🌬️", min:12, lv:"入门",
+    intro:"不数数，只是知道气进来了、气出去了。比数息更细，也更容易走神。",
+    steps:[[60,"安坐","坐定，让呼吸自然，不控制长短深浅。"],
+           [120,"找到触点","注意鼻孔边缘那一点点凉与暖的差别。吸气微凉，呼气微温。"],
+           [240,"只是知道","注意力就放在那一点上。不评判呼吸的好坏，只是知道它在发生。"],
+           [240,"变细","随着练习，呼吸会自然变细变长。不要人为拉长，让它自己发生。"],
+           [60,"收","把注意力扩大回整个身体，缓缓睁眼。"]] },
+  { id:"bodyscan", n:"身体扫描", g:"🫧", min:15, lv:"进阶",
+    intro:"从头到脚逐段觉察。对长期紧绷、失眠、身心分离感特别有用，也是睡前的好选择。",
+    steps:[[60,"躺下或坐好","平躺最好。双手放身体两侧，掌心向上。"],
+           [120,"头面","把注意力放到头顶，慢慢移到额头、眼睛、脸颊、下颌。注意哪里在用力，然后松开。"],
+           [150,"颈肩","颈部、肩膀——这是最常积累紧张的地方。呼气时想象它们变沉、往下落。"],
+           [150,"手臂","上臂、肘、前臂、手掌、每一根手指。"],
+           [180,"躯干","胸口、上腹、下腹、后背、腰。感受呼吸时躯干的起伏。"],
+           [180,"下肢","臀、大腿、膝、小腿、脚踝、脚掌、脚趾。"],
+           [90,"整体","把整个身体当作一个整体来感受。它就在这里，完整地在这里。"],
+           [60,"收","如果要睡就直接睡；如果要起，先动手指脚趾，侧身再坐起。"]] },
+  { id:"loving", n:"慈心", g:"💗", min:12, lv:"进阶",
+    intro:"针对自我厌恶设计。研究一致显示：自我羞辱越重，复发越快。这个练习直接处理那个根。",
+    steps:[[60,"安坐","坐定，把手轻放在胸口。感受手掌下的温度和心跳。"],
+           [150,"对自己","在心里默念：愿我平安，愿我健康，愿我不被自己苛责。如果觉得别扭，那正说明需要练。"],
+           [150,"对亲近的人","想起一个你在乎的人，把同样的话送给他：愿你平安，愿你健康。"],
+           [150,"对中性的人","想起一个见过但不熟的人——便利店店员、同一班车的人。同样的祝愿。"],
+           [150,"对困难的人","想起一个让你不舒服的人。做不到也没关系，试着说出口就有效。"],
+           [90,"对所有人","愿所有正在挣扎的人都能得到帮助。包括此刻和你做着同样练习的陌生人。"],
+           [60,"收","把手放下，静坐片刻。"]] },
+  { id:"urge_surf", n:"冲动冲浪", g:"🏄", min:8, lv:"专项",
+    intro:"专门为冲动设计。不压制、不对抗，把冲动当成一道浪——你只是骑在上面，等它自己过去。",
+    steps:[[45,"承认它","先在心里说：冲动来了。不加评判，只是承认。对抗会加强它。"],
+           [90,"定位","它在身体的哪里？小腹？胸口？喉咙？找到那个位置。"],
+           [90,"描述","它是什么质感？热的、紧的、麻的、跳动的？像描述天气一样描述它。"],
+           [120,"观察变化","盯着那个感觉。它是恒定不变的吗？还是一阵强一阵弱？浪从来不是平的。"],
+           [120,"呼吸穿过它","想象呼吸能穿过那个部位。吸气时空间变大，呼气时松一点。"],
+           [90,"等待回落","浪在退了。你什么都没做，它自己在退——这就是它的本来面目。"],
+           [45,"收","睁眼。记住这个过程：你刚刚证明了不需要行动，它也会过去。"]] }
+];
+
+/* --- 冲动脱敏五级训练（文档 5.2.3） --- */
+const DESENS_LEVELS = [
+  { lv:1, n:"认知重构", g:"🧠", unlock:0, dur:"3 分钟", theory:"CBT 认知行为疗法",
+    what:"冲动来时，先不做任何行动，只做一件事：核查这个念头的真假。",
+    how:["问自己：这是真的需求，还是多巴胺在讨价还价？",
+         "回忆上一次结束后 10 分钟的真实感受，而不是此刻的预测。",
+         "把「我想要」改写成「我的大脑正在要求一次多巴胺」——换个说法，掌控感就回来了。"],
+    why:"冲动会伪装成需求。语言上把两者分开，前额叶就重新上线了。" },
+  { lv:2, n:"身体接地", g:"🧊", unlock:3, dur:"3–5 分钟", theory:"迷走神经刺激",
+    what:"把注意力从念头强行拉回身体。念头活在未来，身体只在当下。",
+    how:["5-4-3-2-1 感官练习：说出 5 样看见的、4 种摸到的、3 种听见的、2 种闻到的、1 种尝到的。",
+         "冷水洗脸 30 秒，或用冷水冲手腕内侧。",
+         "赤脚踩在地板上，感受每一个接触点。"],
+    why:"冷刺激通过迷走神经在几十秒内降低交感兴奋，是最快的物理开关。" },
+  { lv:3, n:"能量转移", g:"💪", unlock:7, dur:"2–10 分钟", theory:"内啡肽替代",
+    what:"不压制冲动，而是把那股能量导到别的出口。",
+    how:["20 个俯卧撑，或做到力竭。",
+         "30 秒原地冲刺 / 高抬腿，要真的喘起来。",
+         "冷水澡 30 秒起步，逐渐延长。"],
+    why:"运动释放的内啡肽能填上多巴胺留下的空缺，比单纯忍耐有效得多。" },
+  { lv:4, n:"渐进暴露", g:"👁️", unlock:21, dur:"5–15 分钟", theory:"暴露疗法",
+    what:"在受控条件下接触轻度触发物，练习「看见但不反应」。这是主动训练，不是放纵。",
+    how:["设定明确的时间上限（比如 10 分钟）和内容边界（只到社交媒体层级，绝不越界）。",
+         "过程中持续观察身体反应，把注意力放在「我现在感觉如何」，而不是内容本身。",
+         "到点必停。停下来的那一刻才是训练真正生效的地方。",
+         "结束后立刻记录：强度多少？停下来难吗？"],
+    why:"完全回避会让触发物的力量越攒越大。可控的暴露能逐步降低敏感度——但顺序不能颠倒，前三级没稳固就做这个是有风险的。",
+    warn:"这一级有风险。前三级没有稳定掌握之前不要尝试，处在排毒期（前 14 天）的人应直接跳过。" },
+  { lv:5, n:"正念观察", g:"☁️", unlock:45, dur:"5–10 分钟", theory:"正念减压 MBSR",
+    what:"最高一级：不做任何事。把冲动当成飘过的云，看着它来，看着它走。",
+    how:["承认它：冲动来了。不加评判。",
+         "定位它在身体的哪个部位，描述它的质感。",
+         "观察它的强度变化——它从来不是恒定的。",
+         "什么都不做，等它自己退。"],
+    why:"到这一级，你不再需要工具。冲动只是一个可以被观察的现象，而不是必须被处理的紧急事件。" }
+];
+
+/* --- 视觉管理（文档 5.2.4） --- */
+const VISUAL_TOOLS = [
+  { id:"gray", g:"⬜", n:"灰度模式", s:"一键把手机变黑白",
+    body:`<p>色彩是刺激强度的重要来源。把屏幕变成黑白，几乎所有内容的吸引力都会明显下降——这是成本最低、见效最快的一招。</p>
+    <h3>iOS</h3><ul><li>设置 → 辅助功能 → 显示与文字大小 → 色彩滤镜 → 打开 → 选「灰度」</li>
+    <li>进阶：设置 → 辅助功能 → 辅助功能快捷键 → 勾选「色彩滤镜」。之后连按三次侧边键即可开关。</li></ul>
+    <h3>Android</h3><ul><li>设置 → 数字健康与家长控制 → 就寝模式 → 灰度</li>
+    <li>或：开发者选项 → 模拟颜色空间 → 全色盲</li></ul>
+    <h3>电脑</h3><ul><li>Windows：设置 → 辅助功能 → 颜色滤镜 → 灰度</li>
+    <li>macOS：系统设置 → 辅助功能 → 显示器 → 颜色滤镜 → 灰度</li></ul>
+    <blockquote>建议先在晚上开启。白天需要看图片工作时再关掉，用快捷键切换很方便。</blockquote>` },
+  { id:"feed", g:"🧹", n:"信息流净化", s:"从源头切断推荐",
+    body:`<p>算法不会因为你「忍住不点」就停止推送——恰恰相反，你的每一次停留都在训练它。必须从源头处理。</p>
+    <h3>三步清理</h3>
+    <ul><li><strong>取关。</strong>打开关注列表，逐个过一遍。标准很简单：看到它你会不会想起那件事？会就取关，不要犹豫「但内容其实还不错」。</li>
+    <li><strong>训练算法。</strong>刷到擦边内容时，长按选「不感兴趣」「减少此类内容」。做几十次算法就会调整。</li>
+    <li><strong>重建订阅。</strong>主动关注健身、知识、手艺、自然类账号，把推荐位占满。空出来的位置一定会被填上，你得先占住。</li></ul>
+    <h3>各平台入口</h3>
+    <ul><li>抖音/TikTok：长按视频 → 不感兴趣；我 → 设置 → 内容偏好</li>
+    <li>Instagram：Settings → Suggested content → 屏蔽关键词</li>
+    <li>微博/X：设置 → 隐私 → 屏蔽关键词</li>
+    <li>YouTube：历史记录 → 暂停观看记录；对推荐视频选「不感兴趣」</li></ul>
+    <blockquote>清理一次不够。设一个每月复查的提醒——算法会慢慢试探回来。</blockquote>` },
+  { id:"block", g:"🚧", n:"拦截与阻断", s:"给冲动加物理门槛",
+    body:`<p>Reborn 本身不做拦截（网页应用没有这个权限），但拦截确实有用——它的价值不是「拦得住」，而是在冲动和行动之间加一道门槛，给理智争取几秒钟。</p>
+    <h3>系统自带（免费且够用）</h3>
+    <ul><li><strong>iOS 屏幕使用时间</strong>：设置 → 屏幕使用时间 → 内容与隐私访问限制 → 内容限制 → 网页内容 → 限制成人网站。可加自定义网址，并单独设一个密码（不要和解锁密码一样）。</li>
+    <li><strong>Android Family Link / 数字健康</strong>：可设应用时限与网站过滤。</li>
+    <li><strong>路由器 DNS</strong>：把 DNS 改成有过滤功能的服务，全家设备一起生效，绕过成本最高——这一招常被低估。</li></ul>
+    <h3>关键细节</h3>
+    <ul><li>密码交给别人保管，或设成一长串随机字符存在你拿不到的地方。自己知道密码的拦截等于没拦。</li>
+    <li>拦截要在状态好的时候设置。冲动时才想起来设，已经晚了。</li></ul>
+    <blockquote>拦截只是第一层。只堵不疏，压抑久了反弹更强——这也是本应用把重心放在「补」上的原因。</blockquote>` },
+  { id:"env", g:"🏠", n:"环境隔断", s:"改环境比改意志便宜",
+    body:`<p>意志力是消耗品，环境不是。每一条环境规则都是一次性投入、长期生效。</p>
+    <h3>按收益排序</h3>
+    <ul><li><strong>手机不进卧室。</strong>单条收益最高。买个便宜闹钟替代手机闹铃，成本二十块。</li>
+    <li><strong>固定关机时间。</strong>把整段高危时间直接拿掉，而不是在里面抵抗。</li>
+    <li><strong>门开着。</strong>独处时把房门开着，社会性存在感能显著降低发生概率。</li>
+    <li><strong>换姿势。</strong>不在床上用手机，只在书桌前用。姿势本身就是线索。</li>
+    <li><strong>洗澡限时。</strong>手机留在浴室外，控制在 10 分钟。</li></ul>
+    <blockquote>不用一次全做。挑最容易的一条，坚持一周，再加下一条。</blockquote>` }
+];
+
+/* --- FAQ --- */
+const FAQ = [
+  { q:"戒多久才算「好了」？", a:"没有一个明确的终点。多数人在 60–90 天感到明显变化：现实中的小事重新有滋味、专注时长回升、冲动频率大幅下降。但成瘾记忆不会被删除，只会被覆盖，所以之后是维护而不是结束。把它当成体重管理而不是一场考试。" },
+  { q:"破戒了，前面的天数是不是白费了？", a:"不是。天数是计分板，不是资产。你在这段时间里建立的习惯、认知和身体状态都还在。真正决定长期结果的不是这一次，而是之后 24 小时的反应——是自我惩罚然后连续失控，还是复盘一下第二天照常打卡。应用里的「重新开始」会记录累计清醒天数，那个数字永远不归零。" },
+  { q:"为什么强调「补」而不是「戒」？", a:"只做戒的人通常会经历空虚期：旧的快感来源断了，新的没建立，每天都在硬扛，很难维持几周。补的目的是把多巴胺基线抬回来——基线上来了，冲动的相对吸引力自然下降。判断标准很简单：如果你每天都觉得在忍，说明补的部分没跟上。" },
+  { q:"中医那些内容有科学依据吗？", a:"要分开看。八段锦、站桩这类属于低强度运动加呼吸训练，运动本身的收益是明确的。体质辨识和食疗属于传统经验框架，不是现代医学诊断，应用里也标注了「非医疗建议」。我们不夸大它，但也不因为它不属于现代医学就丢掉——它提供的是一套可操作的日常结构，而这正是多数人缺的。" },
+  { q:"每天必须全部做完吗？", a:"不必。任务清单是建议不是考核。做一半也比不做强。真正需要每天守住的只有两条：不在高危时段独处、冲动来时用急救工具而不是硬扛。" },
+  { q:"冲动来的时候我什么都想不起来怎么办？", a:"这很正常——冲动峰值时前额叶功能是被压制的。所以急救按钮设计成一直挂在屏幕上，不需要你想起任何东西，点它就行。后面每一步都有引导，你只要跟着做。" },
+  { q:"数据会上传吗？会被别人看到吗？", a:"不会。这个应用没有服务器、没有账号、不联网。所有数据存在你自己浏览器的本地存储里。你可以在「设置 → 数据管理」里导出备份，也可以一键清空。清除浏览器数据就等于彻底删除。" },
+  { q:"能拦截网站吗？", a:"网页应用没有这个系统权限。但「科普 → 视觉管理 → 拦截与阻断」里给了完整方案，用系统自带功能（iOS 屏幕使用时间、路由器 DNS）就够了，而且免费。" },
+  { q:"教练是真的 AI 吗？", a:"不是。它是一套按 CBT 原则编写的引导式对话脚本，有固定的分支路径。我们没有把它包装成 AI，因为在这个场景里，说清楚它是什么比显得高级更重要。它无法处理危机情况——如果有自伤念头，请立即联系专业心理援助。" },
+  { q:"渐进暴露训练（Level 4）安全吗？", a:"有风险，所以设了 Day 21 的解锁门槛，界面里也有明确警告。排毒期（前 14 天）的人应该直接跳过。它的原理是完全回避会让触发物的力量越攒越大，但顺序不能颠倒——前三级没稳固就做这个，很可能变成放纵的借口。不确定就不要做，跳过它不影响康复。" },
+  { q:"伙伴（动物）会死吗？", a:"不会。状态低的时候它会萎靡，但不会消失，也不会有惩罚。这是刻意的设计——羞耻感会提高复发率，我们不打算用愧疚绑架你。" },
+  { q:"可以在电脑上用吗？", a:"可以，任何现代浏览器都行。数据按浏览器分开存储，所以手机和电脑的记录不互通。建议固定用一台设备，或者定期用导出功能同步。" }
+];
+
+/* --- 社区（本地示例内容，非真实用户） --- */
+const COMMUNITY_SEED = [
+  { id:"c1", n:"Day 47", t:"今天第一次觉得「好像不需要它了」", b:"不是忍住了，是压根没想起来。晚上练完站桩洗完澡，躺下就睡着了。四十多天来第一次有这种感觉，记录一下。", l:128, tag:"进展" },
+  { id:"c2", n:"Day 9", t:"排毒期真的难", b:"第九天，情绪特别不稳定，一会儿烦躁一会儿低落。看了科普才知道这是受体上调的过程，不是我意志薄弱。心里好受一点了。", l:96, tag:"求助" },
+  { id:"c3", n:"Day 120", t:"给新人的三条建议", b:"一，手机别进卧室，这一条顶十条。二，别指望靠意志力，靠环境。三，破戒了别自责，第二天照常打卡就行——我复发过四次才到今天。", l:342, tag:"经验" },
+  { id:"c4", n:"Day 23", t:"八段锦真的有用吗？", b:"练了三周，说实话身体变化不大，但有个意外收获：睡前练完之后特别容易入睡，以前躺一小时睡不着。就冲这个我也会继续练。", l:71, tag:"讨论" },
+  { id:"c5", n:"Day 5", t:"第三次重新开始了", b:"前两次分别坚持了 11 天和 6 天。这次想换个思路，不盯着天数了，就每天把任务做完。看看能走多远。", l:154, tag:"重启" },
+  { id:"c6", n:"Day 66", t:"66 天了，说点实话", b:"专注力确实回来了，能连续看两小时书。但也没有网上说的那么神，没有变成另一个人。它只是让我拿回了本来就该属于我的东西。", l:203, tag:"经验" },
+  { id:"c7", n:"Day 31", t:"关于孤独", b:"发现我大部分冲动都发生在孤独的时候。最近开始每周约一次朋友吃饭，效果比任何拦截软件都好。孤独需要的是真实连接，不是替代品。", l:167, tag:"经验" },
+  { id:"c8", n:"Day 14", t:"两周了，记录一下身体变化", b:"晨勃恢复了，黑眼圈淡了一点，最明显的是不那么容易累。以前下午三点就困得不行，现在能撑到晚上。", l:88, tag:"进展" }
+];
+const COMMUNITY_TAGS = ["全部","进展","经验","求助","讨论","重启"];
+
+/* --- 日记提示 --- */
+const DIARY_PROMPTS = [
+  "今天最难的一刻是什么时候？你怎么过去的？",
+  "今天有没有哪个瞬间，你觉得自己在变好？",
+  "如果明天的你能给今天的你一句话，会是什么？",
+  "今天的情绪主要来自哪里？",
+  "有没有什么事，是你一直想做但一直没做的？",
+  "今天你对自己说过最狠的一句话是什么？如果是朋友这样，你会怎么跟他说？",
+  "这周有什么变化是你自己能感觉到的？",
+  "今天有没有一件小事让你觉得值得？"
+];
+const MOODS = [
+  { k:"great", g:"😊", n:"很好" },
+  { k:"ok",    g:"🙂", n:"还行" },
+  { k:"flat",  g:"😐", n:"平淡" },
+  { k:"down",  g:"😔", n:"低落" },
+  { k:"anx",   g:"😰", n:"焦虑" },
+  { k:"angry", g:"😤", n:"烦躁" }
+];
+
+/* ============================================================
+   状态迁移（为老数据补齐新字段）
+   ============================================================ */
+function migrate(){
+  const d = {
+    diary:[], water:{}, sleep:{}, medMin:0, desens:[], achieved:[],
+    posts:[], contacts:[], coinsEver:0, nick:"",
+    settings:{ remind:false, remindTime:"21:30", motion:true, fontScale:1, hideNumbers:false },
+    likes:[]
+  };
+  for(const k in d){ if(S[k] === undefined) S[k] = d[k]; }
+  for(const k in d.settings){ if(S.settings[k] === undefined) S.settings[k] = d.settings[k]; }
+  if(!S.coinsEver || S.coinsEver < S.coins) S.coinsEver = S.coins;
+  save();
+}
+migrate();
+
+/* 记录累计获得的金币 */
+const _addCoins = addCoins;
+addCoins = function(n, why){ S.coinsEver = (S.coinsEver||0) + n; _addCoins(n, why); };
+
+/* ---------- 成就检查 ---------- */
+function checkAchievements(){
+  const fresh = [];
+  for(const a of ACHIEVEMENTS){
+    if(S.achieved.includes(a.id)) continue;
+    let ok = false;
+    try{ ok = a.chk(S); }catch(e){ ok = false; }
+    if(ok){ S.achieved.push(a.id); fresh.push(a); }
+  }
+  if(fresh.length){
+    save();
+    fresh.forEach((a,i) => setTimeout(()=> toast(a.g + " 成就解锁 · " + a.n, true), 600 + i*1400));
+    addCoins(fresh.length * 30, "成就奖励");
+  }
+  return fresh;
+}
+
+/* ---------- 字号与动效设置 ---------- */
+function applyPrefs(){
+  document.documentElement.style.fontSize = (16 * (S.settings.fontScale||1)) + "px";
+  document.body.classList.toggle("no-motion", !S.settings.motion);
+}
+
+/* ============================================================
+   新页面：情绪日记
+   ============================================================ */
+function openDiary(){
+  const wrap = el("div");
+  function paint(){
+    wrap.innerHTML = "";
+    const t = today();
+    const todayEntry = S.diary.find(e => e.d === t);
+
+    // 今日心情
+    const mc = el("div","card");
+    mc.innerHTML = `<b style="font-size:14.5px">今天心情如何？</b>`;
+    const mrow = el("div","mood-row");
+    MOODS.forEach(m=>{
+      const b = el("button","mood-btn" + (todayEntry && todayEntry.mood === m.k ? " on" : ""));
+      b.innerHTML = `<span class="mood-g">${m.g}</span><span>${m.n}</span>`;
+      b.onclick = ()=>{
+        let e = S.diary.find(x => x.d === t);
+        if(!e){ e = { d:t, mood:m.k, text:"" }; S.diary.push(e); }
+        else e.mood = m.k;
+        save(); checkAchievements(); paint();
+      };
+      mrow.appendChild(b);
+    });
+    mc.appendChild(mrow);
+    wrap.appendChild(mc);
+
+    // 写日记
+    const wc = el("div","card");
+    const prompt = DIARY_PROMPTS[daysBetween(S.startDate, t) % DIARY_PROMPTS.length];
+    wc.innerHTML = `<b style="font-size:14.5px">今天的记录</b>
+      <p class="small" style="margin:4px 0 9px;color:var(--accent)">${esc(prompt)}</p>`;
+    const ta = el("textarea");
+    ta.className = "ta";
+    ta.rows = 6;
+    ta.placeholder = "想到什么写什么。没人会看到。";
+    ta.value = todayEntry ? todayEntry.text : "";
+    ta.setAttribute("aria-label","今日日记内容");
+    wc.appendChild(ta);
+    const sb = el("button","btn block","保存");
+    sb.style.marginTop = "10px";
+    sb.onclick = ()=>{
+      const v = ta.value.trim();
+      if(!v && !(todayEntry && todayEntry.mood)){ toast("写点什么，或者先选个心情"); return; }
+      let e = S.diary.find(x => x.d === t);
+      if(!e){ e = { d:t, mood:"", text:v }; S.diary.push(e); }
+      else e.text = v;
+      save();
+      if(v) addCoins(15,"写下今日记录");
+      checkAchievements();
+      toast("已保存 📓");
+      paint();
+    };
+    wc.appendChild(sb);
+    wrap.appendChild(wc);
+
+    // 历史
+    const past = S.diary.filter(e => e.d !== t && (e.text || e.mood)).sort((a,b) => b.d.localeCompare(a.d));
+    if(past.length){
+      wrap.appendChild(el("h3","h-sec","过往记录 · " + past.length + " 篇"));
+      past.slice(0,40).forEach(e=>{
+        const m = MOODS.find(x => x.k === e.mood);
+        const c = el("div","card");
+        c.innerHTML = `<div class="row-between" style="margin-bottom:6px">
+            <span class="num small">${esc(e.d)}</span>
+            <span style="font-size:17px">${m ? m.g : ""}</span></div>
+          ${e.text ? `<p class="small" style="margin:0;color:var(--text-2);white-space:pre-wrap">${esc(e.text)}</p>` : '<p class="small" style="margin:0;opacity:.6">（只记录了心情）</p>'}`;
+        wrap.appendChild(c);
+      });
+    } else {
+      wrap.appendChild(el("div","empty",'<div class="empty-glyph">📓</div><p class="small">还没有过往记录。<br>每天写一点，两周后回头看会很有意思。</p>'));
+    }
+  }
+  paint();
+  openSheet("情绪日记", wrap);
+}
+
+/* ============================================================
+   新页面：统计详情 / 诱因图谱
+   ============================================================ */
+function openStats(){
+  const wrap = el("div");
+  const d = cleanDays();
+
+  // 冲动时段分布
+  const byHour = new Array(24).fill(0);
+  S.urges.forEach(u=>{ const h = new Date(u.ts).getHours(); if(!isNaN(h)) byHour[h]++; });
+  const maxH = Math.max(...byHour, 1);
+  const hasUrge = S.urges.length > 0;
+
+  wrap.innerHTML = `<p class="eyebrow">你的成瘾模式图谱</p>
+    <h2 class="h-display">数据里的你</h2>
+    <p class="lede">这些图不是为了打分，是为了让你看见规律。规律一旦看见，就能提前布防。</p>`;
+
+  // 总览
+  const ov = el("div","grid-2");
+  [["累计练功", S.practice.length + " 次"],
+   ["冥想时长", (S.medMin||0) + " 分钟"],
+   ["日记篇数", S.diary.filter(e=>e.text).length + " 篇"],
+   ["扛过冲动", S.urges.filter(u=>u.resolved).length + " 次"]].forEach(([l,n])=>{
+    const c = el("div","card");
+    c.innerHTML = `<div class="small" style="margin-bottom:2px">${l}</div>
+      <div class="num" style="font-size:21px;font-weight:700">${n}</div>`;
+    ov.appendChild(c);
+  });
+  wrap.appendChild(ov);
+
+  // 冲动时段
+  wrap.appendChild(el("h3","h-sec","冲动的时段分布"));
+  const hc = el("div","card");
+  if(hasUrge){
+    const bars = el("div","hour-chart");
+    for(let h = 0; h < 24; h++){
+      const col = el("div","hour-col");
+      const fill = el("div","hour-bar");
+      fill.style.height = Math.max(3, byHour[h]/maxH*100) + "%";
+      if(byHour[h] === maxH && maxH > 0) fill.classList.add("peak");
+      col.appendChild(fill);
+      if(h % 6 === 0) col.appendChild(el("span","hour-lab", String(h)));
+      bars.appendChild(col);
+    }
+    hc.appendChild(bars);
+    const peak = byHour.indexOf(maxH);
+    hc.appendChild(el("p","small","峰值在 " + peak + ":00 前后。把防护提前到这个点之前，比在里面抵抗省力。"));
+  } else {
+    hc.appendChild(el("div","empty",'<div class="empty-glyph">📊</div><p class="small">还没有冲动记录。<br>用过急救按钮之后，这里会显示时段分布。</p>'));
+  }
+  wrap.appendChild(hc);
+
+  // 心情分布
+  const moodCount = {};
+  S.diary.forEach(e=>{ if(e.mood) moodCount[e.mood] = (moodCount[e.mood]||0)+1; });
+  const moodTotal = Object.values(moodCount).reduce((a,b)=>a+b,0);
+  wrap.appendChild(el("h3","h-sec","心情分布"));
+  const mc = el("div","card");
+  if(moodTotal){
+    MOODS.forEach(m=>{
+      const n = moodCount[m.k]||0;
+      const pct = Math.round(n/moodTotal*100);
+      const row = el("div","stat-line");
+      row.style.marginBottom = "8px";
+      row.innerHTML = `<b>${m.g} ${m.n}</b><div class="bar"><i style="width:${pct}%"></i></div><span>${pct}%</span>`;
+      mc.appendChild(row);
+    });
+  } else {
+    mc.appendChild(el("div","empty",'<div class="empty-glyph">🙂</div><p class="small">还没有心情记录。<br>在情绪日记里选一个心情就会出现。</p>'));
+  }
+  wrap.appendChild(mc);
+
+  // 诱因图谱
+  wrap.appendChild(el("h3","h-sec","诱因图谱"));
+  const tc = el("div","card");
+  const rep = S.report;
+  if(rep && rep.triggers && rep.triggers.length){
+    tc.innerHTML = `<p class="small" style="margin:0 0 10px">来自入职测评。每次复发复盘的结果也会汇总到这里。</p>`;
+    rep.triggers.forEach(t=>{
+      const row = el("div","stat-line");
+      row.style.marginBottom = "8px";
+      row.innerHTML = `<b>${esc(T_LABEL[t.k]||t.k)}</b><div class="bar"><i style="width:${t.pct}%"></i></div><span>${t.pct}%</span>`;
+      tc.appendChild(row);
+    });
+  }
+  // 复发复盘汇总
+  if(S.relapses.length){
+    const sceneCount = {}, emoCount = {};
+    S.relapses.forEach(r=>{
+      if(r.why && r.why.scene) sceneCount[r.why.scene] = (sceneCount[r.why.scene]||0)+1;
+      if(r.why && r.why.emotion) emoCount[r.why.emotion] = (emoCount[r.why.emotion]||0)+1;
+    });
+    const top = o => Object.entries(o).sort((a,b)=>b[1]-a[1])[0];
+    const ts = top(sceneCount), te = top(emoCount);
+    const sum = el("div","alert");
+    sum.style.marginTop = "12px";
+    sum.innerHTML = `<div class="alert-title">${S.relapses.length} 次复盘的共同点</div>
+      <p>${ts ? "最常见的场景是「" + esc(ts[0]) + "」（" + ts[1] + " 次）。" : ""}
+         ${te ? "最常见的情绪是「" + esc(te[0]) + "」（" + te[1] + " 次）。" : ""}
+         ${!ts && !te ? "复盘数据还不够，多记几次就能看出模式。" : "针对这两点提前布防，收益最高。"}</p>`;
+    tc.appendChild(sum);
+  }
+  wrap.appendChild(tc);
+
+  // 复评趋势
+  if(S.ratings.length >= 2){
+    wrap.appendChild(el("h3","h-sec","复评趋势"));
+    const rc = el("div","card");
+    [["fatigue","疲劳程度"],["focus","专注力"],["anxiety","焦虑程度"],["low","情绪低落"]].forEach(([k,l])=>{
+      const series = S.ratings.map(r => r.v[k]).filter(x => x != null);
+      if(series.length < 2) return;
+      const row = el("div");
+      row.style.marginBottom = "14px";
+      const first = series[0], last = series[series.length-1];
+      const delta = last - first;
+      row.innerHTML = `<div class="row-between" style="margin-bottom:5px">
+        <b style="font-size:13.5px">${l}</b>
+        <span class="pill ${delta<0?"ok":delta>0?"crit":""}">${delta<0?"改善 "+Math.abs(delta):delta>0?"上升 "+delta:"持平"}</span></div>`;
+      row.appendChild(sparkline(series.map(x => 11-x)));
+      rc.appendChild(row);
+    });
+    wrap.appendChild(rc);
+  }
+
+  // 练功统计
+  if(S.practice.length){
+    wrap.appendChild(el("h3","h-sec","功法练习统计"));
+    const pc = el("div","card");
+    PRACTICES.forEach(p=>{
+      const n = S.practice.filter(x => x.id === p.id).length;
+      if(!n) return;
+      const mins = S.practice.filter(x => x.id === p.id).reduce((s,x)=>s+x.min,0);
+      const row = el("div","row-between");
+      row.style.padding = "7px 0";
+      row.innerHTML = `<span style="font-size:13.5px">${p.glyph} ${esc(p.name)}</span>
+        <span class="num small">${n} 次 · ${mins} 分钟</span>`;
+      pc.appendChild(row);
+    });
+    wrap.appendChild(pc);
+  }
+
+  openSheet("统计详情", wrap);
+}
+
+/* ============================================================
+   新页面：成就墙
+   ============================================================ */
+function openAchievements(){
+  checkAchievements();
+  const wrap = el("div");
+  const got = S.achieved.length;
+  wrap.innerHTML = `<p class="eyebrow">已解锁 ${got} / ${ACHIEVEMENTS.length}</p>
+    <h2 class="h-display">成就</h2>
+    <p class="lede">成就不是为了炫耀，是为了让看不见的进展变得看得见。</p>`;
+  const bar = el("div","bar gold");
+  bar.innerHTML = `<i style="width:${Math.round(got/ACHIEVEMENTS.length*100)}%"></i>`;
+  wrap.appendChild(bar);
+  const wall = el("div","badge-wall");
+  wall.style.marginTop = "18px";
+  ACHIEVEMENTS.forEach(a=>{
+    const on = S.achieved.includes(a.id);
+    const b = el("div","badge " + (on ? "on" : "off"));
+    b.innerHTML = `<div class="badge-glyph">${on ? a.g : "🔒"}</div><div class="badge-name">${esc(a.n)}</div>`;
+    b.title = a.d;
+    b.onclick = ()=> toast(a.n + " · " + a.d);
+    wall.appendChild(b);
+  });
+  wrap.appendChild(wall);
+  wrap.appendChild(el("h3","h-sec","全部条件"));
+  ACHIEVEMENTS.forEach(a=>{
+    const on = S.achieved.includes(a.id);
+    const r = el("div","row");
+    r.style.cssText = "padding:9px 0;border-bottom:1px solid var(--line);gap:11px";
+    r.innerHTML = `<span style="font-size:19px;${on?"":"filter:grayscale(1);opacity:.4"}">${a.g}</span>
+      <div style="flex:1"><b style="font-size:13.5px">${esc(a.n)}</b><div class="small">${esc(a.d)}</div></div>
+      ${on ? '<span class="pill ok">已解锁</span>' : '<span class="pill">未解锁</span>'}`;
+    wrap.appendChild(r);
+  });
+  openSheet("成就墙", wrap);
+}
+
+/* ============================================================
+   新页面：冥想模块
+   ============================================================ */
+function openMeditationList(){
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="eyebrow">静的部分</p>
+    <h2 class="h-display">冥想引导</h2>
+    <p class="lede">功法练的是身体，冥想练的是「看着念头而不跟着走」的能力。冲动来时能不能不动，取决于平时练没练过。</p>
+    <div class="card"><div class="row-between"><span class="small">累计冥想</span>
+      <span class="num" style="font-size:19px;font-weight:700">${S.medMin||0} 分钟</span></div></div>`;
+  MEDITATIONS.forEach(m=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${m.g}</span>
+      <span class="item-main"><span class="item-title">${esc(m.n)} <span class="pill">${esc(m.lv)}</span></span>
+      <span class="item-sub">${m.min} 分钟 · ${esc(m.intro.slice(0,26))}…</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = ()=> openMeditation(m);
+    wrap.appendChild(b);
+  });
+  wrap.appendChild(el("div","disclaimer","冥想过程中如出现强烈不适、解离感或创伤记忆涌现，请立即停止并睁眼活动身体。有精神科病史者建议在专业人员指导下练习。"));
+  openSheet("冥想", wrap);
+}
+let medIV = null;
+function openMeditation(m){
+  const total = m.steps.reduce((s,x)=>s+x[0],0);
+  let elapsed = 0, idx = 0, left = m.steps[0][0];
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <p class="lede">${esc(m.intro)}</p>
+    <div class="ring-wrap">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+        <circle class="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"></circle>
+      </svg>
+      <div class="ring-center"><div>
+        <div class="practice-timer" id="mT" style="font-size:32px;margin:0">${mmss(total)}</div>
+        <div class="small" id="mS">共 ${m.steps.length} 段</div></div></div>
+    </div>
+    <div class="practice-phase" id="mP">${esc(m.steps[0][1])}</div>
+    <div class="practice-cue" id="mC">${esc(m.steps[0][2])}</div>`;
+  const ring = wrap.querySelector(".ring-fg"), tE = wrap.querySelector("#mT"),
+        sE = wrap.querySelector("#mS"), pE = wrap.querySelector("#mP"), cE = wrap.querySelector("#mC");
+  const list = el("div");
+  list.style.marginTop = "22px";
+  list.innerHTML = `<div class="time-head"><span>引导段落</span></div>`;
+  m.steps.forEach((st,i)=>{
+    const n = el("div","ground-step");
+    n.dataset.i = i;
+    n.innerHTML = `<div class="row" style="align-items:flex-start;gap:11px">
+      <span class="ground-n">${i+1}</span>
+      <div><b style="font-size:14px">${esc(st[1])}</b><p class="small" style="margin:3px 0 0">${esc(st[2])}</p>
+      <span class="small num" style="color:var(--text-3)">${mmss(st[0])}</span></div></div>`;
+    list.appendChild(n);
+  });
+  wrap.appendChild(list);
+  function paint(){
+    ring.style.strokeDashoffset = String(276.5*(1 - elapsed/total));
+    tE.textContent = mmss(total-elapsed);
+    sE.textContent = "第 " + (idx+1) + " / " + m.steps.length + " 段";
+    pE.textContent = m.steps[idx][1];
+    cE.textContent = m.steps[idx][2];
+    list.querySelectorAll(".ground-step").forEach(n=>{
+      const i = +n.dataset.i;
+      n.classList.toggle("active", i === idx);
+      n.classList.toggle("done", i < idx);
+    });
+  }
+  function finish(){
+    clearInterval(medIV); medIV = null;
+    S.medMin = (S.medMin||0) + m.min;
+    save(); checkAchievements();
+    closeSheet(); renderAll();
+    celebrate(m.g, "结束了", m.n + "　" + m.min + " 分钟。累计冥想 " + S.medMin + " 分钟。");
+    addCoins(25,"完成冥想");
+  }
+  const foot = el("div");
+  const sb = el("button","btn block","开始");
+  const db = el("button","btn ghost block","直接标记完成");
+  db.style.marginTop = "8px";
+  sb.onclick = ()=>{
+    if(medIV){ clearInterval(medIV); medIV = null; sb.textContent = "继续"; return; }
+    sb.textContent = "暂停";
+    medIV = setInterval(()=>{
+      elapsed++; left--;
+      if(left <= 0 && idx < m.steps.length-1){ idx++; left = m.steps[idx][0]; toast(m.steps[idx][1]); }
+      paint();
+      if(elapsed >= total) finish();
+    }, 1000);
+  };
+  db.onclick = ()=>{ if(medIV){ clearInterval(medIV); medIV = null; } finish(); };
+  foot.appendChild(sb); foot.appendChild(db);
+  paint();
+  openSheet(m.n, wrap, { foot, onBack:()=>{ if(medIV){ clearInterval(medIV); medIV = null; } popSheet(); }});
+}
+
+/* ============================================================
+   新页面：脱敏训练五级
+   ============================================================ */
+function openDesensList(){
+  const d = cleanDays();
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="eyebrow">不是压抑，是降低强度</p>
+    <h2 class="h-display">冲动脱敏训练</h2>
+    <p class="lede">五个级别按难度递进。前三级随时可用，后两级需要时间和稳定的基础——顺序不能颠倒。</p>`;
+  DESENS_LEVELS.forEach(L=>{
+    const locked = d < L.unlock;
+    const doneN = (S.desens||[]).filter(x => x.lv === L.lv).length;
+    const b = el("button","item" + (locked ? " locked" : ""));
+    b.innerHTML = `<span class="item-glyph">${L.g}</span>
+      <span class="item-main">
+        <span class="item-title">Level ${L.lv} · ${esc(L.n)}${doneN?' <span class="pill ok">练过 '+doneN+' 次</span>':""}</span>
+        <span class="item-sub">${esc(L.dur)} · ${esc(L.theory)}${locked ? " · Day " + L.unlock + " 解锁" : ""}</span>
+      </span>
+      <span class="item-arrow">${locked
+        ? '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'}</span>`;
+    b.onclick = ()=> locked ? toast("坚持到 Day " + L.unlock + " 解锁这一级") : openDesens(L);
+    wrap.appendChild(b);
+  });
+  openSheet("脱敏训练", wrap);
+}
+function openDesens(L){
+  const wrap = el("div");
+  wrap.innerHTML = `
+    <div style="text-align:center;font-size:46px;margin:2px 0 10px">${L.g}</div>
+    <p class="eyebrow" style="text-align:center">LEVEL ${L.lv} · ${esc(L.theory)}</p>
+    <h2 class="h-display" style="text-align:center">${esc(L.n)}</h2>
+    ${L.warn ? `<div class="alert crit"><div class="alert-title">
+      <svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      这一级有风险</div><p>${esc(L.warn)}</p></div>` : ""}
+    <div class="card"><b style="font-size:13.5px">做什么</b>
+      <p class="small" style="margin:5px 0 0;color:var(--text-2)">${esc(L.what)}</p></div>
+    <div class="card"><b style="font-size:13.5px">怎么做</b>
+      <ol style="margin:8px 0 0;padding-left:19px;color:var(--text-2);font-size:13px;line-height:1.8">
+        ${L.how.map(x => "<li>" + esc(x) + "</li>").join("")}</ol></div>
+    <div class="card"><b style="font-size:13.5px">为什么有效</b>
+      <p class="small" style="margin:5px 0 0;color:var(--text-2)">${esc(L.why)}</p></div>`;
+  const foot = el("div");
+  const b = el("button","btn block","我练完了　+30");
+  b.onclick = ()=>{
+    S.desens.push({ d:today(), lv:L.lv });
+    save(); addCoins(30,"完成 Level " + L.lv + " 训练");
+    checkAchievements();
+    popSheet();
+    toast(L.g + " Level " + L.lv + " 完成");
+  };
+  foot.appendChild(b);
+  openSheet("Level " + L.lv, wrap, { foot });
+}
+
+/* ============================================================
+   新页面：视觉管理
+   ============================================================ */
+function openVisualTools(){
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="eyebrow">从源头减少刺激</p>
+    <h2 class="h-display">视觉管理</h2>
+    <p class="lede">拦截解决的是「已经想看」，视觉管理解决的是「一开始就没看到」。后者便宜得多。</p>`;
+  VISUAL_TOOLS.forEach(t=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${t.g}</span>
+      <span class="item-main"><span class="item-title">${esc(t.n)}</span><span class="item-sub">${esc(t.s)}</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = ()=>{
+      const w = el("div","article");
+      w.innerHTML = `<p class="eyebrow">视觉管理</p><h2 class="h-display">${esc(t.n)}</h2>` + t.body;
+      openSheet(t.n, w);
+    };
+    wrap.appendChild(b);
+  });
+  openSheet("视觉管理", wrap);
+}
+
+/* ============================================================
+   新页面：社区
+   ============================================================ */
+function openCommunity(){
+  let tag = "全部";
+  const wrap = el("div");
+  function paint(){
+    wrap.innerHTML = `<p class="eyebrow">你不是一个人</p>
+      <h2 class="h-display">心声墙</h2>`;
+    const note = el("div","alert");
+    note.innerHTML = `<div class="alert-title">关于这个版块</div>
+      <p>本应用没有服务器，所以这里<b>不是真实的在线社区</b>。下面的内容是精选的匿名心声示例，用于参考；你自己发布的内容只保存在这台设备上，不会发送给任何人。</p>`;
+    wrap.appendChild(note);
+
+    // 发布
+    const pc = el("div","card");
+    pc.innerHTML = `<b style="font-size:14px">写下你的心声</b>`;
+    const ta = el("textarea");
+    ta.className = "ta"; ta.rows = 3;
+    ta.placeholder = "此刻想说什么？";
+    ta.setAttribute("aria-label","心声内容");
+    pc.appendChild(ta);
+    const pb = el("button","btn block","发布到本地");
+    pb.style.marginTop = "9px";
+    pb.onclick = ()=>{
+      const v = ta.value.trim();
+      if(!v){ toast("写点什么吧"); return; }
+      S.posts.unshift({ id:"p"+Date.now(), n:"Day "+cleanDays(), t:"", b:v, l:0, tag:"我的", mine:true, d:today() });
+      save(); addCoins(20,"分享心声"); paint();
+    };
+    pc.appendChild(pb);
+    wrap.appendChild(pc);
+
+    // 标签
+    const tabs = el("div","tag-row");
+    ["全部","我的"].concat(COMMUNITY_TAGS.filter(x=>x!=="全部")).forEach(t=>{
+      const b = el("button","tag" + (tag === t ? " on" : ""), esc(t));
+      b.onclick = ()=>{ tag = t; paint(); };
+      tabs.appendChild(b);
+    });
+    wrap.appendChild(tabs);
+
+    // 列表
+    const all = S.posts.concat(COMMUNITY_SEED);
+    const list = tag === "全部" ? all : all.filter(p => p.tag === tag);
+    if(!list.length){
+      wrap.appendChild(el("div","empty",'<div class="empty-glyph">💬</div><p class="small">这个分类还没有内容。</p>'));
+    }
+    list.forEach(p=>{
+      const c = el("div","card");
+      const liked = S.likes.includes(p.id);
+      c.innerHTML = `<div class="row-between" style="margin-bottom:6px">
+          <span class="pill">${esc(p.n)}</span>
+          <span class="pill ${p.mine?"ok":""}">${esc(p.tag)}</span></div>
+        ${p.t ? `<b style="font-size:14.5px;display:block;margin-bottom:5px">${esc(p.t)}</b>` : ""}
+        <p class="small" style="margin:0 0 10px;color:var(--text-2);white-space:pre-wrap;line-height:1.75">${esc(p.b)}</p>`;
+      const row = el("div","row");
+      const lb = el("button","like-btn" + (liked ? " on" : ""));
+      lb.innerHTML = `♥ <span class="num">${p.l + (liked?1:0)}</span>`;
+      lb.onclick = ()=>{
+        const i = S.likes.indexOf(p.id);
+        if(i >= 0) S.likes.splice(i,1); else S.likes.push(p.id);
+        save(); paint();
+      };
+      row.appendChild(lb);
+      if(p.mine){
+        const db = el("button","like-btn","删除");
+        db.onclick = ()=>{
+          if(!confirm("删除这条心声？")) return;
+          S.posts = S.posts.filter(x => x.id !== p.id);
+          save(); paint();
+        };
+        row.appendChild(db);
+      }
+      c.appendChild(row);
+      wrap.appendChild(c);
+    });
+  }
+  paint();
+  openSheet("心声墙", wrap);
+}
+
+/* ============================================================
+   新页面：问责伙伴
+   ============================================================ */
+function openBuddy(){
+  const wrap = el("div");
+  function paint(){
+    wrap.innerHTML = `<p class="eyebrow">最强的诱因是孤独</p>
+      <h2 class="h-display">问责伙伴</h2>
+      <p class="lede">冲动来时能给一个人发消息，效果超过任何拦截软件。在这里存一两个人，急救界面就会出现快捷联系。</p>
+      <div class="alert"><div class="alert-title">隐私说明</div>
+        <p>联系人只保存在这台设备上，不上传。应用<b>不会自动通知任何人</b>——发不发、发什么，完全由你决定。</p></div>`;
+    if(S.contacts.length){
+      S.contacts.forEach((c,i)=>{
+        const card = el("div","card");
+        card.innerHTML = `<div class="row-between" style="margin-bottom:9px">
+          <div><b style="font-size:15px">${esc(c.name)}</b><div class="small">${esc(c.rel||"")}　${esc(c.phone||"")}</div></div></div>`;
+        const row = el("div","btn-row");
+        if(c.phone){
+          const call = el("a","btn ghost","打电话");
+          call.href = "tel:" + encodeURIComponent(c.phone);
+          call.style.textDecoration = "none";
+          const sms = el("a","btn ghost","发消息");
+          sms.href = "sms:" + encodeURIComponent(c.phone) + "?body=" + encodeURIComponent("在吗？我现在有点难受，想跟你说会儿话。");
+          sms.style.textDecoration = "none";
+          row.appendChild(call); row.appendChild(sms);
+        }
+        const del = el("button","btn ghost","移除");
+        del.onclick = ()=>{ S.contacts.splice(i,1); save(); paint(); };
+        row.appendChild(del);
+        card.appendChild(row);
+        wrap.appendChild(card);
+      });
+    } else {
+      wrap.appendChild(el("div","empty",'<div class="empty-glyph">🤝</div><p class="small">还没有添加伙伴。<br>哪怕只是一个能随便聊两句的人也行。</p>'));
+    }
+    const add = el("div","card");
+    add.innerHTML = `<b style="font-size:14px">添加伙伴</b>`;
+    const f = [["name","名字或昵称"],["rel","关系（可选）"],["phone","手机号（可选）"]];
+    const inputs = {};
+    f.forEach(([k,ph])=>{
+      const inp = el("input");
+      inp.type = k === "phone" ? "tel" : "text";
+      inp.placeholder = ph;
+      inp.setAttribute("aria-label", ph);
+      inp.style.cssText = "width:100%;margin-top:8px;padding:11px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px";
+      inputs[k] = inp;
+      add.appendChild(inp);
+    });
+    const ab = el("button","btn block","添加");
+    ab.style.marginTop = "10px";
+    ab.onclick = ()=>{
+      const n = inputs.name.value.trim();
+      if(!n){ toast("至少填个名字"); return; }
+      S.contacts.push({ name:n, rel:inputs.rel.value.trim(), phone:inputs.phone.value.trim() });
+      save(); paint(); toast("已添加");
+    };
+    add.appendChild(ab);
+    wrap.appendChild(add);
+
+    const tips = el("div","card");
+    tips.innerHTML = `<b style="font-size:14px">怎么开口</b>
+      <p class="small" style="margin:6px 0 0;color:var(--text-2);line-height:1.8">
+      不用把事情全说出来。「在吗，陪我聊两句」就够了——目的是打断独处状态，不是交代问题。<br><br>
+      如果找不到人，也可以给自己写：打开情绪日记，写下此刻的感受。把感受变成文字，本身就有降温作用。</p>`;
+    wrap.appendChild(tips);
+  }
+  paint();
+  openSheet("问责伙伴", wrap);
+}
+
+/* ============================================================
+   新页面：设置
+   ============================================================ */
+function openSettings(){
+  const wrap = el("div");
+  function paint(){
+    wrap.innerHTML = "";
+    const st = S.settings;
+
+    // 个人档案
+    const pc = el("div","card");
+    pc.innerHTML = `<b style="font-size:14px">个人档案</b>
+      <p class="small" style="margin:4px 0 9px">昵称只显示在首页问候语里，不会离开这台设备。</p>`;
+    const nick = el("input");
+    nick.type = "text"; nick.maxLength = 16; nick.value = S.nick || "";
+    nick.placeholder = "怎么称呼你？";
+    nick.setAttribute("aria-label","昵称");
+    nick.style.cssText = "width:100%;padding:11px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px";
+    pc.appendChild(nick);
+    const nb = el("button","btn block","保存");
+    nb.style.marginTop = "9px";
+    nb.onclick = ()=>{ S.nick = nick.value.trim(); save(); toast("已保存"); renderAll(); };
+    pc.appendChild(nb);
+    wrap.appendChild(pc);
+
+    // 目标
+    const gc = el("div","card");
+    gc.innerHTML = `<b style="font-size:14px">目标天数</b>
+      <p class="small" style="margin:4px 0 9px">随时可以改。定太高反而容易放弃。</p>`;
+    const grow = el("div","tag-row");
+    [[30,"30 天"],[90,"90 天"],[180,"180 天"],[365,"365 天"],[9999,"不设终点"]].forEach(([v,l])=>{
+      const cur = S.report && S.report.goalDays === v;
+      const b = el("button","tag" + (cur ? " on" : ""), l);
+      b.onclick = ()=>{ if(S.report){ S.report.goalDays = v; save(); paint(); renderAll(); toast("目标已更新"); } };
+      grow.appendChild(b);
+    });
+    gc.appendChild(grow);
+    wrap.appendChild(gc);
+
+    // 提醒
+    const rc = el("div","card");
+    rc.innerHTML = `<b style="font-size:14px">每日提醒</b>
+      <p class="small" style="margin:4px 0 9px">浏览器通知。关闭标签页后可能不会送达——系统闹钟更可靠。</p>`;
+    const rrow = el("div","row-between");
+    rrow.innerHTML = `<span style="font-size:14px">开启提醒</span>`;
+    const sw = el("button","switch" + (st.remind ? " on" : ""));
+    sw.setAttribute("role","switch");
+    sw.setAttribute("aria-checked", String(!!st.remind));
+    sw.innerHTML = "<i></i>";
+    sw.onclick = async ()=>{
+      if(!st.remind){
+        if(!("Notification" in window)){ toast("这个浏览器不支持通知"); return; }
+        const p = await Notification.requestPermission();
+        if(p !== "granted"){ toast("通知权限被拒绝"); return; }
+        st.remind = true; scheduleReminder();
+        toast("提醒已开启");
+      } else { st.remind = false; toast("提醒已关闭"); }
+      save(); paint();
+    };
+    rrow.appendChild(sw);
+    rc.appendChild(rrow);
+    const tw = el("div","row-between");
+    tw.style.marginTop = "11px";
+    tw.innerHTML = `<span style="font-size:14px">提醒时间</span>`;
+    const ti = el("input");
+    ti.type = "time"; ti.value = st.remindTime || "21:30";
+    ti.setAttribute("aria-label","提醒时间");
+    ti.style.cssText = "padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:14px";
+    ti.onchange = ()=>{ st.remindTime = ti.value; save(); scheduleReminder(); };
+    tw.appendChild(ti);
+    rc.appendChild(tw);
+    wrap.appendChild(rc);
+
+    // 外观
+    const ac = el("div","card");
+    ac.innerHTML = `<b style="font-size:14px">外观</b>`;
+    const trow = el("div","row-between");
+    trow.style.marginTop = "10px";
+    trow.innerHTML = `<span style="font-size:14px">主题</span>`;
+    const tgrp = el("div","tag-row");
+    tgrp.style.margin = "0";
+    [["", "跟随系统"],["light","浅色"],["dark","深色"]].forEach(([v,l])=>{
+      const b = el("button","tag" + ((S.theme||"") === v ? " on" : ""), l);
+      b.onclick = ()=>{ S.theme = v || null; save(); applyTheme(); paint(); };
+      tgrp.appendChild(b);
+    });
+    trow.appendChild(tgrp);
+    ac.appendChild(trow);
+
+    const fs = el("div");
+    fs.style.marginTop = "14px";
+    fs.innerHTML = `<div class="row-between" style="margin-bottom:6px"><span style="font-size:14px">字号</span>
+      <span class="num small">${Math.round((st.fontScale||1)*100)}%</span></div>`;
+    const fi = el("input");
+    fi.type = "range"; fi.min = "0.85"; fi.max = "1.3"; fi.step = "0.05";
+    fi.value = st.fontScale || 1;
+    fi.setAttribute("aria-label","字号缩放");
+    fi.oninput = ()=>{ st.fontScale = +fi.value; applyPrefs(); fs.querySelector(".num").textContent = Math.round(fi.value*100) + "%"; };
+    fi.onchange = ()=> save();
+    fs.appendChild(fi);
+    ac.appendChild(fs);
+
+    const mrow = el("div","row-between");
+    mrow.style.marginTop = "14px";
+    mrow.innerHTML = `<div><span style="font-size:14px">动画效果</span><div class="small">关闭后更省电，也更安静</div></div>`;
+    const msw = el("button","switch" + (st.motion ? " on" : ""));
+    msw.setAttribute("role","switch");
+    msw.setAttribute("aria-checked", String(!!st.motion));
+    msw.innerHTML = "<i></i>";
+    msw.onclick = ()=>{ st.motion = !st.motion; save(); applyPrefs(); paint(); };
+    mrow.appendChild(msw);
+    ac.appendChild(mrow);
+
+    const hrow = el("div","row-between");
+    hrow.style.marginTop = "14px";
+    hrow.innerHTML = `<div><span style="font-size:14px">隐藏天数</span><div class="small">在意数字带来压力时可以关掉</div></div>`;
+    const hsw = el("button","switch" + (st.hideNumbers ? " on" : ""));
+    hsw.setAttribute("role","switch");
+    hsw.setAttribute("aria-checked", String(!!st.hideNumbers));
+    hsw.innerHTML = "<i></i>";
+    hsw.onclick = ()=>{ st.hideNumbers = !st.hideNumbers; save(); paint(); renderAll(); };
+    hrow.appendChild(hsw);
+    ac.appendChild(hrow);
+    wrap.appendChild(ac);
+
+    // 数据管理
+    const dc = el("div","card");
+    dc.innerHTML = `<b style="font-size:14px">数据管理</b>
+      <p class="small" style="margin:4px 0 10px">全部数据只存在这台设备的浏览器里。换设备或清浏览器前记得导出。</p>`;
+    const drow = el("div","btn-row");
+    const ex = el("button","btn ghost","导出备份");
+    ex.onclick = exportData;
+    const im = el("button","btn ghost","导入备份");
+    im.onclick = importData;
+    drow.appendChild(ex); drow.appendChild(im);
+    dc.appendChild(drow);
+    const usage = el("p","small");
+    let size = 0;
+    try{ size = new Blob([JSON.stringify(S)]).size; }catch(e){}
+    usage.textContent = "当前数据约 " + (size/1024).toFixed(1) + " KB";
+    usage.style.marginTop = "9px";
+    dc.appendChild(usage);
+    wrap.appendChild(dc);
+
+    // 危险区
+    const zc = el("div","card");
+    zc.innerHTML = `<b style="font-size:14px;color:var(--danger)">危险操作</b>`;
+    const zr = el("div","btn-row");
+    zr.style.marginTop = "10px";
+    const rs = el("button","btn ghost","重新做测评");
+    rs.onclick = ()=>{
+      if(!confirm("重做测评会覆盖现有的诊断报告和方案，但天数、金币、日记都会保留。继续吗？")) return;
+      closeSheet(); startQuiz();
+    };
+    const wp = el("button","btn danger","清除全部数据");
+    wp.onclick = wipe;
+    zr.appendChild(rs); zr.appendChild(wp);
+    zc.appendChild(zr);
+    wrap.appendChild(zc);
+  }
+  paint();
+  openSheet("设置", wrap);
+}
+
+/* 导出 / 导入 */
+function exportData(){
+  try{
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reborn-backup-" + today() + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1000);
+    toast("备份已导出 📦");
+  }catch(e){ toast("导出失败：" + e.message); }
+}
+function importData(){
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json,.json";
+  inp.onchange = ()=>{
+    const f = inp.files && inp.files[0];
+    if(!f) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      try{
+        const obj = JSON.parse(rd.result);
+        if(!obj || typeof obj !== "object" || !obj.startDate) throw new Error("文件格式不对");
+        if(!confirm("导入会覆盖当前设备上的全部数据，确定吗？")) return;
+        S = obj; migrate(); save();
+        toast("导入成功，正在刷新…");
+        setTimeout(()=> location.reload(), 800);
+      }catch(e){ toast("导入失败：" + e.message); }
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
+/* 提醒 */
+let remindTimer = null;
+function scheduleReminder(){
+  clearTimeout(remindTimer);
+  if(!S.settings.remind) return;
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+  const [h,m] = (S.settings.remindTime || "21:30").split(":").map(Number);
+  const now = new Date();
+  const at = new Date();
+  at.setHours(h, m, 0, 0);
+  if(at <= now) at.setDate(at.getDate()+1);
+  const ms = at - now;
+  if(ms > 2147483647) return;
+  remindTimer = setTimeout(()=>{
+    try{
+      const plan = planToday(), done = todayTasks();
+      const left = plan.filter(t => !done[t.id]).length;
+      new Notification("Reborn · 第 " + cleanDays() + " 天", {
+        body: left ? "今天还有 " + left + " 项任务没完成。" : "今天的任务都完成了，去睡吧。",
+        tag: "reborn-daily"
+      });
+    }catch(e){}
+    scheduleReminder();
+  }, ms);
+}
+
+/* ============================================================
+   新页面：关于 / 帮助 / 隐私
+   ============================================================ */
+function openAbout(){
+  const wrap = el("div","article");
+  wrap.innerHTML = `
+    <div style="text-align:center;padding:10px 0 4px">
+      <div style="font-size:46px;line-height:1">🌱</div>
+      <h2 class="h-display" style="margin-top:8px">Reborn 重生</h2>
+      <p class="small" style="margin:0">版本 1.0.0 · 单文件离线版</p>
+    </div>
+    <blockquote style="text-align:center;font-family:var(--font-display);font-size:16px">
+      不是让你「忍住」，而是让你「不想」。
+    </blockquote>
+
+    <h3>为什么做这个</h3>
+    <p>市面上的同类应用几乎都在做同一件事：<strong>拦截和监控</strong>。堵而不疏，压得越久反弹越狠。用户在意志力的战场上反复失败，然后把失败归因于自己不够坚强。</p>
+    <p>但真正的问题往往不在意志。长期高频刺激会让多巴胺受体下调、基线下移——现实中的一切都变得索然无味。在这个状态下要求一个人靠意志抵抗，等于让一个饿了三天的人守着面包不吃。</p>
+    <p>所以 Reborn 的重心不在「戒」，在<strong>「补」</strong>：先把亏空的能量补回来，把基线抬上去，冲动的相对吸引力自然下降。判断标准只有一条——<strong>如果你每天都觉得在忍，说明补的部分没跟上。</strong></p>
+
+    <h3>四条设计原则</h3>
+    <ul>
+      <li><strong>不贩卖焦虑。</strong>不用「一次等于多少天营养」这类无依据的说法吓人。科普篇里明确写出了哪些流行说法被夸大了——因为当你发现某个恐吓是假的，往往会连真的部分一起丢掉。</li>
+      <li><strong>不制造羞耻。</strong>复发后不会有惩罚性文案，累计清醒天数永不归零，伙伴不会死。羞耻会提高复发率，我们不打算用愧疚绑架你。</li>
+      <li><strong>不假装是它不是的东西。</strong>教练是脚本不是 AI，社区是本地示例不是真实在线，这些都在界面里写清楚了。</li>
+      <li><strong>不碰你的数据。</strong>没有账号、没有服务器、不联网。</li>
+    </ul>
+
+    <h3>康复飞轮</h3>
+    <p>五个环节循环上升，缺一个都会卡住：</p>
+    <ul>
+      <li><strong>认知重塑</strong> — 看清多巴胺的话术</li>
+      <li><strong>能量补充</strong> — 功法、晒太阳、膳食、睡眠</li>
+      <li><strong>冲动脱敏</strong> — 诱因管理与五级训练</li>
+      <li><strong>习惯替代</strong> — 把空白时间填满</li>
+      <li><strong>成就巩固</strong> — 打卡、里程碑、伙伴成长</li>
+    </ul>
+
+    <h3>致谢与来源</h3>
+    <p>科普内容综合自成瘾神经科学、认知行为疗法（CBT）、正念减压（MBSR）的公开研究共识；功法部分参考八段锦、易筋经等传统导引术的通行版本；体质辨识框架来自中医体质学说。<strong>本应用不引用具体文献作为医学证明</strong>，所有内容以科普为目的，正式使用前建议自行核实。</p>
+
+    <h3>技术</h3>
+    <p>单个 HTML 文件，内联全部样式与脚本，无外部依赖、无构建步骤、无网络请求。数据存于浏览器 localStorage。可直接保存到本地离线使用，也可添加到主屏幕当作应用打开。</p>
+
+    <div class="disclaimer">Reborn 是自助工具，<b>不是医疗器械，不提供诊断或治疗</b>。若存在严重成瘾、抑郁、焦虑或自伤念头，请寻求精神科医师或心理咨询师的专业帮助。紧急情况请拨打当地心理援助热线或前往医院急诊。</div>`;
+  openSheet("关于", wrap);
+}
+
+function openHelp(){
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="eyebrow">常见问题</p>
+    <h2 class="h-display">帮助</h2>
+    <p class="lede">${FAQ.length} 个最常被问到的问题。找不到答案的话，多半是「先做起来再说」。</p>`;
+  FAQ.forEach((f,i)=>{
+    const c = el("div","faq");
+    const q = el("button","faq-q");
+    q.innerHTML = `<span>${esc(f.q)}</span><span class="faq-mark">+</span>`;
+    q.setAttribute("aria-expanded","false");
+    const a = el("div","faq-a");
+    a.innerHTML = `<p class="small" style="margin:0;color:var(--text-2);line-height:1.8">${esc(f.a)}</p>`;
+    q.onclick = ()=>{
+      const open = c.classList.toggle("open");
+      q.setAttribute("aria-expanded", String(open));
+      q.querySelector(".faq-mark").textContent = open ? "−" : "+";
+    };
+    c.appendChild(q); c.appendChild(a);
+    wrap.appendChild(c);
+  });
+  const more = el("div","card");
+  more.style.marginTop = "18px";
+  more.innerHTML = `<b style="font-size:14px">还是没解决？</b>
+    <p class="small" style="margin:6px 0 0;color:var(--text-2);line-height:1.8">
+    这个应用没有客服，也没有联系方式——它是一个离线工具。<br><br>
+    如果问题是「我该怎么开始」，答案永远是：打开首页，完成今天任务里最容易的那一项。</p>`;
+  wrap.appendChild(more);
+  openSheet("帮助", wrap);
+}
+
+function openPrivacy(){
+  const wrap = el("div","article");
+  wrap.innerHTML = `
+    <p class="eyebrow">隐私说明</p>
+    <h2 class="h-display">你的数据在哪里</h2>
+    <blockquote>简短版：全部在你自己的浏览器里。没有服务器可以上传，因为根本没有服务器。</blockquote>
+
+    <h3>收集什么</h3>
+    <p>应用在本地保存以下内容，用于生成方案和统计：测评答案、每日任务完成记录、冲动记录的时间戳、日记文字与心情、练习与冥想时长、金币与成就、你添加的联系人、以及界面偏好设置。</p>
+
+    <h3>存在哪里</h3>
+    <p>浏览器的 <code>localStorage</code>，键名 <code>reborn.state.v1</code>。这是一块只有当前浏览器、当前站点能访问的本地空间。如果浏览器处于隐私模式或禁用了存储，应用会自动降级到内存存储——此时刷新页面数据就会丢失，界面上的记录也会重置。</p>
+
+    <h3>发送给谁</h3>
+    <p><strong>不发送给任何人。</strong>应用没有任何网络请求代码：没有埋点、没有统计 SDK、没有广告、没有崩溃上报、没有云同步。你可以断网使用，功能完全不受影响——这是最直接的验证方式。</p>
+
+    <h3>谁能看到</h3>
+    <p>能拿到这台设备并解锁浏览器的人。如果设备是共用的，建议：使用浏览器的独立配置文件、给设备设锁屏密码、或在「设置 → 外观 → 隐藏天数」里关掉显眼的数字。</p>
+
+    <h3>怎么删除</h3>
+    <ul>
+      <li>应用内：设置 → 危险操作 → 清除全部数据（需二次确认，不可恢复）</li>
+      <li>浏览器：清除本站点的网站数据</li>
+      <li>直接删掉这个 HTML 文件并清除浏览器数据，即彻底删除</li>
+    </ul>
+
+    <h3>联系人功能</h3>
+    <p>你填写的联系人只用于生成本机的 <code>tel:</code> 和 <code>sms:</code> 链接。应用<strong>不会自动给任何人发送消息或通知</strong>——所有发送动作都需要你自己点击并在系统应用里确认。</p>
+
+    <h3>通知权限</h3>
+    <p>只有你在设置里主动开启每日提醒时才会请求。通知在本地生成，内容不离开设备。随时可以关闭。</p>
+
+    <div class="disclaimer">本说明描述的是这份单文件应用本身的行为。如果你是从第三方网站打开的它，该网站的服务器日志、以及你的浏览器插件，仍可能记录访问行为——这部分不在本应用的控制范围内。</div>`;
+  openSheet("隐私", wrap);
+}
+
+/* 顶栏菜单 */
+$("#menuBtn").onclick = ()=>{
+  const wrap = el("div");
+  wrap.innerHTML = `<p class="lede">快捷入口</p>`;
+  [["⚙️","设置","档案、目标、提醒、外观、备份",openSettings],
+   ["📓","情绪日记","记录今天的心情与想法",openDiary],
+   ["📊","统计详情","冲动时段、心情分布、诱因图谱",openStats],
+   ["🏅","成就墙","已解锁 " + S.achieved.length + " / " + ACHIEVEMENTS.length,openAchievements],
+   ["❓","帮助","常见问题",openHelp],
+   ["🔒","隐私说明","数据存在哪里",openPrivacy],
+   ["🌱","关于 Reborn","设计理念与版本",openAbout]].forEach(([g,t,sub,fn])=>{
+    const b = el("button","item");
+    b.innerHTML = `<span class="item-glyph">${g}</span>
+      <span class="item-main"><span class="item-title">${t}</span><span class="item-sub">${sub}</span></span>
+      <span class="item-arrow"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>`;
+    b.onclick = fn;
+    wrap.appendChild(b);
+  });
+  openSheet("更多", wrap, { noBack:true, onClose:closeSheet });
+};
+
 /* 启动 */
 applyTheme();
+applyPrefs();
+scheduleReminder();
 if(!S.onboarded){
   switchView("home");
   $("#view-home").innerHTML = `
@@ -2887,10 +4507,20 @@ if(!S.onboarded){
   b.style.marginTop = "18px";
   b.onclick = startQuiz;
   $("#view-home").appendChild(b);
+  const links = el("div","btn-row");
+  links.style.cssText = "margin-top:10px;justify-content:center";
+  [["关于",openAbout],["隐私",openPrivacy],["常见问题",openHelp]].forEach(([t,fn])=>{
+    const lb = el("button","tag",t);
+    lb.onclick = fn;
+    links.appendChild(lb);
+  });
+  $("#view-home").appendChild(links);
+  $("#view-home").appendChild(el("div","disclaimer","Reborn 是自助工具，不构成医疗诊断或治疗建议。数据仅存于本设备浏览器，不上传、不联网。"));
   $("#sosBtn").classList.add("hidden");
   $(".tabbar").style.display = "none";
 } else {
   dailyTick();
   switchView("home");
+  checkAchievements();
 }
 </script>
