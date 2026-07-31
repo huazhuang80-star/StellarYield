@@ -1,9 +1,14 @@
-/** 更多：起居护理、环境要求、就医避坑、多宠管理与数据。 */
+/** 更多：所有二级功能的总入口，外加起居护理、季节日历、避坑指南与费用参考。 */
 
-import { h, raw, esc, card } from '../ui.js';
+import { h, raw, esc, card, linkRow, linkGroup } from '../ui.js';
 import { SPECIES } from '../data/species.js';
 import { SEASONS, VET_TRAPS, COST_REFERENCE } from '../data/care.js';
 import * as store from '../lib/store.js';
+import { buildReminders, actionable } from '../lib/reminders.js';
+import { ARTICLES } from '../data/knowledge.js';
+import { FIRST_AID } from '../data/firstaid.js';
+import { GUIDES } from '../data/guide.js';
+import { APP } from '../data/meta.js';
 
 const FREQ_LABEL = {
   daily: '每日',
@@ -29,9 +34,38 @@ export default {
     const pet = ctx.pet;
     const sp = SPECIES[pet.species];
     const s = store.load();
+    const stats = store.statsFor(pet.id);
+    const due = actionable(
+      buildReminders({
+        pet,
+        ageMonths: store.ageInMonths(pet),
+        logs: stats.logs,
+        meds: stats.meds,
+        visits: stats.visits,
+        today: store.today(),
+        leadDays: s.settings.remindLeadDays ?? 7,
+      }),
+    ).length;
 
     return h`
       <h1 class="page-title">⚙️ 更多</h1>
+
+      ${raw(
+        linkGroup('日常', [
+          linkRow('#reminders', '⏰', due ? `提醒（${due} 项待处理）` : '提醒', '疫苗、驱虫、体检、生日、称重的统一到期视图'),
+          linkRow('#timeline', '🌳', '成长时间轴', `里程碑、就诊与体重合成一条线（已有 ${stats.milestones.length} 个里程碑）`),
+          linkRow('#health', '💊', '健康档案', '用药与驱虫、就诊记录、化验趋势、花费、身份卡'),
+        ]),
+      )}
+
+      ${raw(
+        linkGroup('学与查', [
+          linkRow('#knowledge', '📖', '知识库', `${ARTICLES.length} 篇可执行的养护短文`),
+          linkRow('#guide', '🧭', '养护向导', `${GUIDES.length} 个引导问答：不吃东西、选粮、乱尿、要不要去医院…`),
+          linkRow('#firstaid', '🚑', '家庭急救', `${FIRST_AID.length} 类急症：怎么判断 / 立刻做什么 / 绝对不要做`),
+          linkRow('#search', '🔍', '全局搜索', '食物、行为、知识、急救、名词一起搜'),
+        ]),
+      )}
 
       ${raw(
         card(
@@ -48,13 +82,7 @@ export default {
         ),
       )}
 
-      ${raw(
-        card(
-          '环境与居住要求',
-          `<ul class="bullets">${sp.env.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`,
-          { icon: '🏠' },
-        ),
-      )}
+      ${raw(card('环境与居住要求', `<ul class="bullets">${sp.env.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`, { icon: '🏠' }))}
 
       ${raw(
         card(
@@ -93,69 +121,14 @@ export default {
       )}
 
       ${raw(
-        card(
-          '我的宠物',
-          `<ul class="pet-list">${s.pets
-            .map(
-              (p) => `<li class="${p.id === pet.id ? 'active' : ''}">
-                <button class="btn small" data-switch="${esc(p.id)}">${esc(SPECIES[p.species]?.emoji ?? '🐾')} ${esc(p.name)}</button>
-                ${s.pets.length > 1 ? `<button class="btn small ghost" data-remove="${esc(p.id)}">删除</button>` : ''}
-              </li>`,
-            )
-            .join('')}</ul>
-           <button class="btn" id="add-pet">+ 添加一只宠物</button>
-           <p class="muted">多宠家庭尤其注意：狗用驱虫药不能用于猫，猫需要单独的进食点与猫砂盆数量。</p>`,
-          { icon: '🐾' },
-        ),
-      )}
-
-      ${raw(
-        card(
-          '数据',
-          `<p class="muted">所有记录只保存在这台设备的浏览器里，不会上传。清除浏览器数据或卸载会一并删除，建议定期导出备份。</p>
-           <button class="btn" id="export">导出档案 JSON</button>
-           <button class="btn ghost" id="wipe">清除全部数据</button>`,
-          { icon: '💾' },
-        ),
+        linkGroup('设置与说明', [
+          linkRow('#settings', '⚙️', '设置', `主题、字号、提醒提前量、宠物管理、备份与导入（当前 ${s.pets.length} 只）`),
+          linkRow('#help', '❓', '帮助与常见问题', '每个页面怎么用，以及被问得最多的问题'),
+          linkRow('#about', 'ℹ️', `关于 PetBloom v${APP.version}`, '产品原则、内容依据与边界、名词表、更新日志'),
+        ]),
       )}
 
       <p class="disclaimer">PetBloom 的所有内容都是科学养护参考，会随共识更新；具体到你的宠物，最终判断权始终属于面诊过它的执业兽医。</p>
     `;
-  },
-
-  bind(root, ctx) {
-    root.querySelectorAll('button[data-switch]').forEach((b) =>
-      b.addEventListener('click', () => {
-        store.setActivePet(b.dataset.switch);
-        ctx.navigate('home');
-      }),
-    );
-
-    root.querySelectorAll('button[data-remove]').forEach((b) =>
-      b.addEventListener('click', () => {
-        if (confirm('删除这只宠物的全部档案与记录？此操作无法撤销。')) {
-          store.removePet(b.dataset.remove);
-          ctx.refresh();
-        }
-      }),
-    );
-
-    root.querySelector('#add-pet')?.addEventListener('click', () => ctx.navigate('onboarding'));
-
-    root.querySelector('#export')?.addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(store.load(), null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `petbloom-${store.today()}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-
-    root.querySelector('#wipe')?.addEventListener('click', () => {
-      if (confirm('清除全部宠物档案与记录？此操作无法撤销。')) {
-        store.reset();
-        ctx.navigate('onboarding');
-      }
-    });
   },
 };

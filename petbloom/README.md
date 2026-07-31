@@ -1,6 +1,8 @@
 # PetBloom · 宠物花园
 
-全物种宠物饲养管理与陪伴 PWA。这是产品方案 V1.0 中 Phase 2 的 MVP 实现：**建档系统 + 精准饮食处方 + 5 分钟症状自查 + 行为图鉴**。
+全物种宠物饲养管理与陪伴 PWA（v1.1.0）。
+
+> **换对话继续开发？先读 [HANDOFF.md](./HANDOFF.md)** —— 那里有完整的项目交接说明。
 
 运行时零依赖、纯静态、离线可用 —— 因为最需要它的场景（凌晨三点发现猫吐了）往往也是网络最差的时候。
 
@@ -19,26 +21,39 @@ npm run build        # 打成单文件 dist/petbloom.html
 
 - 手机上想当 App 用：在浏览器打开后「添加到主屏幕」
 - 想装成 PWA（带图标与离线缓存）：用开发模式那份 `index.html`，它有 manifest 与 Service Worker
-- `dist/` 按仓库既有约定不入版本库（根 `.gitignore` 忽略 `dist/`），克隆后跑一次 `npm run build` 即可生成：
-  - `petbloom.html` —— 完整文档
-  - `petbloom-artifact.html` —— 只有页面内容（无 doctype/head/body），供自带骨架的托管环境使用
+- `dist/` 按仓库既有约定不入版本库（根 `.gitignore` 忽略 `dist/`），克隆后跑一次 `npm run build` 即可生成
 
 ## MVP 验证的核心指标
 
 方案里定下的一条判断标准：**用户在"宠物出现异常"时，是否愿意打开 APP 并完成 5 分钟症状自查。** 这一版把这条路径做完整了 —— 从首页的「它好像不舒服」入口，到判级、家庭护理、就医摘要与费用参考。
 
-## 五个功能模块
+## 功能模块
+
+**底部主导航**
 
 | 模块 | 回答的问题 | 关键实现 |
 | --- | --- | --- |
-| 建档 `views/onboarding.js` | 它是谁、你现在怎么养、你相信什么 | 10 个物种 + 品种标准 + 养护习惯 + 六大认知漏洞自评 |
 | 首页 `views/home.js` | 今天状态如何、今天该做什么、有什么要注意 | 每日任务、健康预警、花园进度、成就、彩蛋 |
-| 吃什么 `views/nutrition.js` | 该吃多少、能不能吃、这袋粮行不行 | 四套投喂模型 + 食物安全库 + 粮食标签评测 |
-| 读懂它 `views/behavior.js` | 它这个叫声/动作是什么意思 | 行为图鉴（可解锁）+ 问题行为纠正 + 品种风险 |
 | 档案 `views/records.js` | 它这一路的数据长什么样 | 体重曲线、免疫计划、体检清单、双未来预测 |
-| 不舒服 `views/triage.js` | 现在该观察、该今天去、还是该马上急诊 | 判级引擎 + 行动清单 + 就医摘要 + 避坑话术 |
+| 吃什么 `views/nutrition.js` | 该吃多少、能不能吃、这袋粮行不行 | 五套投喂模型 + 食物安全库 + 粮食标签评测 |
+| 读懂它 `views/behavior.js` | 它这个叫声/动作是什么意思 | 行为图鉴（可解锁）+ 问题行为纠正 + 品种风险 |
+| 更多 `views/more.js` | 其他功能在哪 | 全部二级入口 + 护理频率 + 季节日历 + 避坑指南 + 费用参考 |
 
-## 饮食引擎：为什么需要四套模型
+**二级页面**
+
+| 模块 | 回答的问题 |
+| --- | --- |
+| 提醒 `views/reminders.js` | 什么快到期了（疫苗/驱虫/体检/生日/称重统一视图） |
+| 时间轴 `views/timeline.js` | 它这一路都发生了什么（里程碑 + 就诊 + 体重合成一条线） |
+| 健康档案 `views/health.js` | 用药、就诊、化验趋势、花费、身份卡 |
+| 知识库 `views/knowledge.js` | 8 分类 26 篇可执行的养护短文，按物种过滤 |
+| 家庭急救 `views/firstaid.js` | 12 类急症：怎么判断 / 立刻做什么 / 绝对不要做 |
+| 养护向导 `views/guide.js` | 不知道从哪问起时的 6 棵引导决策树 |
+| 搜索 `views/search.js` | 跨食物、行为、知识、急救、名词、FAQ 的全局搜索 |
+| 症状自查 `views/triage.js` | 现在该观察、该今天去、还是该马上急诊 |
+| 设置 / 关于 / 帮助 | 主题字号、备份导入、内容依据与边界、常见问题 |
+
+## 饮食引擎：为什么需要五套模型
 
 "每天该吃多少"在不同物种上根本不是同一个问题，所以 `lib/nutrition.js` 按物种分派：
 
@@ -78,13 +93,16 @@ petbloom/
 ├── scripts/
 │   ├── serve.js            零依赖本地服务器
 │   └── build-single-file.js 单文件打包（esbuild）
-├── dist/                   构建产物：单文件版 App
 ├── src/
-│   ├── app.js              hash 路由 + 主题切换 + 底部导航
-│   ├── ui.js               模板拼接与转义（无框架）
+│   ├── app.js              hash 路由（含 ?参数）+ 顶栏 + 主题字号 + 底部导航
+│   ├── ui.js               模板拼接与转义 + toast + 对话框 + 入口行 + 时间轴（无框架）
 │   ├── data/               species / foods / behavior / care / triage / myths
-│   ├── lib/                nutrition / triage / alerts / growth / projection / store
-│   └── views/              onboarding / home / nutrition / behavior / records / more / triage
+│   │                       knowledge / firstaid / guide / meta
+│   ├── lib/                nutrition / triage / alerts / growth / projection
+│   │                       reminders / search / finance / store
+│   └── views/              onboarding home records nutrition behavior triage more
+│                           knowledge firstaid reminders timeline health search
+│                           guide settings about help
 └── tests/                  node --test，全部针对纯函数层
 ```
 

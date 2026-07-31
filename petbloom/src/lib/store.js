@@ -9,12 +9,23 @@
 const KEY = 'petbloom.state.v1';
 
 const EMPTY = {
-  version: 1,
+  version: 2,
   pets: [],
   activePetId: null,
-  logs: {},      // petId -> [{date, taskIds, tasksTotal, weightKg, foodGrams, waterMl, note}]
-  triages: {},   // petId -> [{date, level, answers, summarized}]
-  settings: { theme: 'auto', onboarded: false },
+  logs: {},        // petId -> [{date, taskIds, tasksTotal, weightKg, foodGrams, waterMl, note}]
+  triages: {},     // petId -> [{date, level, answers, summarized}]
+  // 通用集合：结构一致的档案条目都放这里，避免每加一类记录就改一次 store
+  items: {},       // petId -> {meds:[], visits:[], expenses:[], milestones:[], labs:[]}
+  settings: { theme: 'auto', fontScale: 1, onboarded: false, remindLeadDays: 7 },
+};
+
+/** 通用集合的种类。新增一类记录只要往这里加一项。 */
+export const COLLECTIONS = {
+  meds: { name: '用药与驱虫', icon: '💊' },
+  visits: { name: '就诊记录', icon: '🏥' },
+  expenses: { name: '花费', icon: '💰' },
+  milestones: { name: '里程碑', icon: '⭐' },
+  labs: { name: '化验指标', icon: '🧪' },
 };
 
 let state = null;
@@ -65,6 +76,19 @@ function commit() {
 export function subscribe(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);
+}
+
+/** 用备份文件整体替换当前状态（导入功能）。 */
+export function replaceAll(next) {
+  const base = structuredCloneSafe(EMPTY);
+  state = { ...base, ...next };
+  state.logs = state.logs ?? {};
+  state.triages = state.triages ?? {};
+  state.items = state.items ?? {};
+  state.settings = { ...base.settings, ...(next.settings ?? {}) };
+  if (!state.pets.some((p) => p.id === state.activePetId)) state.activePetId = state.pets[0]?.id ?? null;
+  commit();
+  return state;
 }
 
 export function reset() {
@@ -147,6 +171,7 @@ export function addPet(pet) {
   s.activePetId = id;
   s.logs[id] = s.logs[id] ?? [];
   s.triages[id] = s.triages[id] ?? [];
+  s.items[id] = s.items[id] ?? {};
   s.settings.onboarded = true;
   commit();
   return record;
@@ -166,6 +191,7 @@ export function removePet(petId) {
   s.pets = s.pets.filter((p) => p.id !== petId);
   delete s.logs[petId];
   delete s.triages[petId];
+  delete s.items?.[petId];
   if (s.activePetId === petId) s.activePetId = s.pets[0]?.id ?? null;
   commit();
 }
@@ -259,6 +285,44 @@ export function unlockSignal(petId, signalName) {
   commit();
 }
 
+// ── 通用集合（用药 / 就诊 / 花费 / 里程碑 / 化验） ──────────────
+
+function bucket(petId, kind) {
+  const s = load();
+  s.items = s.items ?? {};
+  s.items[petId] = s.items[petId] ?? {};
+  s.items[petId][kind] = s.items[petId][kind] ?? [];
+  return s.items[petId][kind];
+}
+
+/** 按日期倒序返回某类条目。 */
+export function itemsFor(petId, kind) {
+  return [...bucket(petId, kind)].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
+
+export function addItem(petId, kind, item) {
+  const list = bucket(petId, kind);
+  const record = { id: `${kind}_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`, date: today(), ...item };
+  list.push(record);
+  commit();
+  return record;
+}
+
+export function updateItem(petId, kind, itemId, patch) {
+  const record = bucket(petId, kind).find((x) => x.id === itemId);
+  if (!record) return null;
+  Object.assign(record, patch);
+  commit();
+  return record;
+}
+
+export function removeItem(petId, kind, itemId) {
+  const s = load();
+  const list = bucket(petId, kind);
+  s.items[petId][kind] = list.filter((x) => x.id !== itemId);
+  commit();
+}
+
 // ── 汇总（供徽章与首页使用） ────────────────────────────────────
 
 export function statsFor(petId) {
@@ -273,6 +337,11 @@ export function statsFor(petId) {
   return {
     pet,
     logs: logs.map((l) => ({ ...l, tasksDone: l.taskIds?.length ?? 0 })),
+    milestones: itemsFor(petId, 'milestones'),
+    visits: itemsFor(petId, 'visits'),
+    meds: itemsFor(petId, 'meds'),
+    expenses: itemsFor(petId, 'expenses'),
+    labs: itemsFor(petId, 'labs'),
     daysTogether: daysBetween(pet?.homecoming),
     speciesCount: new Set(s.pets.map((p) => p.species)).size,
     triageWithSummary: triages.filter((t) => t.summarized).length,

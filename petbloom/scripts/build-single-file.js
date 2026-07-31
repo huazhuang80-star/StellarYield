@@ -39,7 +39,11 @@ async function main() {
   const js = bundled.outputFiles[0].text;
 
   const style = `<style>\n${css}</style>`;
-  const markup = '<main id="app" class="app"></main>\n<nav id="nav" class="nav" hidden></nav>';
+  const markup =
+    '<a class="skip-link" href="#app">跳到主要内容</a>\n' +
+    '<header id="appbar" class="appbar" hidden></header>\n' +
+    '<main id="app" class="app"></main>\n' +
+    '<nav id="nav" class="nav" hidden></nav>';
   const script = `<script>\n${js}</script>`;
 
   // 片段版：宿主环境会补上 doctype / head / body
