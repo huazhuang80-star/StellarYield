@@ -227,6 +227,45 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
   </div>
 </header>
 
+<!-- ══════════ 0 · 修订说明 ══════════ -->
+<section id="s0">
+  <div class="shead"><span class="no">00</span><h2>第四版改了什么、为什么改</h2><span class="note">REVISION</span></div>
+  <div class="col">
+    <p>这是第四版。第三版做完之后业主审图，指出两个问题，这一版是围绕这两个问题重做的。把它们写在最前面，是因为它们决定了后面所有平面的排法。</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <caption>业主审图意见与处理</caption>
+      <thead><tr><th style="width:22%">业主原话</th><th style="width:30%">问题实质</th><th>第四版怎么做的</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>「厨房和餐厅居然是分开的」</strong></td>
+          <td>第三版把厨房放在后附房、餐厅放在主楼，中间隔着一条走廊。做好饭要端着菜穿过走廊才到餐桌，一天三顿，天天如此。这是排布上的硬伤，不是审美问题。</td>
+          <td>厨房搬回主楼，和餐桌<strong>合成一间 25.8 m² 的「餐厨一体」</strong>，中间不隔墙。北端 L 形操作台（水槽 → 备餐 → 灶）加冰箱，中间 1.65 m 半岛吧台配两张吧椅，南端 1.70 × 0.95 六人餐桌配八椅。<strong>从灶台转身到餐桌两步，不出门、不过走廊。</strong>客厅仍然单独一间，用 1.60 m 门洞和餐厨相连——业主要的「客厅可以单独分一个」。</td>
+        </tr>
+        <tr>
+          <td><strong>「很多家具挡在门口，进都进不去」</strong></td>
+          <td>第三版的家具是按「哪里有空位放哪里」摆的，没有按门的开启弧线核对过。门扇转开 90° 会扫到什么，图上根本没画，所以看不出来。</td>
+          <td><strong>平面图上每一扇门的开启弧线都画出来了</strong>，业主可以自己看有没有撞到家具。逐扇核对后的改动：厨房 L 形台面退到西墙和北墙，1.60 m 门洞前完全空出；餐桌东移 0.20 m 留出拉椅子的空间；洗衣机移到东侧、储物架移到东墙、二层晾衣杆退到 x≥7.85；<strong>次卧的书桌全部取消</strong>——2.50 m 进深放下 2.00 m 的床之后再塞书桌，一定会顶住门，书桌集中到二层共用的起居 · 书房。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <h3>顺带修掉的三个自己发现的错</h3>
+    <p><strong>① 图纸和三维模型以前是两套数据。</strong>平面图一套坐标，三维模型另一套坐标，改了平面忘了改模型，就会出现「图上有门、模型里是堵墙」。第四版把墙、门、家具、连每一个室内机位全部改成<strong>从平面图数据算出来</strong>，平面一改模型自动跟着改，两张图不可能再各说各话。</p>
+    <p><strong>② 房子两侧的通道里种了六棵果树。</strong>西边通道 0.65 m、东边 0.55 m，第三版在这里画了香蕉、木瓜、波罗蜜各两棵。这是错的：这几种树的树冠半径都超过 0.55 m，种下去树冠直接压在外墙上，叶子常年贴墙会让墙面长期潮湿发霉，根系还会顶坏散水。这两条通道的用途本来就是<strong>排水明沟 + 检修通道 + 穿堂风进风口</strong>，不该种树。第四版全部去掉，果树只留在前院和后端。</p>
+    <p><strong>③ 剖面图把不在同一条剖切线上的东西画在了一起。</strong>第三版的剖面同时画了卧室和楼梯光井，但卧室在西边、楼梯在东边，一刀切不到一起。第四版明确标成<strong>剖面 A–A · 沿楼梯与走廊剖切</strong>，剖切面以西的房间另外注明。立面图上窗户的位置以前也是手写的、和平面对不上，现在同样从平面生成。</p>
+  </div>
+
+  <div class="col">
+    <h3>还没做完的</h3>
+    <p>造价总额没有变——足配 <span class="num">$47,494</span>，按减项清单压到 <span class="num">$39,410</span>，仍在 4 万美金以内。分项表里按房间列的那几行已经按新平面改过，但整体还可以再核一遍。48 帧漫游连环图正在按新模型重跑。</p>
+  </div>
+</section>
+
 <!-- ══════════ 1 · 设计策略 ══════════ -->
 <section id="s1">
   <div class="shead"><span class="no">01</span><h2>设计策略：钱花在哪、省在哪</h2><span class="note">DESIGN MOVES</span></div>
@@ -246,7 +285,7 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
     <div class="move">
       <p class="k">MOVE 2</p>
       <h4>公厕兼做泳池冲淋更衣间</h4>
-      <p>公厕不放在一层客厅旁，而是放在后附房里，从洗衣房进入，同时开门通向后院。这样从泳池、菜园、鸡鸭舍回来的人可以直接冲洗、换衣、上厕所，不用踩着湿脚和泥穿过客厅。一个 5.3 m² 的空间同时解决了「公厕」和「泳池更衣淋浴」两个需求。</p>
+      <p>公厕开在那条 1.05 m 走廊上，紧挨着玄关厅，从大门进来六步就到，从后院回来也是六步——两头都不用穿过客厅或餐厨一体。从泳池、菜园、鸡鸭舍回来的人踩着湿脚和泥，走的是走廊这条硬地线路，不进任何一个起居空间。</p>
       <span class="save">省下一间独立更衣室，约 $600</span>
     </div>
     <div class="move">
@@ -412,7 +451,7 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
     <p><strong>① 任何房间都不用穿另一个房间。</strong>四间卧室、公厕、储物间、餐厨一体、洗衣房的门全部开在那条 1.05 米宽的走廊上。旧方案里「二楼次卧 1 要穿过主卧衣帽间」「从后院回来要穿餐厅和厨房才能上公厕」这两处已经不存在。<br>
     <strong>② 从大门到后院是一条直线。</strong>人行门 → 汀步 → 门廊 → 玄关 → 走廊 → 后走廊 → 后院门，全程不进任何房间，搬东西、拉水管、抬家具都不用绕。<br>
     <strong>③ 湿区集中在西侧一条竖线上。</strong>主卫、卫 1、卫 2 在二层西墙上下对齐，卫 4 在后附房西端，排水立管只需两根；洗衣房单独在后附房，潮气不进主屋。厨房虽然回到主楼，但整条操作台贴在西北角外墙上，抽油烟机直接短管排到室外，油烟不穿房间。<br>
-    <strong>④ 泳池的人不进屋。</strong>后附房东端的淋浴更衣间外门直通后院，冲完澡换好衣服再进屋。<br>
+    <strong>④ 从院子回来的人不穿客厅。</strong>后附房东端的农具房外门直通后端服务带，脏鞋脏工具在那里就卸掉；要冲洗上厕所，沿走廊到公厕，全程踩的都是走廊地砖。<br>
     <strong>⑤ 逐门校核过一遍。</strong>把三维模型里每一段隔墙和每一扇门重新对了一次坐标，补上了原先只画了门扇、墙却没开洞的 9 处：卫 4、公厕、储物间、洗衣房、衣帽间、主卫、卫 1、卫 2、二层起居书房。现在这九个房间是真的能走进去，不是画上去的。<br>
     <strong>⑥ 门扇一律朝房间内开，两个例外是故意的。</strong>所有房门都朝房间里开，1.05 米走廊的净宽任何时候都是满的。两个例外：<strong>入户门朝门廊外开</strong>（否则门扇会占掉玄关 0.9 米，进门要侧身），<strong>无障碍卫 4 朝外开</strong>（老人万一在里面滑倒挡住门，外开的门才推得开——这是养老规范的硬性要求）。平面图上每一扇门的开启弧线都画出来了，业主可以自己看有没有撞到家具。<br>
     <strong>⑦ 家具让开门口。</strong>业主审第三版时指出「很多家具挡在门口，进都进不去」。第四版逐扇门核对过：厨房 L 形操作台退到西墙和北墙，从走廊进餐厨的 1.60 米门洞前完全空出；餐桌东移 0.20 米留出拉椅子的空间；洗衣机移到东侧、储物架移到东墙、二层晾衣杆退到 x≥7.85；次卧的书桌全部取消（2.50 米进深放下 2.00 米的床之后，再塞书桌就会顶住门），书桌集中到二层共用的起居 · 书房。</p>
@@ -583,7 +622,7 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
         <tr><td>电线</td><td>照明 2×1.5、插座 2×2.5、空调专线 2×4.0 mm²</td><td>Cadivi / Trần Phú</td><td class="n">— <small>按回路计</small></td></tr>
         <tr><td>开关插座</td><td>面板式，每卧室 4 组插座 + 空调专用</td><td>Panasonic Wide / Schneider Zencelo</td><td class="n">85,000 <small>đ/组</small></td></tr>
         <tr><td>给水管</td><td>PPR 热熔（冷热分设），排水 PVC D110</td><td>Bình Minh / Đệ Nhất</td><td class="n">— <small>按米计</small></td></tr>
-        <tr><td>厨房橱柜</td><td>防潮 MDF 柜体 + 天然花岗岩台面 + 不锈钢水槽 + 抽油烟机</td><td>本地木工定制 4.2 m</td><td class="n">24,000,000 <small>đ/整套</small></td></tr>
+        <tr><td>厨房橱柜</td><td>防潮 MDF 柜体 + 天然花岗岩台面 + 不锈钢水槽 + 抽油烟机</td><td>本地木工定制 8.7 m + 半岛</td><td class="n">24,000,000 <small>đ/整套</small></td></tr>
         <tr><td>栏杆</td><td>方钢管 + 仿木扶手，阳台高 1.1 m、楼梯 0.9 m</td><td>本地铁艺</td><td class="n">850,000 <small>đ/m</small></td></tr>
         <tr><td>防水</td><td>卫浴与阳台 2 遍聚合物水泥基 + 屋面女儿墙根部加强</td><td>Sika / Kova CT-11A</td><td class="n">95,000 <small>đ/m²</small></td></tr>
       </tbody>
@@ -646,14 +685,14 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
         <tr><td>B6</td><td>防水<small>6 处卫浴 + 屋面 + 阳台 + 女儿墙根部</small></td><td class="n">—</td><td class="n">13.0</td><td class="n">494</td></tr>
         <tr class="sub"><td colspan="5">装修</td></tr>
         <tr><td>B7</td><td>地面铺砖与踢脚</td><td class="n">180 m²</td><td class="n">39.0</td><td class="n">1,483</td></tr>
-        <tr><td>B8</td><td>卫浴与厨房墙地砖<small>4 间独立卫浴 + 公厕 + 泳池淋浴间 + 厨房防溅墙</small></td><td class="n">6 间</td><td class="n">26.0</td><td class="n">989</td></tr>
+        <tr><td>B8</td><td>卫浴与厨房墙地砖<small>主卫 + 卫 1 + 卫 2 + 无障碍卫 4 + 公厕 + 洗衣房 + 厨房防溅墙</small></td><td class="n">6 间</td><td class="n">26.0</td><td class="n">989</td></tr>
         <tr><td>B9</td><td>内外墙涂料<small>内墙约 460 m² + 外墙约 265 m²</small></td><td class="n">725 m²</td><td class="n">33.0</td><td class="n">1,255</td></tr>
-        <tr><td>B10</td><td>门<small>入户门 1 + 卧室门 4 + 卫浴 ABS 门 6 + 厨房洗衣门 4 + 门套</small></td><td class="n">15 扇</td><td class="n">29.0</td><td class="n">1,103</td></tr>
+        <tr><td>B10</td><td>门<small>入户门 1 + 卧室门 4 + 卫浴 ABS 门 6 + 储物洗衣农具门 4 + 门套；餐厨与客厅之间是无门扇门洞</small></td><td class="n">15 扇</td><td class="n">29.0</td><td class="n">1,103</td></tr>
         <tr><td>B11</td><td>窗 · 纱窗 · 防盗栅 · 遮阳格栅<small>铝合金玻璃窗约 26 m² + 一层防盗栅 + 仿木铝格栅 12 m²</small></td><td class="n">38 m²</td><td class="n">35.0</td><td class="n">1,331</td></tr>
         <tr><td>B12</td><td>卫浴洁具<small>6 套：坐便、台盆、镜柜、龙头、花洒、玻璃隔断；卫 1 含 1.49 m 浴缸；卫 4 含适老扶手</small></td><td class="n">6 套</td><td class="n">38.0</td><td class="n">1,445</td></tr>
         <tr><td>B13</td><td>电气<small>配管配线、开关插座、灯具 26 处、吊扇 3 台、配电箱、接地、网络</small></td><td class="n">203 m²</td><td class="n">42.0</td><td class="n">1,597</td></tr>
         <tr><td>B14</td><td>给排水与热水<small>PPR 冷热管、PVC 排水、增压泵、太阳能热水器、即热式 ×2</small></td><td class="n">—</td><td class="n">23.0</td><td class="n">875</td></tr>
-        <tr><td>B15</td><td>厨房橱柜<small>L 形上下柜 8.7 m + 中岛 + 花岗岩台面 + 水槽 + 抽油烟机</small></td><td class="n">1 套</td><td class="n">34.0</td><td class="n">1,293</td></tr>
+        <tr><td>B15</td><td>厨房橱柜<small>L 形上下柜 8.7 m + 1.65 m 半岛 + 花岗岩台面 + 水槽 + 抽油烟机</small></td><td class="n">1 套</td><td class="n">34.0</td><td class="n">1,293</td></tr>
         <tr><td>B16</td><td>衣柜与衣帽间<small>主卧衣帽间柜体 + 3 间卧室衣柜 + 玄关鞋柜 + 储物货架</small></td><td class="n">6 处</td><td class="n">22.0</td><td class="n">837</td></tr>
         <tr><td>B17</td><td>栏杆<small>前后阳台 + 楼梯 + 无障碍坡道扶手</small></td><td class="n">18 m</td><td class="n">14.0</td><td class="n">532</td></tr>
         <tr><td>B18</td><td>门廊 · 阳台 · 晾衣棚 · 后操作台<small>轻钢 + 聚碳酸酯板 / 混凝土板 + 户外水槽</small></td><td class="n">30 m²</td><td class="n">17.0</td><td class="n">646</td></tr>
@@ -711,7 +750,7 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
       <thead><tr><th>项目</th><th>内容</th><th class="n">M₫</th><th class="n">USD</th></tr></thead>
       <tbody>
         <tr><td>E1 旋转楼梯替代 U 型梯</td><td>Ø2.0 m 中柱式钢结构 + 硬木踏板 $950，替代现浇混凝土 U 型梯 $1,407</td><td class="n">−12.0</td><td class="n" style="color:var(--good)">−457</td></tr>
-        <tr><td>E2 主屋内淋浴更衣改干区</td><td>后附房东端改农具房，省掉防水与整套洁具</td><td class="n">−18.0</td><td class="n" style="color:var(--good)">−684</td></tr>
+        <tr><td>E2 后附房东端淋浴更衣改干区</td><td>改成农具房，省掉防水与整套洁具；冲洗改用公厕</td><td class="n">−18.0</td><td class="n" style="color:var(--good)">−684</td></tr>
         <tr><td>E3 池边独立淋浴储物小体量</td><td>1.8 × 4.0 m，砌体 + 平顶 + 坐便台盆淋浴 + 排水；湿脚不进主屋</td><td class="n">+29.0</td><td class="n">+1,103</td></tr>
         <tr><td>E4 管线加长</td><td>房子北移约 10 m，给排水、强弱电、化粪池管线延长</td><td class="n">+10.0</td><td class="n">+380</td></tr>
         <tr class="hl"><td>E5 屋面三层做法</td><td>PU 夹芯板 +$479、玻璃棉 +$230、铝箔屏障 +$114、檐脊通风构造 +$172</td><td class="n">+26.2</td><td class="n">+995</td></tr>
@@ -788,12 +827,12 @@ hr{border:none; border-top:1px solid var(--hair); margin:34px 0}
       <caption>减项清单 · 从足配 $47,494 压回 $39,410</caption>
       <thead><tr><th class="n">序</th><th>减项内容</th><th class="n">省 M₫</th><th class="n">省 USD</th><th class="n">累计 USD</th></tr></thead>
       <tbody>
-        <tr><td class="n">1</td><td><strong>主楼进深 9.60 → 9.20 m</strong>（客厅 22.7→20.7、餐厅 12.0→11.0，其余房间不变，走廊动线不受影响）</td><td class="n">53.5</td><td class="n">2,034</td><td class="n">2,034</td></tr>
+        <tr><td class="n">1</td><td><strong>主楼进深 9.60 → 9.20 m</strong>（客厅 21.2→20.2、餐厨一体 25.8→24.8，两间各减 0.20 m 进深；餐桌与操作台之间仍有 1.05 m 净距，其余房间不变，走廊动线不受影响）</td><td class="n">53.5</td><td class="n">2,034</td><td class="n">2,034</td></tr>
         <tr><td class="n">2</td><td>卧室衣柜、玄关鞋柜全部自行后配</td><td class="n">14.0</td><td class="n">532</td><td class="n">2,566</td></tr>
         <tr><td class="n">3</td><td>客厅餐厅不做吊顶（仅卧室与卫浴做）</td><td class="n">8.0</td><td class="n">304</td><td class="n">2,870</td></tr>
         <tr><td class="n">4</td><td>卫 1 浴缸取消，改标准淋浴</td><td class="n">7.0</td><td class="n">266</td><td class="n">3,136</td></tr>
         <tr><td class="n">5</td><td>泳池配件精简（去遮阳伞、边几、毛巾柜，保留泳圈与扶梯）</td><td class="n">7.0</td><td class="n">266</td><td class="n">3,402</td></tr>
-        <tr><td class="n">6</td><td>厨房中岛取消，保留 L 形台面</td><td class="n">6.0</td><td class="n">228</td><td class="n">3,630</td></tr>
+        <tr><td class="n">6</td><td>厨房半岛吧台与两张吧椅取消，保留 L 形台面（餐桌与操作台之间直接留空，动线不变）</td><td class="n">6.0</td><td class="n">228</td><td class="n">3,630</td></tr>
         <tr><td class="n">7</td><td>太阳能热水器改即热式电热水器 ×3</td><td class="n">6.0</td><td class="n">228</td><td class="n">3,858</td></tr>
         <tr><td class="n">8</td><td>凉亭石桌凳改成品塑木桌椅（吊灯吊扇保留）</td><td class="n">6.0</td><td class="n">228</td><td class="n">4,086</td></tr>
         <tr><td class="n">9</td><td>两侧砌体围墙各再减 6 m，改网栅 + 绿篱</td><td class="n">9.0</td><td class="n">342</td><td class="n">4,428</td></tr>
@@ -1416,7 +1455,7 @@ function drawSite(){
   o.push(txt(X(5.05),Y(19.4),'主 楼',{size:11,weight:600,mono:false}));
   o.push(txt(X(5.05),Y(20.8),'两层 8.80 × 9.60',{size:7,fill:'var(--muted)'}));
   o.push(txt(X(5.05),Y(26.7),'后附房 单层',{size:8,weight:600,mono:false}));
-  o.push(txt(X(5.05),Y(27.8),'厨房 · 洗衣 · 农具',{size:6.4,fill:'var(--muted)',mono:false}));
+  o.push(txt(X(5.05),Y(27.8),'适老卧室 · 无障碍卫 · 洗衣 · 农具',{size:6.4,fill:'var(--muted)',mono:false}));
   // 1.05 m 走廊贯通轴
   o.push(line(X(6.52),Y(14.30),X(6.52),Y(29.00),'var(--clay)',1.6,'5 4'));
   // 旋转楼梯位置
